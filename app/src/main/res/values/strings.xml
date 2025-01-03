@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">EinkaufslisteAnroid</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">Fehler</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="default_web_client_id">813378276227-pvpc2210i6ma9a2u661i3j9174olof4h.apps.googleusercontent.com</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="e_mail">E-Mail</string>
+    <string name="passwort">Passwort</string>
+    <string name="login">Login</string>
+    <string name="klicke_hier_um_dich_zu_registrieren">Klicke hier um dich zu registrieren</string>
+    <string name="login_via_google">Login via Google</string>
+    <string name="register">Jetzt registrieren</string>
+    <string name="klicke_hier_um_dich_zu_anmelden">zu Login wechseln</string>
+    <string name="mindestens_8_zeichen">Mindestens 8 Zeichen</string>
+    <string name="mindestens_ein_gro_buchstabe">Mindestens ein Großbuchstabe</string>
+    <string name="mindestens_ein_sonderzeichen">Mindestens ein Sonderzeichen</string>
+    <string name="mindestens_eine_zahl">Mindestens eine Zahl</string>
+</resources>
