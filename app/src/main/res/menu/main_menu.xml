@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Logout bleibt oben -->
+    <item
+        android:id="@+id/itemLogout"
+        android:icon="@drawable/logout_icon"
+        android:title="@string/logout"
+        />
+
+    <!-- Einstellungen als Submenü -->
+    <group android:title="@string/einstellungen">
+        <item
+            android:id="@+id/darkmode"
+            android:icon="@drawable/darkmode_icon"
+            android:title="@string/darkmode_aktvieren"
+            />
+        <item
+            android:id="@+id/lightmode"
+            android:icon="@drawable/lightmode_icon"
+            android:title="@string/darkmode_deaktvieren"
+            />
+    </group>
+</menu>

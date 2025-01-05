@@ -22,4 +22,10 @@
     <string name="mindestens_ein_gro_buchstabe">Mindestens ein Großbuchstabe</string>
     <string name="mindestens_ein_sonderzeichen">Mindestens ein Sonderzeichen</string>
     <string name="mindestens_eine_zahl">Mindestens eine Zahl</string>
+    <string name="einstellungen">Einstellungen</string>
+    <string name="logout">Logout</string>
+    <string name="darkmode_aktvieren">Darkmode aktvieren</string>
+    <string name="darkmode_deaktvieren">Darkmode deaktivieren</string>
+    <string name="oeffneDrawer">Menü öffnen</string>
+    <string name="schliesseDrawer">Menü ausblenden</string>
 </resources>
