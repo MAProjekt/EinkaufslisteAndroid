@@ -28,4 +28,9 @@
     <string name="darkmode_deaktvieren">Darkmode deaktivieren</string>
     <string name="oeffneDrawer">Menü öffnen</string>
     <string name="schliesseDrawer">Menü ausblenden</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="home">Home</string>
+    <string name="bersicht">Übersicht</string>
+    <string name="ueber_uns">Über uns</string>
 </resources>

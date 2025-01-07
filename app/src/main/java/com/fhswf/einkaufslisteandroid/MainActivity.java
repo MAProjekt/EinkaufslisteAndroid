@@ -1,12 +1,16 @@
 package com.fhswf.einkaufslisteandroid;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
@@ -15,68 +19,63 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     DrawerLayout drawerLayout; // Verwaltet das Hauptlayout des Navigation Drawers
-    NavigationView navigationView; // Seitenmenü
-    ActionBarDrawerToggle drawerToggle; // Für Syncronisation
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //EdgeToEdge.enable(this);
         setContentView(com.fhswf.einkaufslisteandroid.R.layout.activity_main);
 
+        Toolbar toolbar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.sideMenuLayout);
-        navigationView = findViewById(R.id.navigation_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
-        // Erstellt einen ActionBarDrawerToggle
-        // Verknüpft das DrawerLayout mit der ActionBar
-        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.oeffneDrawer, R.string.schliesseDrawer);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.schliesseDrawer);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
 
-        drawerLayout.addDrawerListener(drawerToggle); // Fügt den DrawerListener zum Layout hinzu, um auf Events zuzugreifen (öffnen, schließen)
-        drawerToggle.syncState(); // Synchronisiert den Zustand des Drawer-Toggles
-
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Problemanfällig
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (savedInstanceState == null){
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container_view_tag, new HomeFragment()).commit();
+            navigationView.setCheckedItem(R.id.nav_home);
         }
-
-
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int itemId = item.getItemId();
-                if (itemId == R.id.itemLogout) {
-                    Toast.makeText(MainActivity.this, "Erfolgreich ausgeloggt", Toast.LENGTH_SHORT).show();
-                } else if (itemId == R.id.darkmode) {
-                    Toast.makeText(MainActivity.this, "Darkmode aktiviert", Toast.LENGTH_SHORT).show();
-                } else if (itemId == R.id.lightmode) {
-                    Toast.makeText(MainActivity.this, "Darkmode deaktiviert", Toast.LENGTH_SHORT).show();
-                }
-                return true;
-            }
-        });
     }
 
     @Override
-    public boolean onOptionsItemSelected(@androidx.annotation.NonNull MenuItem item) {
-        if (drawerToggle.onOptionsItemSelected(item)){
-            return true; // DrawerToggle hat die Aktion verarbeitet
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (itemId == R.id.nav_home) {
+            Toast.makeText(MainActivity.this, "Erfolgreich ausgeloggt", Toast.LENGTH_SHORT).show();
+        } else if (itemId == R.id.nav_uebersicht) {
+            Toast.makeText(MainActivity.this, "Darkmode aktiviert", Toast.LENGTH_SHORT).show();
+        } else if (itemId == R.id.nav_ueber_uns) {
+            Toast.makeText(MainActivity.this, "Darkmode deaktiviert", Toast.LENGTH_SHORT).show();
+        } else if (itemId == R.id.nav_logout) {
+            mAuth.signOut();
+            startActivity(new Intent(this, Login.class));
+            finish();
         }
-        return super.onOptionsItemSelected(item);
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     @Override
     public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)){
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
             drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
+        }else {
             super.onBackPressed();
         }
     }

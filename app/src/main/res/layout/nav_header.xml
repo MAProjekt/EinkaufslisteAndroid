@@ -6,7 +6,8 @@
     android:gravity="bottom"
     android:orientation="vertical"
     android:paddingStart="10sp"
-    android:paddingEnd="10sp">
+    android:paddingEnd="10sp"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <TextView
         android:id="@+id/sidemenuUsername"
