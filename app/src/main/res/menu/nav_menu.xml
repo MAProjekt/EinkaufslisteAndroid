@@ -34,4 +34,18 @@
         </menu>
 
     </item>
+
+    <!-- Das zweite Menü -->
+    <item
+        android:id="@+id/itemLogout"
+        android:title="@string/logout" />
+
+    <group android:title="@string/einstellungen">
+        <item
+            android:id="@+id/darkmode"
+            android:title="@string/darkmode_aktvieren" />
+        <item
+            android:id="@+id/lightmode"
+            android:title="@string/darkmode_deaktvieren" />
+    </group>
 </menu>
