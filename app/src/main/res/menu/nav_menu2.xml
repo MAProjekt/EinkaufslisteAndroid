@@ -12,5 +12,8 @@
         <item
             android:id="@+id/lightmode"
             android:title="@string/darkmode_deaktvieren" />
+        <item
+            android:id="@+id/listeHinzufuegen"
+            android:title="@string/liste_hinzuf_gen" />
     </group>
 </menu>

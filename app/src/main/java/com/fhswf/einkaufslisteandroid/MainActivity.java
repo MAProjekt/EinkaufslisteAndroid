@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
@@ -18,9 +21,18 @@ import androidx.fragment.app.Fragment;
 import com.fhswf.einkaufslisteandroid.fragment.HomeFragment;
 import com.fhswf.einkaufslisteandroid.fragment.UeberUns;
 import com.fhswf.einkaufslisteandroid.fragment.UebersichtFragment;
+import com.fhswf.einkaufslisteandroid.models.Produkt;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Files;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
@@ -49,6 +61,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container_view_tag, new HomeFragment()).commit();
             navigationView.setCheckedItem(R.id.nav_home);
         }
+
+        // Teil um Produkt hinzuzufügen
+        FloatingActionButton add_button = findViewById(R.id.add_button);
+        add_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this, "FAB gedrückt!", Toast.LENGTH_SHORT).show();
+                Produkt produkt = new Produkt("Banane", "3");
+            }
+        });
     }
 
     @Override
@@ -118,6 +140,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.lightmode) {
             deactivateDarkMode();
             return true;
+        } else if (itemId == R.id.listeHinzufuegen){
+            showCreateListDialog();
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -132,6 +157,68 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         Toast.makeText(this, "Darkmode deaktiviert", Toast.LENGTH_SHORT).show();
     }
+
+    /**
+     * Dialog in dem der User einen Namen für die Liste vergeben muss
+     */
+    private void showCreateListDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Neue Liste erstellen");
+
+        // Eingabefeld für den Listennamen
+        EditText input = new EditText(this);
+        input.setHint("Listenname eingeben");
+        builder.setView(input);
+
+        // Buttons im Dialog
+        builder.setPositiveButton("Erstellen", (dialog, which) -> {
+            String listName = input.getText().toString().trim();
+            if (!listName.isEmpty()) {
+                saveListToJSON(listName);
+                Toast.makeText(this, "Liste erstellt: " + listName, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Listenname darf nicht leer sein!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    /**
+     * Liste wird hier in einer .json Datei gepsiechert (tmp) um später im HomeFragment ausgelesen
+     * zu werden
+     * @param listName
+     */
+    private void saveListToJSON(String listName) {
+        // JSON-Datei-Pfad
+        File file = new File(getFilesDir(), "listen.json");
+        JSONArray listsArray = new JSONArray();
+
+        try {
+            // Bestehende Listen laden und prüfen ob bereits vorhanden
+            if (file.exists()) {
+                String content = new String(Files.readAllBytes(file.toPath()));
+                listsArray = new JSONArray(content);
+            }
+
+            // Neue Liste hinzufügen
+            JSONObject newList = new JSONObject();
+            newList.put("listName", listName);
+            newList.put("products", new JSONArray()); // Leere Produkte-Liste
+            listsArray.put(newList);
+
+            // Speichern
+            try (FileWriter writer = new FileWriter(file)) {
+                writer.write(listsArray.toString());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
 
