@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //EdgeToEdge.enable(this);
         setContentView(com.fhswf.einkaufslisteandroid.R.layout.activity_main);
+        // Farbe der Statusleiste setzen
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.default_ThemeOverlay_AppCompat));
 
         Toolbar toolbar = findViewById(R.id.toolBar);
         setSupportActionBar(toolbar);
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        // User im nav_menu 1 anzeigen
+        // User im nav_menu 1 (nav_header) anzeigen
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null && user.getEmail() != null) {
