@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -71,6 +72,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Produkt produkt = new Produkt("Banane", "3");
             }
         });
+
+        // User im nav_menu 1 anzeigen
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null && user.getEmail() != null) {
+            View headerView = navigationView.getHeaderView(0);
+            TextView nutzerNameSlideshow = headerView.findViewById(R.id.nutzerNameSlideshow);
+            if (nutzerNameSlideshow != null) {
+                nutzerNameSlideshow.setText(user.getEmail());
+            } else {
+                Toast.makeText(this, "TextView nicht gefunden.", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
