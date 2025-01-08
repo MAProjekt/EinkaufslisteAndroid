@@ -40,9 +40,10 @@ public class Login extends AppCompatActivity {
     Button buttonLogin;
     FirebaseAuth mAuth;
     ProgressBar progressBar;
-    TextView textView;
+    TextView textViewRegister;
     SignInButton googleBtn;
     GoogleSignInClient googleSignInClient;
+    TextView textViewForgotPassword;
     private static final int RC_SIGN_IN = 2000;
 
     @Override
@@ -78,8 +79,9 @@ public class Login extends AppCompatActivity {
         buttonLogin = findViewById(R.id.loginBtn);
         mAuth = FirebaseAuth.getInstance();
         progressBar = findViewById(R.id.progressBar);
-        textView = findViewById(R.id.registerText);
+        textViewRegister = findViewById(R.id.registerText);
         googleBtn = findViewById(R.id.googleBtn);
+        textViewForgotPassword = findViewById(R.id.forgotPasswordText);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -107,7 +109,7 @@ public class Login extends AppCompatActivity {
             mAuth.signOut(); //Bessere Sicherheit, kann aber vllt weg
         }
 
-        textView.setOnClickListener(new View.OnClickListener() {
+        textViewRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Register.class);
@@ -158,6 +160,34 @@ public class Login extends AppCompatActivity {
                             }
                         });
 
+            }
+        });
+
+        // Passwort vergessen
+        textViewForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = String.valueOf(editTextEmail.getText());
+                if (email.isEmpty()) {
+                    Toast.makeText(Login.this, "Gebe bitte eine E-Mail-Adresse ein!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
+                    Toast.makeText(Login.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Firebase Passwort Zurücksetzen E-Mail senden
+                mAuth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(Login.this, "E-Mail zum Zurücksetzen des Passworts wurde gesendet.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(Login.this, "Fehler beim Senden der E-Mail.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         });
 

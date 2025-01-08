@@ -35,4 +35,5 @@
     <string name="ueber_uns">Über uns</string>
     <string name="produkt_hinzuf_gen">Produkt hinzufügen</string>
     <string name="liste_hinzuf_gen">Liste hinzufügen</string>
+    <string name="passwort_vergessen">Passwort vergessen?</string>
 </resources>
