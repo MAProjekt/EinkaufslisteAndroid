@@ -5,13 +5,12 @@
     android:layout_height="match_parent"
     tools:context=".fragment.UebersichtFragment">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Uebersicht Fragment Test"
-        android:textSize="20sp"
-        android:layout_centerInParent="true"
-        android:textColor="@color/black"
-        />
+    <!-- RecyclerView für die Produktliste -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/productRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="8dp" />
+
 
 </RelativeLayout>

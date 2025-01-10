@@ -2,6 +2,7 @@ package com.fhswf.einkaufslisteandroid;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,11 +20,20 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.fhswf.einkaufslisteandroid.fragment.HomeFragment;
 import com.fhswf.einkaufslisteandroid.fragment.UeberUns;
 import com.fhswf.einkaufslisteandroid.fragment.UebersichtFragment;
-import com.fhswf.einkaufslisteandroid.models.Produkt;
+import com.fhswf.einkaufslisteandroid.logic.ProductAdapter;
+import com.fhswf.einkaufslisteandroid.models.Product;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,11 +45,18 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    DrawerLayout drawerLayout; // Verwaltet das Hauptlayout des Navigation Drawers
+    private DrawerLayout drawerLayout; // Verwaltet das Hauptlayout des Navigation Drawers
+
+    private RecyclerView productRecyclerView;
+    private ProductAdapter productAdapter;
+    private List<Product> productList;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 Toast.makeText(MainActivity.this, "FAB gedrückt!", Toast.LENGTH_SHORT).show();
-                Produkt produkt = new Produkt("Banane", "3");
+                //Produkt produkt = new Produkt("Banane", "3");
             }
         });
 
@@ -235,8 +252,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
     }
-
-
 
 
 }
