@@ -36,4 +36,10 @@
     <string name="produkt_hinzuf_gen">Produkt hinzufügen</string>
     <string name="liste_hinzuf_gen">Liste hinzufügen</string>
     <string name="passwort_vergessen">Passwort vergessen?</string>
+    <string name="produktname">Produktname</string>
+    <string name="zutaten">Zutaten</string>
+    <string name="n_hrwerte">Nährwerte</string>
+    <string name="allergene">Allergene</string>
+    <string name="herkunft">Herkunft</string>
+    <string name="hinzuf_gen">Hinzufügen</string>
 </resources>

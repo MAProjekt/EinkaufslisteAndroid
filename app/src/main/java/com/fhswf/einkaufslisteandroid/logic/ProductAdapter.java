@@ -8,9 +8,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fhswf.einkaufslisteandroid.R;
+import com.fhswf.einkaufslisteandroid.fragment.ProductDetailsFragment;
 import com.fhswf.einkaufslisteandroid.models.Product;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -33,12 +35,29 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return new ProductViewHolder(view);
     }
 
+
+    //Anzeigen des Produkts, Listener für PopupFenster
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
         holder.nameTextView.setText(product.getName());
         holder.brandTextView.setText(product.getMarke());
         Glide.with(context).load(product.getImageURL()).into(holder.productImageView);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProductDetailsFragment pdf = ProductDetailsFragment.newInstance(
+                        product.getName(),
+                        product.getImageURL(),
+                        product.getZutaten(),
+                        product.getNaehrwerte(),
+                        product.getAllergene(),
+                        product.getHerkunft()
+                );
+                pdf.show(((FragmentActivity) context).getSupportFragmentManager(), "ProductDetailsFragment");
+            }
+        });
     }
 
     @Override

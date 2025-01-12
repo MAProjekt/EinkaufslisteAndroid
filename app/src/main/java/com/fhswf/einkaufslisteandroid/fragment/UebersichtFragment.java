@@ -21,8 +21,7 @@ public class UebersichtFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_uebersicht, container, false);
 
-        RecyclerView productRecyclerView = view.findViewById(R.id.productRecyclerView);
-        productDataFetcher = new ProductDataFetcher(getContext(), productRecyclerView);
+        productDataFetcher = new ProductDataFetcher(getContext(), view.findViewById(R.id.productRecyclerView));
         productDataFetcher.fetchProductData("zitrone"); // Beispiel-Suchbegriff
 
         return view;

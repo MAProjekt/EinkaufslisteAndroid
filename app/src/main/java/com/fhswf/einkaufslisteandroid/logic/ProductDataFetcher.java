@@ -76,4 +76,8 @@ public class ProductDataFetcher {
 
         queue.add(jsonObjectRequest);
     }
+
+    public void seeProductDetailsAndAddToList(Product product) {
+
+    }
 }
