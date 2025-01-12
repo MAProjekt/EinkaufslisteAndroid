@@ -20,6 +20,7 @@ import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.JsonListManager;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -35,10 +36,10 @@ public class ProductDetailsFragment extends DialogFragment {
     private static final String ARG_INGREDIENTS = "ingredients";
     private static final String ARG_NUTRIMENTS = "nutriments";
     private static final String ARG_ALLERGENS = "allergens";
-    private static final String ARG_COUNTRY = "country";
+    private static final String ARG_STORE = "stores";
 
     // Factory-Methode zum Erstellen einer neuen Fragment-Instanz mit Daten
-    public static ProductDetailsFragment newInstance(String name, String imageUrl, String ingredients, String nutriments, String allergens, String country) {
+    public static ProductDetailsFragment newInstance(String name, String imageUrl, String ingredients, String nutriments, String allergens, String store) {
         ProductDetailsFragment fragment = new ProductDetailsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_NAME, name);
@@ -46,11 +47,13 @@ public class ProductDetailsFragment extends DialogFragment {
         args.putString(ARG_INGREDIENTS, ingredients);
         args.putString(ARG_NUTRIMENTS, nutriments);
         args.putString(ARG_ALLERGENS, allergens);
-        args.putString(ARG_COUNTRY, country);
+        args.putString(ARG_STORE, store);
         fragment.setArguments(args);
         return fragment;
     }
 
+    //TODO: getArguments() anschauen und verstehen, wie greift man überhaupt auf die Daten eines Produktes zu
+    //Zeigt die gefetchten Daten an
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -62,16 +65,18 @@ public class ProductDetailsFragment extends DialogFragment {
         TextView produktZutatenText = view.findViewById(R.id.produktZutatenText);
         TextView produktNutriText = view.findViewById(R.id.produktNutriText);
         TextView produktAllergeneText = view.findViewById(R.id.produktAllergeneText);
-        TextView produktHerkunftText = view.findViewById(R.id.produktHerkunftText);
+        TextView produktStoreText = view.findViewById(R.id.produktHerkunftText);
         Button produktHinzufuegenButton = view.findViewById(R.id.produktHinzufuegen);
 
         // Daten aus dem Bundle holen
         if (getArguments() != null) {
             produktNameText.setText(getArguments().getString(ARG_NAME, "Kein Name verfügbar"));
-            produktZutatenText.setText("Zutaten: " + getArguments().getString(ARG_INGREDIENTS, "Keine Angaben"));
-            produktNutriText.setText("Nährwerte: " + getArguments().getString(ARG_NUTRIMENTS, "Keine Angaben"));
-            produktAllergeneText.setText("Allergene: " + getArguments().getString(ARG_ALLERGENS, "Keine Angaben"));
-            produktHerkunftText.setText("Herkunft: " + getArguments().getString(ARG_COUNTRY, "Unbekannt"));
+            String ingredientsJson = getArguments().getString(ARG_INGREDIENTS, "[]");
+            produktZutatenText.setText("Zutaten: " + parseIngredients(ingredientsJson));
+            produktNutriText.setText(getArguments().getString(ARG_NUTRIMENTS, "Keine Angaben"));
+            produktAllergeneText.setText(getArguments().getString(ARG_ALLERGENS, "Keine Angaben"));
+            produktStoreText.setText("Verfügbar bei: " + getArguments().getString(ARG_STORE, "Kein Laden verfügbar"));
+
 
             // Bild laden mit Glide
             String imageUrl = getArguments().getString(ARG_IMAGE_URL);
@@ -81,11 +86,30 @@ public class ProductDetailsFragment extends DialogFragment {
         }
 
         produktHinzufuegenButton.setOnClickListener(v -> {
-            String produktName = produktNameText.getText().toString();
+
             showSelectionDialog();
         });
 
         return view;
+    }
+
+
+    //Die ganzen Zutaten rausholen
+    private String parseIngredients(String ingredientsJson) {
+        StringBuilder builder = new StringBuilder();
+        try {
+            JSONArray ingredientsArray = new JSONArray(ingredientsJson);
+            for (int i = 0; i < ingredientsArray.length(); i++) {
+                JSONObject ingredient = ingredientsArray.getJSONObject(i);
+                builder.append(ingredient.optString("text", "Unbekannt"));
+                if (i < ingredientsArray.length() - 1) {
+                    builder.append(", ");
+                }
+            }
+        } catch (JSONException e) {
+            builder.append("Fehler beim Laden der Zutaten.");
+        }
+        return builder.toString();
     }
 
     private void showSelectionDialog() {
@@ -102,6 +126,7 @@ public class ProductDetailsFragment extends DialogFragment {
                 .show();
     }
 
+    //TODO: Funktioniert noch nicht wirklich, wegen deN Eigenschaften des JSON Objekts
     private void addProductToList(String selectedList) {
         File file = new File(requireContext().getFilesDir(), "listen.json");
 
@@ -120,7 +145,7 @@ public class ProductDetailsFragment extends DialogFragment {
                         String produktZutaten = getArguments().getString(ARG_INGREDIENTS);
                         String produktNutri = getArguments().getString(ARG_NUTRIMENTS);
                         String produktAllergene = getArguments().getString(ARG_ALLERGENS);
-                        String produktHerkunft = getArguments().getString(ARG_COUNTRY);
+                        String produktStore = getArguments().getString(ARG_STORE);
 
                         // Erstelle ein neues Produkt-JSON-Objekt
                         JSONObject productObject = new JSONObject();
@@ -128,7 +153,7 @@ public class ProductDetailsFragment extends DialogFragment {
                         productObject.put("ingredients", produktZutaten);
                         productObject.put("nutriments", produktNutri);
                         productObject.put("allergens", produktAllergene);
-                        productObject.put("country", produktHerkunft);
+                        productObject.put("stores", produktStore);
 
                         // Füge das Produkt zur Liste hinzu
                         JSONArray productsArray = listObject.getJSONArray("products");
@@ -148,32 +173,5 @@ public class ProductDetailsFragment extends DialogFragment {
             }
         }
     }
-
-//    private List<String> loadListsFromJSON() {
-//        List<String> listNames = new ArrayList<>();
-//        File file = new File(requireContext().getFilesDir(), "listen.json");
-//        Log.d("FilePath", "Dateipfad: " + file.getAbsolutePath());
-//
-//        if (file.exists()) {
-//            try {
-//                String content = new String(Files.readAllBytes(file.toPath()));
-//
-//
-//                // Verarbeite die JSON-Daten
-//                JSONArray listsArray = new JSONArray(content);
-//                for (int i = 0; i < listsArray.length(); i++) {
-//                    JSONObject listObject = listsArray.getJSONObject(i);
-//                    listNames.add(listObject.getString("listName"));
-//
-//                }
-//                // Ausgabe der gesamten JSON im Log
-//                //Log.d("JSONOutput", "JSON Inhalt: " + content);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        return listNames;
-//    }
 
 }

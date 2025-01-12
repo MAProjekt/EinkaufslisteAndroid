@@ -5,22 +5,25 @@ public class Product {
     private String imageURL;
     private String marke;
     private String allergene;
-    private String herkunft;
+    private String store;
     private String zutaten;
     private String naehrwerte;
 
-    public Product(String name, String imageURL, String marke) {
+    public Product(String name, String imageURL, String marke, String store, String nutrients, String zutaten) {
         this.name = name;
         this.imageURL = imageURL;
         this.marke = marke;
+        this.store = store;
+        this.naehrwerte = nutrients;
+        this.zutaten = zutaten;
     }
 
-    public Product(String name, String imageURL, String marke, String allergene, String herkunft, String zutaten, String naehrwerte) {
+    public Product(String name, String imageURL, String marke, String allergene, String store, String zutaten, String naehrwerte) {
         this.name = name;
         this.imageURL = imageURL;
         this.marke = marke;
         this.allergene = allergene;
-        this.herkunft = herkunft;
+        this.store = store;
         this.zutaten = zutaten;
         this.naehrwerte = naehrwerte;
     }
@@ -41,8 +44,8 @@ public class Product {
         return allergene;
     }
 
-    public String getHerkunft() {
-        return herkunft;
+    public String getStore() {
+        return store;
     }
 
     public String getNaehrwerte() {

@@ -22,7 +22,7 @@ public class UebersichtFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_uebersicht, container, false);
 
         productDataFetcher = new ProductDataFetcher(getContext(), view.findViewById(R.id.productRecyclerView));
-        productDataFetcher.fetchProductData("zitrone"); // Beispiel-Suchbegriff
+        productDataFetcher.fetchProductData("Frucht Butter Milch Zitrone"); // Beispiel-Suchbegriff
 
         return view;
     }

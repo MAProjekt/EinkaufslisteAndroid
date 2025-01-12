@@ -32,11 +32,11 @@ public class JsonListManager {
                     JSONObject listObject = listsArray.getJSONObject(i);
                     listNames.add(listObject.getString("listName"));
                 }
+                Log.d("JSONOutput", "JSON Inhalt: " + content);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
         return listNames;
     }
 

@@ -53,7 +53,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                         product.getZutaten(),
                         product.getNaehrwerte(),
                         product.getAllergene(),
-                        product.getHerkunft()
+                        product.getStore()
                 );
                 pdf.show(((FragmentActivity) context).getSupportFragmentManager(), "ProductDetailsFragment");
             }

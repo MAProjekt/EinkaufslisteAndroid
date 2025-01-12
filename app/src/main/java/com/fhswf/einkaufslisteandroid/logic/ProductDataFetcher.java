@@ -57,8 +57,11 @@ public class ProductDataFetcher {
                                 String name = product.optString("product_name", "Unbekannt");
                                 String brand = product.optString("brands", "Unbekannt");
                                 String imageUrl = product.optString("image_url", "");
+                                String store = product.optString("stores", "Kein Laden verfügbar");
+                                String nutrients = product.optString("nutrients", "Keine Nährwerte");
+                                String zutaten = product.optString("ingredients", "Keine Zutaten");
 
-                                productList.add(new Product(name, imageUrl, brand));
+                                productList.add(new Product(name, imageUrl, brand, store, nutrients, zutaten));
                             }
                             adapter.notifyDataSetChanged();
                         } catch (Exception e) {
@@ -77,7 +80,4 @@ public class ProductDataFetcher {
         queue.add(jsonObjectRequest);
     }
 
-    public void seeProductDetailsAndAddToList(Product product) {
-
-    }
 }
