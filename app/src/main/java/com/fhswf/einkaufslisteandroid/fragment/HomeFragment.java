@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.fhswf.einkaufslisteandroid.R;
+import com.fhswf.einkaufslisteandroid.datenpersistierung.JsonListManager;
 import com.fhswf.einkaufslisteandroid.logic.ListAdapter;
 
 import org.json.JSONArray;
@@ -91,7 +92,7 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Listen aus JSON laden
-        List<String> listNames = loadListsFromJSON();
+        List<String> listNames = JsonListManager.loadListsFromJSON(getContext());
         ListAdapter adapter = new ListAdapter(listNames, this::onListClicked);
         recyclerView.setAdapter(adapter);
 
@@ -102,25 +103,25 @@ public class HomeFragment extends Fragment {
      * Hilfsmethode für die onCreateView + sollte noch ausgelagert werden
      * @return
      */
-    private List<String> loadListsFromJSON() {
-        List<String> listNames = new ArrayList<>();
-        File file = new File(requireContext().getFilesDir(), "listen.json");
-
-        if (file.exists()) {
-            try {
-                String content = new String(Files.readAllBytes(file.toPath()));
-                JSONArray listsArray = new JSONArray(content);
-                for (int i = 0; i < listsArray.length(); i++) {
-                    JSONObject listObject = listsArray.getJSONObject(i);
-                    listNames.add(listObject.getString("listName"));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return listNames;
-    }
+//    private List<String> loadListsFromJSON() {
+//        List<String> listNames = new ArrayList<>();
+//        File file = new File(requireContext().getFilesDir(), "listen.json");
+//
+//        if (file.exists()) {
+//            try {
+//                String content = new String(Files.readAllBytes(file.toPath()));
+//                JSONArray listsArray = new JSONArray(content);
+//                for (int i = 0; i < listsArray.length(); i++) {
+//                    JSONObject listObject = listsArray.getJSONObject(i);
+//                    listNames.add(listObject.getString("listName"));
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        return listNames;
+//    }
 
     /**
      * Methode wenn eine Liste angeklickt wird.
@@ -129,6 +130,8 @@ public class HomeFragment extends Fragment {
     private void onListClicked(String listName) {
         Toast.makeText(getContext(), "Liste ausgewählt: " + listName, Toast.LENGTH_SHORT).show();
         // Hier kannst du Produkte der Liste anzeigen lassen
+
+
     }
 
 
