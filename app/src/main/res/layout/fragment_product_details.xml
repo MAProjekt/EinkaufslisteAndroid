@@ -6,6 +6,7 @@
     tools:context=".fragment.ProductDetailsFragment"
     android:orientation="vertical">
 
+
 <LinearLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -20,51 +21,80 @@
         android:layout_marginEnd="8dp"
         android:scaleType="centerCrop"/>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:orientation="vertical">
+        android:layout_height="200dp">
 
-        <TextView
-            android:id="@+id/produktNameText"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/produktname"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            />
-        <TextView
-            android:id="@+id/produktZutatenText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/zutaten"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            />
-        <TextView
-            android:id="@+id/produktNutriText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/n_hrwerte"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
-        <TextView
-            android:id="@+id/produktAllergeneText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/allergene"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
-        <TextView
-            android:id="@+id/produktHerkunftText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/herkunft"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
+            android:background="@color/white"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/produktNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/produktname"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="10dp"
+                />
+            <TextView
+                android:id="@+id/produktZutatenText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/zutaten"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="10dp"
+                />
+            <TextView
+                android:id="@+id/produktAllergeneText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/allergene"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp"/>
+            <TextView
+                android:id="@+id/produktHerkunftText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/herkunft"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp"/>
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TableLayout
+                    android:id="@+id/nutriTabelle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TableRow>
+                        <TextView
+                            android:text="Nährstoffe"
+                            android:textStyle="bold"
+                            android:padding="8dp"/>
+                        <TextView
+                            android:text="Menge (pro 100g)"
+                            android:textStyle="bold"
+                            android:padding="8dp"/>
+                        <TextView
+                            android:text="Einheit"
+                            android:textStyle="bold"
+                            android:padding="8dp"/>
+                    </TableRow>
+
+                </TableLayout>
+            </HorizontalScrollView>
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
 
 </LinearLayout>
 

@@ -9,24 +9,16 @@ public class Product {
     private String zutaten;
     private String naehrwerte;
 
-    public Product(String name, String imageURL, String marke, String store, String nutrients, String zutaten) {
+    public Product(String name, String imageURL, String marke, String store, String nutrients, String zutaten, String allergene) {
         this.name = name;
         this.imageURL = imageURL;
         this.marke = marke;
         this.store = store;
         this.naehrwerte = nutrients;
         this.zutaten = zutaten;
+        this.allergene = allergene;
     }
 
-    public Product(String name, String imageURL, String marke, String allergene, String store, String zutaten, String naehrwerte) {
-        this.name = name;
-        this.imageURL = imageURL;
-        this.marke = marke;
-        this.allergene = allergene;
-        this.store = store;
-        this.zutaten = zutaten;
-        this.naehrwerte = naehrwerte;
-    }
 
     public String getName() {
         return name;

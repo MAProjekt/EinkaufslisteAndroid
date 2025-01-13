@@ -58,10 +58,12 @@ public class ProductDataFetcher {
                                 String brand = product.optString("brands", "Unbekannt");
                                 String imageUrl = product.optString("image_url", "");
                                 String store = product.optString("stores", "Kein Laden verfügbar");
-                                String nutrients = product.optString("nutrients", "Keine Nährwerte");
+                                String nutrients = product.optString("nutriments", "Keine Nährwerte");
                                 String zutaten = product.optString("ingredients", "Keine Zutaten");
+                                String allergene = product.optString("allergens_from_ingredients", "Keine Allergene");
+                                String allergene_clean = allergene.replaceAll("en:\\w+,?\\s*", "").trim();  //Damit man en: Wörter entfernt
 
-                                productList.add(new Product(name, imageUrl, brand, store, nutrients, zutaten));
+                                productList.add(new Product(name, imageUrl, brand, store, nutrients, zutaten, allergene_clean));
                             }
                             adapter.notifyDataSetChanged();
                         } catch (Exception e) {

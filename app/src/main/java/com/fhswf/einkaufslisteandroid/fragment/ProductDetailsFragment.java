@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +20,7 @@ import androidx.fragment.app.DialogFragment;
 import com.bumptech.glide.Glide;
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.JsonListManager;
+import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +30,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class ProductDetailsFragment extends DialogFragment {
@@ -35,8 +40,10 @@ public class ProductDetailsFragment extends DialogFragment {
     private static final String ARG_IMAGE_URL = "image_url";
     private static final String ARG_INGREDIENTS = "ingredients";
     private static final String ARG_NUTRIMENTS = "nutriments";
-    private static final String ARG_ALLERGENS = "allergens";
+    private static final String ARG_ALLERGENS = "allergens_from_ingredients";
     private static final String ARG_STORE = "stores";
+    private static final List<String> nutriListe = new ArrayList<>(Arrays.asList("calcium", "fat", "energy","energy-kcal",
+            "energy-kj","proteins", "salt", "sugars", "sodium" ));
 
     // Factory-Methode zum Erstellen einer neuen Fragment-Instanz mit Daten
     public static ProductDetailsFragment newInstance(String name, String imageUrl, String ingredients, String nutriments, String allergens, String store) {
@@ -59,11 +66,11 @@ public class ProductDetailsFragment extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_product_details, container, false);
 
-        // Views aus dem Layout referenzieren
+        // Views aus dem Layout
         ImageView produktBildDetails = view.findViewById(R.id.produktBildDetails);
         TextView produktNameText = view.findViewById(R.id.produktNameText);
         TextView produktZutatenText = view.findViewById(R.id.produktZutatenText);
-        TextView produktNutriText = view.findViewById(R.id.produktNutriText);
+        TableLayout nutriTabelle = view.findViewById(R.id.nutriTabelle);
         TextView produktAllergeneText = view.findViewById(R.id.produktAllergeneText);
         TextView produktStoreText = view.findViewById(R.id.produktHerkunftText);
         Button produktHinzufuegenButton = view.findViewById(R.id.produktHinzufuegen);
@@ -71,11 +78,19 @@ public class ProductDetailsFragment extends DialogFragment {
         // Daten aus dem Bundle holen
         if (getArguments() != null) {
             produktNameText.setText(getArguments().getString(ARG_NAME, "Kein Name verfügbar"));
-            String ingredientsJson = getArguments().getString(ARG_INGREDIENTS, "[]");
-            produktZutatenText.setText("Zutaten: " + parseIngredients(ingredientsJson));
-            produktNutriText.setText(getArguments().getString(ARG_NUTRIMENTS, "Keine Angaben"));
-            produktAllergeneText.setText(getArguments().getString(ARG_ALLERGENS, "Keine Angaben"));
+            String ingredientsJson = getArguments().getString(ARG_INGREDIENTS, "Keine Zutaten verfügbar");
+            produktZutatenText.setText("Zutaten: " + jsonZutaten(ingredientsJson));
+            produktAllergeneText.setText("Allergene: " + getArguments().getString(ARG_ALLERGENS, "Keine Angaben"));
             produktStoreText.setText("Verfügbar bei: " + getArguments().getString(ARG_STORE, "Kein Laden verfügbar"));
+
+            //Nährwerte auslesen
+            String nutrimentsJson = getArguments().getString(ARG_NUTRIMENTS, "Keine Nährwerte gefunden");
+            try {
+                JSONObject nutri = new JSONObject(nutrimentsJson);
+                nutriWerte(nutriTabelle, nutri);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
 
             // Bild laden mit Glide
@@ -93,9 +108,59 @@ public class ProductDetailsFragment extends DialogFragment {
         return view;
     }
 
+    private void nutriWerte(TableLayout table, JSONObject nutri){
+        Iterator<String> keys = nutri.keys();
 
-    //Die ganzen Zutaten rausholen
-    private String parseIngredients(String ingredientsJson) {
+        while (keys.hasNext()){
+            String key = keys.next();
+
+            //Nur Nährwerte für 100g
+            if(key.endsWith("_100g")){
+                String nutrientKey = key.replace("_100g", "");  // Z.B. "calcium"
+                String value = nutri.optString(key, "-");
+                String unit = nutri.optString(nutrientKey + "_unit", ""); //gibt Einheit
+
+                TableRow row = new TableRow(getContext());
+
+                //Damit nur die wichtigsten Nährwerte angezeigt werden
+                if (!filterNutriWerte(nutrientKey)) {
+                    continue;
+                }
+
+                TextView nameTextView = new TextView(getContext());
+                nameTextView.setText(nutrientKey);
+                nameTextView.setPadding(8, 8, 8, 8);
+
+                TextView valueTextView = new TextView(getContext());
+                valueTextView.setText(value);
+                valueTextView.setPadding(8, 8, 8, 8);
+
+                TextView unitTextView = new TextView(getContext());
+                unitTextView.setText(unit);
+                unitTextView.setPadding(8, 8, 8, 8);
+
+                // Zeile zur Tabelle hinzufügen
+                row.addView(nameTextView);
+                row.addView(valueTextView);
+                row.addView(unitTextView);
+
+                table.addView(row);
+            }
+        }
+    }
+    //Nur die wichtigsten Nährwerte anzeigen
+    //TODO: Vielleicht eine Map zurückgeben mit einem String und bool als Paar, sodass die Nähwerte in deutsch übersetzt werden
+    //Tipp: vllt ein switch case für das übesetzen?
+    private boolean filterNutriWerte(String nutri){
+        if(nutriListe.contains(nutri)){
+            return true;
+        }
+        return false;
+    }
+
+
+    //Die ganzen Zutaten, Nährwerte rausholen
+    private String jsonZutaten(String ingredientsJson) {
         StringBuilder builder = new StringBuilder();
         try {
             JSONArray ingredientsArray = new JSONArray(ingredientsJson);
