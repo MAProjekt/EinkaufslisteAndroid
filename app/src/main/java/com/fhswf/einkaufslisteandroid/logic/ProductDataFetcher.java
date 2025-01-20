@@ -17,6 +17,9 @@ import com.fhswf.einkaufslisteandroid.models.Product;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,45 +44,66 @@ public class ProductDataFetcher {
         recyclerView.setAdapter(adapter);
     }
 
+
     public void fetchProductData(String searchTerm) {
-        String url = "https://de.openfoodfacts.org/cgi/search.pl?search_terms=" + searchTerm + "&json=1";
+        try {
+            // Datei aus dem assets-Ordner laden
+            InputStream inputStream = context.getAssets().open("daten.json");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
 
-        RequestQueue queue = Volley.newRequestQueue(context);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONArray products = response.getJSONArray("products");
-                            for (int i = 0; i < products.length(); i++) {
-                                JSONObject product = products.getJSONObject(i);
-                                String name = product.optString("product_name", "Unbekannt");
-                                String brand = product.optString("brands", "Unbekannt");
-                                String imageUrl = product.optString("image_url", "");
-                                String store = product.optString("stores", "Kein Laden verfügbar");
-                                String nutrients = product.optString("nutriments", "Keine Nährwerte");
-                                String zutaten = product.optString("ingredients", "Keine Zutaten");
-                                String allergene = product.optString("allergens_from_ingredients", "Keine Allergene");
-                                String allergene_clean = allergene.replaceAll("en:\\w+,?\\s*", "").trim();  //Damit man en: Wörter entfernt
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            reader.close();
+            inputStream.close();
 
-                                productList.add(new Product(name, imageUrl, brand, store, nutrients, zutaten, allergene_clean));
-                            }
-                            adapter.notifyDataSetChanged();
-                        } catch (Exception e) {
-                            Log.e("API_TEST", "Fehler beim Verarbeiten der API-Antwort: " + e.getMessage());
+            // JSON-Daten als Array verarbeiten
+            JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+
+            productList.clear(); // Liste zurücksetzen
+
+            // Durch das Haupt-Array iterieren
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                // Überprüfen, ob der Schlüssel "products" existiert
+                if (jsonObject.has("products")) {
+                    JSONArray products = jsonObject.getJSONArray("products");
+
+                    // Produkte durchsuchen
+                    for (int j = 0; j < products.length(); j++) {
+                        JSONObject product = products.getJSONObject(j);
+                        String name = product.optString("product_name", "Unbekannt");
+
+                        // Filter basierend auf dem Suchbegriff
+                        if (name.toLowerCase().contains(searchTerm.toLowerCase())) {
+                            String brand = product.optString("brands", "Unbekannt");
+                            String imageUrl = product.optString("image_url", "");
+                            String store = product.optString("stores", "Kein Laden verfügbar");
+                            String nutrients = product.optString("nutriments", "Keine Nährwerte");
+                            String zutaten = product.optString("ingredients_text", "Keine Zutaten");
+                            String allergene = product.optString("allergens_from_ingredients", "Keine Allergene");
+
+                            // Produkt zur Liste hinzufügen
+                            productList.add(new Product(name, imageUrl, brand, store, nutrients, zutaten, allergene));
                         }
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("API_TEST", "Fehler bei der API-Anfrage: " + error.getMessage());
-                    }
                 }
-        );
+            }
 
-        queue.add(jsonObjectRequest);
+            // RecyclerView-Adapter aktualisieren
+            adapter.notifyDataSetChanged();
+            Log.d("RECYCLER_VIEW", "Adapter aktualisiert. Anzahl Produkte: " + productList.size());
+
+        } catch (Exception e) {
+            Log.e("JSON_FILE", "Fehler beim Verarbeiten der Datei: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
+
+
 
 }

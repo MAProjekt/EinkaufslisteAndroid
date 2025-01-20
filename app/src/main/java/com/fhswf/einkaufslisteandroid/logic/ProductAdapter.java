@@ -19,6 +19,11 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+
+/***
+ * Verwalten der Datenanzeige in der RecyclerView.
+ * Beim Klick auf einem Produkt wird ein DialogFragment mit den Produktdetails angezeigt.
+ */
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
     private Context context;
     private List<Product> productList;
