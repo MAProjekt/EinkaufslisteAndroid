@@ -26,7 +26,7 @@ public class UebersichtFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_uebersicht, container, false);
 
-        productDataFetcher = new ProductDataFetcher(getContext(), view.findViewById(R.id.productRecyclerView));
+        //productDataFetcher = new ProductDataFetcher(getContext(), view.findViewById(R.id.productRecyclerView));
 
         EditText eingabeProdukt = view.findViewById(R.id.eingabeProduktEditText);
 
@@ -34,6 +34,7 @@ public class UebersichtFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    productDataFetcher = new ProductDataFetcher(getContext(), view.findViewById(R.id.productRecyclerView));
                     String productQuery = eingabeProdukt.getText().toString().trim();
                     if (!productQuery.isEmpty()) {
                         productDataFetcher.fetchProductData(productQuery); // Ausführen, wenn Enter gedrückt wird
