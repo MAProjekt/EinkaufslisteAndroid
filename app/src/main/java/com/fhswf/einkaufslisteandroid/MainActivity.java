@@ -38,6 +38,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -46,7 +47,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
@@ -105,6 +108,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(this, "TextView nicht gefunden.", Toast.LENGTH_SHORT).show();
             }
         }
+
+        //Tmp
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Map<String, Object> test = new HashMap<>();
+        test.put("Dennis", "Demir");
+
+        db.collection("Testzweck").add(test);
     }
 
     @Override

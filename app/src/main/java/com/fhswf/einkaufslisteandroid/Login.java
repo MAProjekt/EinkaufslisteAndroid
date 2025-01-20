@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,7 +37,7 @@ import java.util.regex.Pattern;
 
 public class Login extends AppCompatActivity {
 
-    TextInputEditText editTextEmail, editTextPasswort;
+    EditText editTextEmail, editTextPasswort;
     Button buttonLogin;
     FirebaseAuth mAuth;
     ProgressBar progressBar;
