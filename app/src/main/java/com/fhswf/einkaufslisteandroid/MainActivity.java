@@ -38,7 +38,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+//import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -110,11 +110,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         //Tmp
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Map<String, Object> test = new HashMap<>();
-        test.put("Dennis", "Demir");
+        //FirebaseFirestore db = FirebaseFirestore.getInstance();
+        //Map<String, Object> test = new HashMap<>();
+        //test.put("Dennis", "Demir");
 
-        db.collection("Testzweck").add(test);
+        //db.collection("Testzweck").add(test);
     }
 
     @Override
