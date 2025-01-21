@@ -83,7 +83,7 @@ public class ProductDataFetcher {
                             String imageUrl = product.optString("image_url", "");
                             String store = product.optString("stores", "Kein Laden verfügbar");
                             String nutrients = product.optString("nutriments", "Keine Nährwerte");
-                            String zutaten = product.optString("ingredients_text", "Keine Zutaten");
+                            String zutaten = product.optString("ingredients", "Keine Zutaten");
                             String allergene = product.optString("allergens_from_ingredients", "Keine Allergene");
 
                             // Produkt zur Liste hinzufügen
@@ -95,7 +95,6 @@ public class ProductDataFetcher {
 
             // RecyclerView-Adapter aktualisieren
             adapter.notifyDataSetChanged();
-            Log.d("RECYCLER_VIEW", "Adapter aktualisiert. Anzahl Produkte: " + productList.size());
 
         } catch (Exception e) {
             Log.e("JSON_FILE", "Fehler beim Verarbeiten der Datei: " + e.getMessage());

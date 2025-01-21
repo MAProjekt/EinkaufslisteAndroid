@@ -80,7 +80,7 @@ public class ProductDetailsFragment extends DialogFragment {
             produktNameText.setText(getArguments().getString(ARG_NAME, "Kein Name verfügbar"));
             String ingredientsJson = getArguments().getString(ARG_INGREDIENTS, "Keine Zutaten verfügbar");
             produktZutatenText.setText("Zutaten: " + jsonZutaten(ingredientsJson));
-            produktAllergeneText.setText("Allergene: " + getArguments().getString(ARG_ALLERGENS, "Keine Angaben"));
+            produktAllergeneText.setText("Allergene: " + cleanAllergene(getArguments().getString(ARG_ALLERGENS, "Keine Angaben")));
             produktStoreText.setText("Verfügbar bei: " + getArguments().getString(ARG_STORE, "Kein Laden verfügbar"));
 
             //Nährwerte auslesen
@@ -106,6 +106,15 @@ public class ProductDetailsFragment extends DialogFragment {
         });
 
         return view;
+    }
+
+    //Eine Funktion, um bei den Allergenen alle Wörter mit "en:" zu entfernen
+    private String cleanAllergene(String allergene){
+        String cleanA = allergene.replaceAll(",?\\s*en:[^,]*", "").trim();
+
+        // Wenn am Anfang des Satzes ein Wort mit en: entfernt wird, dann würde der Satz mit einem Komma anfangen
+        // Um das zu verhindern wird erste Komma entfernt
+        return cleanA.replaceFirst("^,\\s*", "");
     }
 
     private void nutriWerte(TableLayout table, JSONObject nutri){
@@ -166,7 +175,7 @@ public class ProductDetailsFragment extends DialogFragment {
             JSONArray ingredientsArray = new JSONArray(ingredientsJson);
             for (int i = 0; i < ingredientsArray.length(); i++) {
                 JSONObject ingredient = ingredientsArray.getJSONObject(i);
-                builder.append(ingredient.optString("text", "Unbekannt"));
+                builder.append(ingredient.optString("text", "Unbekannt").replace("_", ""));  //Holt String aus JsonObject und entfernt das _
                 if (i < ingredientsArray.length() - 1) {
                     builder.append(", ");
                 }
