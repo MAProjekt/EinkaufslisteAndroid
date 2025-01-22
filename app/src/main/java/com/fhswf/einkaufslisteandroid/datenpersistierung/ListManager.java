@@ -1,11 +1,7 @@
 package com.fhswf.einkaufslisteandroid.datenpersistierung;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.content.Context;
 import android.util.Log;
-
-import com.fhswf.einkaufslisteandroid.models.Product;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,7 +14,7 @@ import java.util.List;
 /**
  * Auslagerungsklasse nur provisorisch zum Ausprobieren erstmal
  */
-public class JsonListManager {
+public class ListManager {
 
     public static List<String> loadListsFromJSON(Context context) {
         List<String> listNames = new ArrayList<>();

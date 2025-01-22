@@ -12,15 +12,9 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.fhswf.einkaufslisteandroid.R;
-import com.fhswf.einkaufslisteandroid.datenpersistierung.JsonListManager;
+import com.fhswf.einkaufslisteandroid.datenpersistierung.ListManager;
 import com.fhswf.einkaufslisteandroid.logic.ListAdapter;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,7 +25,6 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1"; // vordef. Parameter
     private static final String ARG_PARAM2 = "param2";// vordef. Parameter
 
@@ -92,9 +85,9 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Listen aus JSON laden
-        List<String> listNames = JsonListManager.loadListsFromJSON(getContext());
-        ListAdapter adapter = new ListAdapter(listNames, this::onListClicked);
-        recyclerView.setAdapter(adapter);
+        //List<String> listNames = ListManager.loadListsFromJSON(getContext());
+        //ListAdapter adapter = new ListAdapter(listNames, this::onListClicked);
+        //recyclerView.setAdapter(adapter);
 
         return view;
     }

@@ -53,4 +53,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             textView = itemView.findViewById(android.R.id.text1);
         }
     }
+
+    public void updateData(List<String> newData) {
+        this.listNames.clear();
+        this.listNames.addAll(newData);
+        notifyDataSetChanged();
+    }
 }

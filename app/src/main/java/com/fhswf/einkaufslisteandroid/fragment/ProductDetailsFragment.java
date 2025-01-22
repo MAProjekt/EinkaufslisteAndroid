@@ -19,8 +19,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.bumptech.glide.Glide;
 import com.fhswf.einkaufslisteandroid.R;
-import com.fhswf.einkaufslisteandroid.datenpersistierung.JsonListManager;
-import com.google.android.material.tabs.TabLayout;
+import com.fhswf.einkaufslisteandroid.datenpersistierung.ListManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -102,7 +101,7 @@ public class ProductDetailsFragment extends DialogFragment {
 
         produktHinzufuegenButton.setOnClickListener(v -> {
 
-            showSelectionDialog();
+            //showSelectionDialog();
         });
 
         return view;
@@ -186,23 +185,28 @@ public class ProductDetailsFragment extends DialogFragment {
         return builder.toString();
     }
 
-    private void showSelectionDialog() {
-        List<String> listNames = JsonListManager.loadListsFromJSON(getContext()); // Deine Listen aus JSON laden
-
-        // Dialog mit einer Liste von Listen anzeigen
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Liste auswählen")
-                .setItems(listNames.toArray(new String[0]), (dialog, which) -> {
-                    String selectedList = listNames.get(which);
-                    Toast.makeText(getContext(), "Produkt wird in " + selectedList + " gespeichert!", Toast.LENGTH_SHORT).show();
-                    addProductToList(selectedList);
-                })
-                .show();
-    }
+    /**
+     * Methode die beim Button Klick des Popup-Fensters aufgerufen wird, zeigt eine Liste von den Einkaufslisten an
+     */
+//    private void showSelectionDialog() {
+//        List<String> listNames = ListManager.loadListsFromJSON(getContext()); // Listen aus JSON laden
+//
+//        // Dialog mit einer Liste von Listen anzeigen
+//        new AlertDialog.Builder(requireContext())
+//                .setTitle("Liste auswählen")
+//                .setItems(listNames.toArray(new String[0]), (dialog, which) -> {
+//                    String selectedList = listNames.get(which);
+//                    Toast.makeText(getContext(), "Produkt wird in " + selectedList + " gespeichert!", Toast.LENGTH_SHORT).show();
+//                    addProductToList(selectedList);
+//                })
+//                .show();
+//    }
 
     //TODO: Funktioniert noch nicht wirklich, wegen deN Eigenschaften des JSON Objekts
     private void addProductToList(String selectedList) {
         File file = new File(requireContext().getFilesDir(), "listen.json");
+
+        Log.d("FilePath", "Dateipfad: " + file.getAbsolutePath());
 
         if (file.exists()) {
             try {

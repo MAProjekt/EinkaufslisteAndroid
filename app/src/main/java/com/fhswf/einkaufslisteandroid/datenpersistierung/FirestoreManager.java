@@ -31,6 +31,12 @@ public class FirestoreManager {
         this.user = FirebaseAuth.getInstance().getCurrentUser();
     }
 
+
+    /**
+     * Speichert nur eine Liste und zwar die die man grad erstellt zur Firebase Datenbank
+     * Problem: Man will gesamte bzw. alle listen speichern
+     * @param gesamtListe
+     */
     public void saveListToFirestore(String gesamtListe) {
         if (user == null) {
             Toast.makeText(context, "Bitte melden Sie sich an!", Toast.LENGTH_SHORT).show();

@@ -210,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     /**
      * Dialog in dem der User einen Namen für die Liste vergeben muss
+     *
      */
     private void showCreateListDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -224,9 +225,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setPositiveButton("Erstellen", (dialog, which) -> {
             String listName = input.getText().toString().trim();
             if (!listName.isEmpty()) {
-                saveListToJSON(listName);
+                //saveListToJSON(listName);   ############################
 
-                // in Datenbank abspeichern
+                // in Datenbank abspeichern, aber nur eine Liste und zwar die neuste
                 firestoreManager.saveListToFirestore(listName);
 
                 Toast.makeText(this, "Liste erstellt: " + listName, Toast.LENGTH_SHORT).show();
@@ -239,39 +240,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         builder.show();
     }
-
-    /**
-     * Liste wird hier in einer .json Datei gepsiechert (tmp) um später im HomeFragment ausgelesen
-     * zu werden
-     * @param listName
-     */
-    private void saveListToJSON(String listName) {
-        // JSON-Datei-Pfad
-        File file = new File(getFilesDir(), "listen.json");
-        JSONArray listsArray = new JSONArray();
-
-        try {
-            // Bestehende Listen laden und prüfen ob bereits vorhanden
-            if (file.exists()) {
-                String content = new String(Files.readAllBytes(file.toPath()));
-                listsArray = new JSONArray(content);
-            }
-
-            // Neue Liste hinzufügen
-            JSONObject newList = new JSONObject();
-            newList.put("listName", listName);
-            newList.put("products", new JSONArray()); // Leere Produkte-Liste
-            listsArray.put(newList);
-
-            // Speichern
-            try (FileWriter writer = new FileWriter(file)) {
-                writer.write(listsArray.toString());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 
 }
