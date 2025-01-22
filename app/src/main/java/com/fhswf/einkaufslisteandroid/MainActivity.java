@@ -29,6 +29,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+//import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.fragment.HomeFragment;
 import com.fhswf.einkaufslisteandroid.fragment.UeberUns;
@@ -62,14 +63,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private List<Product> productList;
 
     private FirestoreManager firestoreManager;
+    private FirebaseAuth mAuth;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //Datenbankanbindung
-        firestoreManager = new FirestoreManager(this);
+        firestoreManager = new FirestoreManager();
+        mAuth = FirebaseAuth.getInstance();
 
         //EdgeToEdge.enable(this);
         setContentView(com.fhswf.einkaufslisteandroid.R.layout.activity_main);
@@ -216,28 +218,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Neue Liste erstellen");
 
-        // Eingabefeld für den Listennamen
         EditText input = new EditText(this);
         input.setHint("Listenname eingeben");
         builder.setView(input);
 
-        // Buttons im Dialog
         builder.setPositiveButton("Erstellen", (dialog, which) -> {
             String listName = input.getText().toString().trim();
             if (!listName.isEmpty()) {
-                //saveListToJSON(listName);   ############################
+                String userId = mAuth.getCurrentUser().getUid();
+                firestoreManager.saveList(userId, listName, new FirestoreManager.FirestoreCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                        //Damit beim Hinzufügen eines neuen Namens (Einkaufsliste) Seite aktualisiert wird
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container_view_tag, new HomeFragment())
+                                .commit();
+                    }
 
-                // in Datenbank abspeichern, aber nur eine Liste und zwar die neuste
-                firestoreManager.saveListToFirestore(listName);
-
-                Toast.makeText(this, "Liste erstellt: " + listName, Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else {
                 Toast.makeText(this, "Listenname darf nicht leer sein!", Toast.LENGTH_SHORT).show();
             }
         });
 
         builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
-
         builder.show();
     }
 

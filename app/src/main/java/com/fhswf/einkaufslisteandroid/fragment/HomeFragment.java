@@ -12,9 +12,12 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.fhswf.einkaufslisteandroid.R;
-import com.fhswf.einkaufslisteandroid.datenpersistierung.ListManager;
+import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.logic.ListAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,23 +38,6 @@ public class HomeFragment extends Fragment {
     public HomeFragment() {
     }
 
-//    /**
-//     * Use this factory method to create a new instance of
-//     * this fragment using the provided parameters.
-//     *
-//     * @param param1 Parameter 1.
-//     * @param param2 Parameter 2.
-//     * @return A new instance of fragment HomeFragment.
-//     */
-//    // TODO: Rename and change types and number of parameters
-//    public static HomeFragment newInstance(String param1, String param2) {
-//        HomeFragment fragment = new HomeFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,17 +63,34 @@ public class HomeFragment extends Fragment {
      * @return
      */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         RecyclerView recyclerView = view.findViewById(R.id.ViewLists);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Listen aus JSON laden
-        //List<String> listNames = ListManager.loadListsFromJSON(getContext());
-        //ListAdapter adapter = new ListAdapter(listNames, this::onListClicked);
-        //recyclerView.setAdapter(adapter);
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirestoreManager firestoreManager = new FirestoreManager();
+
+        if (mAuth.getCurrentUser() != null) {
+            String userId = mAuth.getCurrentUser().getUid();
+            firestoreManager.getLists(userId, new FirestoreManager.FirestoreCallbackList() {
+                @Override
+                public void onSuccess(List<DocumentSnapshot> documents) {
+                    List<String> listNames = new ArrayList<>();
+                    for (DocumentSnapshot doc : documents) {
+                        listNames.add(doc.getString("name"));
+                    }
+                    ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onListClicked);
+                    recyclerView.setAdapter(adapter);
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         return view;
     }
@@ -96,25 +99,6 @@ public class HomeFragment extends Fragment {
      * Hilfsmethode für die onCreateView + sollte noch ausgelagert werden
      * @return
      */
-//    private List<String> loadListsFromJSON() {
-//        List<String> listNames = new ArrayList<>();
-//        File file = new File(requireContext().getFilesDir(), "listen.json");
-//
-//        if (file.exists()) {
-//            try {
-//                String content = new String(Files.readAllBytes(file.toPath()));
-//                JSONArray listsArray = new JSONArray(content);
-//                for (int i = 0; i < listsArray.length(); i++) {
-//                    JSONObject listObject = listsArray.getJSONObject(i);
-//                    listNames.add(listObject.getString("listName"));
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        return listNames;
-//    }
 
     /**
      * Methode wenn eine Liste angeklickt wird.
@@ -122,7 +106,7 @@ public class HomeFragment extends Fragment {
      */
     private void onListClicked(String listName) {
         Toast.makeText(getContext(), "Liste ausgewählt: " + listName, Toast.LENGTH_SHORT).show();
-        // Hier kannst du Produkte der Liste anzeigen lassen
+        //Hier Produkte anzeigen lassen
 
 
     }

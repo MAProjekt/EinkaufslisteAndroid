@@ -19,7 +19,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.bumptech.glide.Glide;
 import com.fhswf.einkaufslisteandroid.R;
-import com.fhswf.einkaufslisteandroid.datenpersistierung.ListManager;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
