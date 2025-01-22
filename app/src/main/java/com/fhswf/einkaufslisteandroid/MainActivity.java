@@ -29,6 +29,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.fragment.HomeFragment;
 import com.fhswf.einkaufslisteandroid.fragment.UeberUns;
 import com.fhswf.einkaufslisteandroid.fragment.UebersichtFragment;
@@ -60,10 +61,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProductAdapter productAdapter;
     private List<Product> productList;
 
+    private FirestoreManager firestoreManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Datenbankanbindung
+        firestoreManager = new FirestoreManager(this);
 
         //EdgeToEdge.enable(this);
         setContentView(com.fhswf.einkaufslisteandroid.R.layout.activity_main);
@@ -219,6 +225,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String listName = input.getText().toString().trim();
             if (!listName.isEmpty()) {
                 saveListToJSON(listName);
+
+                // in Datenbank abspeichern
+                firestoreManager.saveListToFirestore(listName);
+
                 Toast.makeText(this, "Liste erstellt: " + listName, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Listenname darf nicht leer sein!", Toast.LENGTH_SHORT).show();
