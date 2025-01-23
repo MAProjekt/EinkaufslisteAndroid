@@ -19,6 +19,10 @@ import androidx.fragment.app.DialogFragment;
 
 import com.bumptech.glide.Glide;
 import com.fhswf.einkaufslisteandroid.R;
+import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 import org.json.JSONArray;
@@ -30,8 +34,10 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class ProductDetailsFragment extends DialogFragment {
 
@@ -59,11 +65,14 @@ public class ProductDetailsFragment extends DialogFragment {
     }
 
     //TODO: getArguments() anschauen und verstehen, wie greift man überhaupt auf die Daten eines Produktes zu
-    //Zeigt die gefetchten Daten an
+    //Zeigt im PopUp-Fnester die gefetchten Daten an
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_product_details, container, false);
+        View view = inflater.inflate(R.layout.fragment_product_details, container, false);  //Um Layout zu laden und die entsprechenden Sachen anzuzeigen
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String userId = auth.getCurrentUser().getUid();
 
         // Views aus dem Layout
         ImageView produktBildDetails = view.findViewById(R.id.produktBildDetails);
@@ -99,9 +108,11 @@ public class ProductDetailsFragment extends DialogFragment {
             }
         }
 
+
+        //Button zum Hinzufügen des Produktes zu einer Liste
         produktHinzufuegenButton.setOnClickListener(v -> {
 
-            //showSelectionDialog();
+            showSelectionDialog(userId);
         });
 
         return view;
@@ -116,6 +127,13 @@ public class ProductDetailsFragment extends DialogFragment {
         return cleanA.replaceFirst("^,\\s*", "");
     }
 
+    /**
+     * Diese Funktion erstellt eine Tabelle für die Nährwerte und bearbeitet die
+     * vorhandenen Nährwerte des Produkts.
+     *
+     * @param table Die Tabelle in der die Nährwerte angezeigt werden sollen
+     * @param nutri Der Nährwert welcher bearbeitet und angezeigt wird
+     */
     private void nutriWerte(TableLayout table, JSONObject nutri){
         Iterator<String> keys = nutri.keys();
 
@@ -186,70 +204,85 @@ public class ProductDetailsFragment extends DialogFragment {
     }
 
     /**
-     * Methode die beim Button Klick des Popup-Fensters aufgerufen wird, zeigt eine Liste von den Einkaufslisten an
+     *
+     *
+     * @param userId User id, damit die von ihm zuvor erstellten Einkaufslisten angezeigt werden
      */
-//    private void showSelectionDialog() {
-//        List<String> listNames = ListManager.loadListsFromJSON(getContext()); // Listen aus JSON laden
-//
-//        // Dialog mit einer Liste von Listen anzeigen
-//        new AlertDialog.Builder(requireContext())
-//                .setTitle("Liste auswählen")
-//                .setItems(listNames.toArray(new String[0]), (dialog, which) -> {
-//                    String selectedList = listNames.get(which);
-//                    Toast.makeText(getContext(), "Produkt wird in " + selectedList + " gespeichert!", Toast.LENGTH_SHORT).show();
-//                    addProductToList(selectedList);
-//                })
-//                .show();
-//    }
+    private void showSelectionDialog(String userId) {
+        FirestoreManager firestoreManager = new FirestoreManager();
 
-    //TODO: Funktioniert noch nicht wirklich, wegen deN Eigenschaften des JSON Objekts
-    private void addProductToList(String selectedList) {
-        File file = new File(requireContext().getFilesDir(), "listen.json");
-
-        Log.d("FilePath", "Dateipfad: " + file.getAbsolutePath());
-
-        if (file.exists()) {
-            try {
-                // Lese den Inhalt der Datei als String
-                String content = new String(Files.readAllBytes(file.toPath()));
-                JSONArray listsArray = new JSONArray(content);
-
-                // Durchsuche alle Listen, um die richtige zu finden
-                for (int i = 0; i < listsArray.length(); i++) {
-                    JSONObject listObject = listsArray.getJSONObject(i);
-                    if (listObject.getString("listName").equals(selectedList)) {
-                        // Produktdetails holen
-                        String produktName = getArguments().getString(ARG_NAME);
-                        String produktZutaten = getArguments().getString(ARG_INGREDIENTS);
-                        String produktNutri = getArguments().getString(ARG_NUTRIMENTS);
-                        String produktAllergene = getArguments().getString(ARG_ALLERGENS);
-                        String produktStore = getArguments().getString(ARG_STORE);
-
-                        // Erstelle ein neues Produkt-JSON-Objekt
-                        JSONObject productObject = new JSONObject();
-                        productObject.put("name", produktName);
-                        productObject.put("ingredients", produktZutaten);
-                        productObject.put("nutriments", produktNutri);
-                        productObject.put("allergens", produktAllergene);
-                        productObject.put("stores", produktStore);
-
-                        // Füge das Produkt zur Liste hinzu
-                        JSONArray productsArray = listObject.getJSONArray("products");
-                        productsArray.put(productObject);
-
-                        // Liste wieder in die JSON-Datei schreiben
-                        FileWriter writer = new FileWriter(file);
-                        writer.write(listsArray.toString());
-                        writer.close();
-
-                        Toast.makeText(getContext(), "Produkt wird zu " + selectedList + " hinzugefügt!", Toast.LENGTH_SHORT).show();
-                        return;
+        // Einkaufslisten mit FirestoreManager laden
+        firestoreManager.getLists(userId, new FirestoreManager.FirestoreCallbackList() {
+            @Override
+            public void onSuccess(List<DocumentSnapshot> documents) { //Hier die Listen (Einkaufslisten)
+                // Namen der Einkaufslisten extrahieren
+                List<String> listNames = new ArrayList<>();
+                for (DocumentSnapshot document : documents) {
+                    String listName = document.getString("name");
+                    if (listName != null) {
+                        listNames.add(listName);
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+
+                // AlertDialog erstellen und anzeigen
+                if (!listNames.isEmpty()) {
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle("Liste auswählen")
+                            .setItems(listNames.toArray(new String[0]), (dialog, which) -> {
+                                String selectedList = listNames.get(which); // Gewählte Liste
+                                addProductToList(selectedList, userId); // Produkt zur Liste hinzufügen
+                            })
+                            .setNegativeButton("Abbrechen", (dialog, which) -> dialog.dismiss())
+                            .show();
+                } else {
+                    Toast.makeText(getContext(), "Keine Listen gefunden", Toast.LENGTH_SHORT).show();
+                }
             }
-        }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(getContext(), "Fehler beim Laden der Listen: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
+    private void addProductToList(String selectedList, String userId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        String productName = getArguments().getString(ARG_NAME, "Unbekannt");
+        String imageUrl = getArguments().getString(ARG_IMAGE_URL, "");
+        String store = getArguments().getString(ARG_STORE, "Kein Laden verfügbar");
+
+        // Neues Produkt als Map erstellen
+        Map<String, String> neuesProduct = new HashMap<>();
+        neuesProduct.put("name", productName);
+        neuesProduct.put("image_url", imageUrl);
+        neuesProduct.put("store", store);
+
+        // Liste aus Firestore holen
+        db.collection("users").document(userId).collection("lists").document(selectedList)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Bestehende Produktliste holen
+                        List<Map<String, String>> products = (List<Map<String, String>>) documentSnapshot.get("products");
+                        if (products == null) {
+                            products = new ArrayList<>();
+                        }
+
+                        products.add(neuesProduct); // Neues Produkt hinzufügen
+
+                        // Aktualisierte Liste speichern
+                        db.collection("users").document(userId).collection("lists").document(selectedList)
+                                .update("products", products)
+                                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Hinzufügen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    } else {
+                        Toast.makeText(getContext(), "Liste existiert nicht", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Laden der Liste: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
 
 }

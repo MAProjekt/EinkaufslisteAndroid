@@ -25,7 +25,7 @@ public class UebersichtFragment extends Fragment {
     private static final String LAST_SEARCH_TERM_KEY = "lastSearchTerm";
 
     private ProductDataFetcher productDataFetcher;
-    private SharedPreferences sharedPreferences;
+    private SharedPreferences sharedPreferences;  //Um letzte Suche zu speichern
     private EditText eingabeProdukt;
 
     @Override
@@ -42,8 +42,8 @@ public class UebersichtFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.productRecyclerView);
         productDataFetcher = new ProductDataFetcher(getContext(), recyclerView);
 
-        // Letzten Suchbegriff laden
-        loadLastSearch();
+
+        loadLastSearch(); //letzte Suche laden
 
         eingabeProdukt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -77,7 +77,7 @@ public class UebersichtFragment extends Fragment {
         String lastSearchTerm = sharedPreferences.getString(LAST_SEARCH_TERM_KEY, "");
         if (!lastSearchTerm.isEmpty()) {
             eingabeProdukt.setText(lastSearchTerm);
-            productDataFetcher.fetchProductData(lastSearchTerm);
+            productDataFetcher.fetchProductData(lastSearchTerm);  //letzte Suchergebnisse laden
         }
     }
 }

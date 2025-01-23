@@ -20,19 +20,31 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 
-/***
- * Verwalten der Datenanzeige in der RecyclerView.
- * Beim Klick auf einem Produkt wird ein DialogFragment mit den Produktdetails angezeigt.
+/**
+ * Der ProductApdater stellt die gefilterten Produktdaten in der RecyclerView dar.
  */
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
     private Context context;
     private List<Product> productList;
 
+    /**
+     * Konstruktor für den ProductAdapter.
+     *
+     * @param context     der Kontext, in dem der Adapter verwendet wird
+     * @param productList die Liste der Produkte, die angezeigt werden sollen
+     */
     public ProductAdapter(Context context, List<Product> productList) {
         this.context = context;
         this.productList = productList;
     }
 
+    /**
+     * Erstellt eine neue View für ein Produktelement.
+     *
+     * @param parent  die übergeordnete ViewGroup, in der die neue View hinzugefügt wird
+     * @param viewType wird nicht verwendet
+     * @return Ein neuer ProductViewHolder mit der erstellten View
+     */
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -41,13 +53,18 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     }
 
 
-    //Anzeigen des Produkts, Listener für PopupFenster
+    /**
+     * füllt die View eines Produktelements mit den entsprechenden Daten aus der Produktliste.
+     *
+     * @param holder   ViewHolder, der die Daten enthält.
+     * @param position  Position des aktuellen Produkts in der Liste.
+     */
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.nameTextView.setText(product.getName());
-        holder.brandTextView.setText(product.getMarke());
-        Glide.with(context).load(product.getImageURL()).into(holder.productImageView);
+        holder.nameText.setText(product.getName());
+        holder.brandText.setText(product.getMarke());
+        Glide.with(context).load(product.getImageURL()).into(holder.productImage);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,15 +87,18 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
+    /**
+     * ViewHolder-Klasse für ein einzelnes Produktelement in der RecyclerView.
+     */
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, brandTextView;
-        ImageView productImageView;
+        TextView nameText, brandText;
+        ImageView productImage;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
-            nameTextView = itemView.findViewById(R.id.nameTextView);
-            brandTextView = itemView.findViewById(R.id.brandTextView);
-            productImageView = itemView.findViewById(R.id.productImageView);
+            nameText = itemView.findViewById(R.id.nameTextView);
+            brandText = itemView.findViewById(R.id.brandTextView);
+            productImage = itemView.findViewById(R.id.productImageView);
         }
     }
 }

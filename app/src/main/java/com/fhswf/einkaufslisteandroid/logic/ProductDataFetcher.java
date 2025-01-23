@@ -18,6 +18,11 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
+/**
+ * Diese Klasse lädt und filtert Produktdaten aus einer JSON-File.
+ * Aktualisiert auch die RecyclerView mit dem ProduktAdapter.
+ */
 public class ProductDataFetcher {
 
     private Context context;
@@ -66,7 +71,7 @@ public class ProductDataFetcher {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                    // Überprüfen, ob der Schlüssel "products" existiert
+                    // Products, JSONArrays extgrahieren
                     if (jsonObject.has("products")) {
                         JSONArray products = jsonObject.getJSONArray("products");
 

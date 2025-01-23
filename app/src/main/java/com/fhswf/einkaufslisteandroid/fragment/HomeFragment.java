@@ -21,9 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link HomeFragment#newInstance} factory method to
- * create an instance of this fragment.
+ *Zeigt die Einkaufslisten an, welche die Produkte speichern, zudem kann man auf die Einkaufsliste klicken,
+ * um die Produkte anzuzeigen.
  */
 public class HomeFragment extends Fragment {
 
@@ -74,14 +73,14 @@ public class HomeFragment extends Fragment {
 
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            firestoreManager.getLists(userId, new FirestoreManager.FirestoreCallbackList() {
+            firestoreManager.getLists(userId, new FirestoreManager.FirestoreCallbackList() {  //Lädt die Einkaufslisten aus der Datenbank
                 @Override
                 public void onSuccess(List<DocumentSnapshot> documents) {
                     List<String> listNames = new ArrayList<>();
                     for (DocumentSnapshot doc : documents) {
-                        listNames.add(doc.getString("name"));
+                        listNames.add(doc.getString("name"));  //Zeigt die
                     }
-                    ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onListClicked);
+                    ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked);  //Wenn Liste geklickt wird, wird die Methode aufgerufen
                     recyclerView.setAdapter(adapter);
                 }
 
@@ -104,7 +103,7 @@ public class HomeFragment extends Fragment {
      * Methode wenn eine Liste angeklickt wird.
      * @param listName
      */
-    private void onListClicked(String listName) {
+    private void onEinkaufsListClicked(String listName) {
         Toast.makeText(getContext(), "Liste ausgewählt: " + listName, Toast.LENGTH_SHORT).show();
         //Hier Produkte anzeigen lassen
 

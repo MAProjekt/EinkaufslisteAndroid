@@ -58,10 +58,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DrawerLayout drawerLayout; // Verwaltet das Hauptlayout des Navigation Drawers
 
-    private RecyclerView productRecyclerView;
-    private ProductAdapter productAdapter;
-    private List<Product> productList;
-
     private FirestoreManager firestoreManager;
     private FirebaseAuth mAuth;
 
@@ -117,12 +113,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-        //Tmp
-        //FirebaseFirestore db = FirebaseFirestore.getInstance();
-        //Map<String, Object> test = new HashMap<>();
-        //test.put("Dennis", "Demir");
-
-        //db.collection("Testzweck").add(test);
     }
 
     @Override
@@ -224,9 +214,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         builder.setPositiveButton("Erstellen", (dialog, which) -> {
             String listName = input.getText().toString().trim();
+            List<String> products = new ArrayList<>();  //<---- Liste für Produkte, das muss noch im FirestoreManager korrigiert werden
             if (!listName.isEmpty()) {
                 String userId = mAuth.getCurrentUser().getUid();
-                firestoreManager.saveList(userId, listName, new FirestoreManager.FirestoreCallback() {
+                firestoreManager.saveList(userId, listName, products, new FirestoreManager.FirestoreCallback() {
                     @Override
                     public void onSuccess(String message) {
                         Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();

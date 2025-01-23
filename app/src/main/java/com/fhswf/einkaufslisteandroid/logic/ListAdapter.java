@@ -12,15 +12,29 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+/**
+ * Klasse welche die Namen der Einkaufslisten anzeigt und sie durch ein Klick auf den Namen aufrufbar macht.
+ * Die Einkaufslisten-Namen werden im HomeFragment angezeigt.
+ */
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     private final List<String> listNames;
     private final OnListClickListener listener;
 
+    /**
+     * Interface, wenn auf ein Listenelement geklickt wird.
+     */
     public interface OnListClickListener {
         void onListClick(String listName);
     }
 
+
+    /**
+     * Konstruktor für den ListAdapter.
+     *
+     * @param listNames Liste der Namen, die angezeigt werden sollen.
+     * @param listener Listener für Klick-Ereignisse auf Listenelementen.
+     */
     public ListAdapter(List<String> listNames, OnListClickListener listener) {
         this.listNames = listNames;
         this.listener = listener;
@@ -40,6 +54,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         holder.itemView.setOnClickListener(v -> listener.onListClick(listName));
     }
 
+    /**
+     * Gibt die Anzahl der Elemente in der Liste zurück.
+     *
+     * @return Die Anzahl der Listenelemente.
+     */
     @Override
     public int getItemCount() {
         return listNames.size();
@@ -52,11 +71,5 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             super(itemView);
             textView = itemView.findViewById(android.R.id.text1);
         }
-    }
-
-    public void updateData(List<String> newData) {
-        this.listNames.clear();
-        this.listNames.addAll(newData);
-        notifyDataSetChanged();
     }
 }
