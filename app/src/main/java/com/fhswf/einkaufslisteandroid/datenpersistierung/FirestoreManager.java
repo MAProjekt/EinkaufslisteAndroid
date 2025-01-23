@@ -1,5 +1,6 @@
 package com.fhswf.einkaufslisteandroid.datenpersistierung;
 
+import com.fhswf.einkaufslisteandroid.models.Product;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -15,7 +16,7 @@ public class FirestoreManager {
         db = FirebaseFirestore.getInstance();
     }
 
-    public void saveList(String userId, String listName, List<String> products , FirestoreCallback callback) {
+    public void saveList(String userId, String listName, List<Product> products , FirestoreCallback callback) {
         Map<String, Object> listData = new HashMap<>();
         listData.put("name", listName);
         listData.put("products", products);

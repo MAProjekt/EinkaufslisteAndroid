@@ -9,6 +9,18 @@ public class Product {
     private String zutaten;
     private String naehrwerte;
 
+
+    //Für Firestore, damit deserialisiert werden kann
+    public Product() {
+
+    }
+
+    public Product(String name, String imageURL, String store){
+        this.name = name;
+        this.imageURL = imageURL;
+        this.store = store;
+    }
+
     public Product(String name, String imageURL, String marke, String store, String nutrients, String zutaten, String allergene) {
         this.name = name;
         this.imageURL = imageURL;
@@ -18,6 +30,8 @@ public class Product {
         this.zutaten = zutaten;
         this.allergene = allergene;
     }
+
+
 
 
     public String getName() {

@@ -20,6 +20,8 @@ import androidx.fragment.app.DialogFragment;
 import com.bumptech.glide.Glide;
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
+import com.fhswf.einkaufslisteandroid.models.Product;
+import com.fhswf.einkaufslisteandroid.models.ProductList;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -253,35 +255,32 @@ public class ProductDetailsFragment extends DialogFragment {
         String imageUrl = getArguments().getString(ARG_IMAGE_URL, "");
         String store = getArguments().getString(ARG_STORE, "Kein Laden verfügbar");
 
-        // Neues Produkt als Map erstellen
-        Map<String, String> neuesProduct = new HashMap<>();
-        neuesProduct.put("name", productName);
-        neuesProduct.put("image_url", imageUrl);
-        neuesProduct.put("store", store);
+        Product neuesProduct = new Product(productName, imageUrl, store);
 
         // Liste aus Firestore holen
         db.collection("users").document(userId).collection("lists").document(selectedList)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // Bestehende Produktliste holen
-                        List<Map<String, String>> products = (List<Map<String, String>>) documentSnapshot.get("products");
-                        if (products == null) {
-                            products = new ArrayList<>();
+                        ProductList productList = documentSnapshot.toObject(ProductList.class);  //Inhalt der Einkaufsliste bzw. Einkaufslisten initialisierne
+                        if (productList != null && productList.getProducts() != null) {
+                            List<Product> products = productList.getProducts();
+                            products.add(neuesProduct);
+
+                            System.out.println(neuesProduct.getImageURL());
+
+                            // Liste speichern
+                            db.collection("users").document(userId).collection("lists").document(selectedList)
+                                    .update("products", products)
+                                    .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show())
+                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Hinzufügen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                         }
-
-                        products.add(neuesProduct); // Neues Produkt hinzufügen
-
-                        // Aktualisierte Liste speichern
-                        db.collection("users").document(userId).collection("lists").document(selectedList)
-                                .update("products", products)
-                                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Hinzufügen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                     } else {
                         Toast.makeText(getContext(), "Liste existiert nicht", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Laden der Liste: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
     }
 
 

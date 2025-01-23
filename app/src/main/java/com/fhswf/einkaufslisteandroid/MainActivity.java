@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         builder.setPositiveButton("Erstellen", (dialog, which) -> {
             String listName = input.getText().toString().trim();
-            List<String> products = new ArrayList<>();  //<---- Liste für Produkte, das muss noch im FirestoreManager korrigiert werden
+            List<Product> products = new ArrayList<>();  //<---- Liste für Produkte, das muss noch im FirestoreManager korrigiert werden
             if (!listName.isEmpty()) {
                 String userId = mAuth.getCurrentUser().getUid();
                 firestoreManager.saveList(userId, listName, products, new FirestoreManager.FirestoreCallback() {
