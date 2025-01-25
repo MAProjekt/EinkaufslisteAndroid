@@ -1,5 +1,6 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -14,8 +15,12 @@ import android.widget.Toast;
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.logic.ListAdapter;
+import com.fhswf.einkaufslisteandroid.logic.ProductAdapter;
+import com.fhswf.einkaufslisteandroid.models.Product;
+import com.fhswf.einkaufslisteandroid.models.ProductList;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,9 +111,45 @@ public class HomeFragment extends Fragment {
     private void onEinkaufsListClicked(String listName) {
         Toast.makeText(getContext(), "Liste ausgewählt: " + listName, Toast.LENGTH_SHORT).show();
         //Hier Produkte anzeigen lassen
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userId = mAuth.getCurrentUser().getUid();
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Produkte aus Firestore abrufen
+        db.collection("users").document(userId).collection("lists").document(listName)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    ProductList productList = documentSnapshot.toObject(ProductList.class);
+                    if (productList != null){
+                        List<Product> products = productList.getProducts();
+                        // Dialog anzeigen
+                        showProductsDialog(listName, products);
+                    }else {
+                        Toast.makeText(getContext(), "Keine Produkte gefunden!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Abrufen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
     }
+
+    private void showProductsDialog(String listName, List<Product> products) {
+        RecyclerView recyclerView = new RecyclerView(requireContext());  //Scroll Liste initialisieren
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        //requireContext() um sicherzustellen einen gültigen Kontext zu bekommen der nicht null ist
+        //req.Cont: notwendig um Ressourcen wie Layouts etc. laden zu können
+        ProductAdapter adapter = new ProductAdapter(requireContext(), products);  //Im Adapter ist auch das Anzeigen des Popup-Fenster bei Klick auf Produkt enthalten
+        recyclerView.setAdapter(adapter);
+
+        //Erstellt Dialog fenster
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Produkte in der Liste: " + listName)
+                .setView(recyclerView) // RecyclerView in den Dialog einfügen
+                .setPositiveButton("Schließen", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
 
 
 

@@ -28,6 +28,21 @@ public class FirestoreManager {
                 .addOnFailureListener(e -> callback.onFailure("Fehler beim Speichern: " + e.getMessage()));
     }
 
+
+
+    //Ohne Interface
+//    public void saveList(String userId, String listName, List<Product> products,
+//                         OnSuccessListener<String> onSuccess, OnFailureListener onFailure) {
+//        Map<String, Object> listData = new HashMap<>();
+//        listData.put("name", listName);
+//        listData.put("products", products);
+//
+//        db.collection("users").document(userId).collection("lists").document(listName)
+//                .set(listData)
+//                .addOnSuccessListener(aVoid -> onSuccess.onSuccess("Liste gespeichert"))
+//                .addOnFailureListener(e -> onFailure.onFailure("Fehler beim Speichern: " + e.getMessage()));
+//    }
+
     public void getLists(String userId, FirestoreCallbackList callback) {
         db.collection("users").document(userId).collection("lists")
                 .get()
@@ -36,6 +51,17 @@ public class FirestoreManager {
 
 
     }
+
+    //Ohne Interface
+//    public void getLists(String userId,
+//                         OnSuccessListener<List<DocumentSnapshot>> onSuccess,
+//                         OnFailureListener onFailure) {
+//        db.collection("users").document(userId).collection("lists")
+//                .get()
+//                .addOnSuccessListener(queryDocumentSnapshots -> onSuccess.onSuccess(queryDocumentSnapshots.getDocuments()))
+//                .addOnFailureListener(e -> onFailure.onFailure("Fehler beim Laden: " + e.getMessage()));
+//    }
+
 
 
     //Ohne Interfaces===?

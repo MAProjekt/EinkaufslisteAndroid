@@ -82,15 +82,15 @@ public class ProductDataFetcher {
 
                             // Filter basierend auf dem Suchbegriff
                             if (name.toLowerCase().contains(searchTerm.toLowerCase())) {
-                                String brand = product.optString("brands", "Unbekannt");
+                                String marke = product.optString("brands", "Unbekannt");
                                 String imageUrl = product.optString("image_url", "");
-                                String store = product.optString("stores", "Kein Laden verfügbar");
+                                String laden = product.optString("stores", "Kein Laden verfügbar");
                                 String nutrients = product.optString("nutriments", "Keine Nährwerte");
                                 String zutaten = product.optString("ingredients", "Keine Zutaten");
                                 String allergene = product.optString("allergens_from_ingredients", "Keine Allergene");
 
                                 // Produkt zur Liste hinzufügen
-                                filteredList.add(new Product(name, imageUrl, brand, store, nutrients, zutaten, allergene));
+                                filteredList.add(new Product(name, imageUrl, marke, laden, nutrients, zutaten, allergene));
                             }
                         }
                     }

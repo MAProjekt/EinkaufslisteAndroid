@@ -221,9 +221,7 @@ public class ProductDetailsFragment extends DialogFragment {
                 List<String> listNames = new ArrayList<>();
                 for (DocumentSnapshot document : documents) {
                     String listName = document.getString("name");
-                    if (listName != null) {
-                        listNames.add(listName);
-                    }
+                    listNames.add(listName);
                 }
 
                 // AlertDialog erstellen und anzeigen
@@ -254,30 +252,30 @@ public class ProductDetailsFragment extends DialogFragment {
         String productName = getArguments().getString(ARG_NAME, "Unbekannt");
         String imageUrl = getArguments().getString(ARG_IMAGE_URL, "");
         String store = getArguments().getString(ARG_STORE, "Kein Laden verfügbar");
+        String zutaten = getArguments().getString(ARG_INGREDIENTS, "Keine Zutaten verfügbar");
+        String nutriments = getArguments().getString(ARG_NUTRIMENTS, "Keine Nährwerte verfügbar");
+        String allergene = getArguments().getString(ARG_ALLERGENS, "Keine Allergene gefunden!");
 
-        Product neuesProduct = new Product(productName, imageUrl, store);
+        Product neuesProduct = new Product(productName, imageUrl, zutaten, nutriments, store, allergene);  //anderen Konstruktor
 
         // Liste aus Firestore holen
         db.collection("users").document(userId).collection("lists").document(selectedList)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        ProductList productList = documentSnapshot.toObject(ProductList.class);  //Inhalt der Einkaufsliste bzw. Einkaufslisten initialisierne
-                        if (productList != null && productList.getProducts() != null) {
-                            List<Product> products = productList.getProducts();
-                            products.add(neuesProduct);
-
-                            System.out.println(neuesProduct.getImageURL());
-
-                            // Liste speichern
-                            db.collection("users").document(userId).collection("lists").document(selectedList)
-                                    .update("products", products)
-                                    .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show())
-                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Hinzufügen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        }
-                    } else {
-                        Toast.makeText(getContext(), "Liste existiert nicht", Toast.LENGTH_SHORT).show();
+                    ProductList productList = documentSnapshot.toObject(ProductList.class);//Inhalt der Einkaufsliste bzw. Einkaufslisten initialisierne
+                    if (productList == null) {
+                        Toast.makeText(getContext(), "Liste existiert nicht!" + selectedList, Toast.LENGTH_SHORT).show();
                     }
+                    List<Product> products = productList.getProducts();
+                    products.add(neuesProduct);
+
+                    System.out.println(neuesProduct.getImageURL());
+                    // Liste speichern
+                    db.collection("users").document(userId).collection("lists").document(selectedList)
+                            .update("products", products)
+                            .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Hinzufügen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Laden der Liste: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 

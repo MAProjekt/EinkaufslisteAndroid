@@ -66,6 +66,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.brandText.setText(product.getMarke());
         Glide.with(context).load(product.getImageURL()).into(holder.productImage);
 
+        //Wenn man auf ein Produkt klickt, wird das PopUp Fenster geöffnet
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,7 +78,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                         product.getAllergene(),
                         product.getStore()
                 );
-                pdf.show(((FragmentActivity) context).getSupportFragmentManager(), "ProductDetailsFragment");
+                pdf.show(((FragmentActivity) context).getSupportFragmentManager(), "ProductDetailsFragment");  //Zeigt das Popup-Fenster an
             }
         });
     }

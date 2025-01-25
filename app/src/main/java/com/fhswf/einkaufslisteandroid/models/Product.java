@@ -15,10 +15,13 @@ public class Product {
 
     }
 
-    public Product(String name, String imageURL, String store){
+    public Product(String name, String imageUrl, String zutaten, String nutriments, String store, String allergene){
         this.name = name;
-        this.imageURL = imageURL;
+        this.imageURL = imageUrl;
         this.store = store;
+        this.naehrwerte = nutriments;
+        this.zutaten = zutaten;
+        this.allergene = allergene;
     }
 
     public Product(String name, String imageURL, String marke, String store, String nutrients, String zutaten, String allergene) {
