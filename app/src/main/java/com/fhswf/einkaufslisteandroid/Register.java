@@ -23,8 +23,6 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.regex.Pattern;
 
 
-
-
 public class Register extends AppCompatActivity {
     TextInputEditText editTextEmail, editTextPassword;
     Button buttonreg;
@@ -94,17 +92,17 @@ public class Register extends AppCompatActivity {
                 password = String.valueOf(editTextPassword.getText());
 
                 if(TextUtils.isEmpty(email)){
-                    Toast.makeText(Register.this, "Enter email", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Register.this, "Gebe eine Mail ein", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
                     return;
                 }
                 if(TextUtils.isEmpty(password)){
-                    Toast.makeText(Register.this, "Enter password", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Register.this, "Gebe ein Passwort ein", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
                     return;
                 }
                 if (!password.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$")) {
-                    Toast.makeText(Register.this, "Password must contain at least one uppercase letter, one digit, and one special character", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Register.this, "Passwort muss mind. 8 Zeichen, eine Zahl, ein Sonderzeichen und ein Großbuchstaben haben ", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
                     return;
                 }
