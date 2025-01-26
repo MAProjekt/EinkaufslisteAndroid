@@ -48,14 +48,27 @@ public class FirestoreManager {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     ProductList productList = documentSnapshot.toObject(ProductList.class); // Liste initialisieren
-                    if (productList == null) {
-                        onFailure.onFailure(new Exception("Liste existiert nicht: " + selectedList));
-                        return;
-                    }
                     List<Product> products = productList.getProducts();
                     products.add(newProduct);
 
                     // Liste aktualisieren
+                    db.collection("users").document(userId).collection("lists").document(selectedList)
+                            .update("products", products)
+                            .addOnSuccessListener(onSuccess)
+                            .addOnFailureListener(onFailure);
+                })
+                .addOnFailureListener(onFailure);
+    }
+
+    public void deleteProductFromList(String userId, String selectedList, Product productToDelete,
+                                      OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
+        db.collection("users").document(userId).collection("lists").document(selectedList)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    ProductList productList = documentSnapshot.toObject(ProductList.class);
+                    List<Product> products = productList.getProducts();
+                    products.remove(productToDelete);
+
                     db.collection("users").document(userId).collection("lists").document(selectedList)
                             .update("products", products)
                             .addOnSuccessListener(onSuccess)
