@@ -80,7 +80,7 @@ public class ProductDataFetcher {
                             JSONObject product = products.getJSONObject(j);
                             String name = product.optString("product_name", "Unbekannt");
 
-                            // Filter basierend auf dem Suchbegriff
+                            // Nach Suchbegriff filtern
                             if (name.toLowerCase().contains(searchTerm.toLowerCase())) {
                                 String marke = product.optString("brands", "Unbekannt");
                                 String imageUrl = product.optString("image_url", "");
@@ -89,7 +89,6 @@ public class ProductDataFetcher {
                                 String zutaten = product.optString("ingredients", "Keine Zutaten");
                                 String allergene = product.optString("allergens_from_ingredients", "Keine Allergene");
 
-                                // Produkt zur Liste hinzufügen
                                 filteredList.add(new Product(name, imageUrl, marke, laden, nutrients, zutaten, allergene));
                             }
                         }
@@ -106,6 +105,11 @@ public class ProductDataFetcher {
         });
     }
 
+    /**
+     * Aktualisiert die RecyclerView mit den gefilterten Produkten.
+     * @param filteredList Die gefilterte Liste von Produkten.
+     *
+     */
     private void updateRecyclerView(List<Product> filteredList) {
         // UI-Update muss auf dem Haupt-Thread erfolgen
         ((RecyclerView) recyclerView).post(() -> {

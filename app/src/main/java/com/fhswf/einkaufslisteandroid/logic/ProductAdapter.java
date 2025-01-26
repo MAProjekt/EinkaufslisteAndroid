@@ -70,7 +70,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ProductDetailsFragment pdf = ProductDetailsFragment.newInstance(
+                ProductDetailsFragment pdf = ProductDetailsFragment.erstelleFragmentMitDaten(
                         product.getName(),
                         product.getImageURL(),
                         product.getZutaten(),

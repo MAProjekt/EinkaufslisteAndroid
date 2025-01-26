@@ -1,6 +1,7 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,10 +53,24 @@ public class ProductDetailsFragment extends DialogFragment {
     private static final List<String> nutriListe = new ArrayList<>(Arrays.asList("calcium", "fat", "energy","energy-kcal",
             "energy-kj","proteins", "salt", "sugars", "sodium" ));
 
-    // Factory-Methode zum Erstellen einer neuen Fragment-Instanz mit Daten
-    public static ProductDetailsFragment newInstance(String name, String imageUrl, String ingredients, String nutriments, String allergens, String store) {
+
+    /**
+     * Erzeugt ein neues ProductDetailsFragment mit den übergebenen Daten.
+     *
+     * Diese Methode dient als Factory-Methode, um sicherzustellen, dass die notwendigen Daten
+     *  korrekt an das Fragment übergeben werden. Die Daten werden in einem Bundle gespeichert und
+     *  über setArguments() dem Fragment hinzugefügt, damit sie später abgerufen werden können.
+     * @param name Name des Produktes
+     * @param imageUrl Bild des Produkts
+     * @param ingredients Zutaten des Produkts
+     * @param nutriments Nährwerte des Produkts
+     * @param allergens Allergene des Produkts
+     * @param store LAden, in dem das Produkt verfügbar ist
+     * @return
+     */
+    public static ProductDetailsFragment erstelleFragmentMitDaten(String name, String imageUrl, String ingredients, String nutriments, String allergens, String store) {
         ProductDetailsFragment fragment = new ProductDetailsFragment();
-        Bundle args = new Bundle();
+        Bundle args = new Bundle();  //Bundle wie Map, speichert Key-Value Paare, hier z.B. arg mit dem übergebenen Namen
         args.putString(ARG_NAME, name);
         args.putString(ARG_IMAGE_URL, imageUrl);
         args.putString(ARG_INGREDIENTS, ingredients);
@@ -76,7 +91,6 @@ public class ProductDetailsFragment extends DialogFragment {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         String userId = auth.getCurrentUser().getUid();
 
-        // Views aus dem Layout
         ImageView produktBildDetails = view.findViewById(R.id.produktBildDetails);
         TextView produktNameText = view.findViewById(R.id.produktNameText);
         TextView produktZutatenText = view.findViewById(R.id.produktZutatenText);
@@ -85,9 +99,9 @@ public class ProductDetailsFragment extends DialogFragment {
         TextView produktStoreText = view.findViewById(R.id.produktHerkunftText);
         Button produktHinzufuegenButton = view.findViewById(R.id.produktHinzufuegen);
 
-        // Daten aus dem Bundle holen
+        //mit getArguments() auf die Daten die im Bundle gespeichert sind zuzugreifen
         if (getArguments() != null) {
-            produktNameText.setText(getArguments().getString(ARG_NAME, "Kein Name verfügbar"));
+            produktNameText.setText(getArguments().getString(ARG_NAME, "Kein Name verfügbar"));  //holt sich den übergebenen Namen, der unter dem Key ARG_NAMe gespeichert ist
             String ingredientsJson = getArguments().getString(ARG_INGREDIENTS, "Keine Zutaten verfügbar");
             produktZutatenText.setText("Zutaten: " + jsonZutaten(ingredientsJson));
             produktAllergeneText.setText("Allergene: " + cleanAllergene(getArguments().getString(ARG_ALLERGENS, "Keine Angaben")));
@@ -176,9 +190,12 @@ public class ProductDetailsFragment extends DialogFragment {
             }
         }
     }
-    //Nur die wichtigsten Nährwerte anzeigen
-    //TODO: Vielleicht eine Map zurückgeben mit einem String und bool als Paar, sodass die Nähwerte in deutsch übersetzt werden
-    //Tipp: vllt ein switch case für das übesetzen?
+
+    /**
+     * Die Methode dient dazu, um nur die in der nutriListe definiereten Werte anzuzeigen.
+     * @param nutri Der übergebene Nährwert.
+     * @return true, wenn der übergebene Nährwert in der Liste vorhanden ist, false, wenn er nicht in der Liste vorhanden ist.
+     */
     private boolean filterNutriWerte(String nutri){
         if(nutriListe.contains(nutri)){
             return true;
@@ -206,49 +223,52 @@ public class ProductDetailsFragment extends DialogFragment {
     }
 
     /**
-     *
+     * Öffnet ein Dialog-Fenster, um die Liste auswählen, in der das Produkt hinzugefügt werden soll.
      *
      * @param userId User id, damit die von ihm zuvor erstellten Einkaufslisten angezeigt werden
      */
     private void showSelectionDialog(String userId) {
         FirestoreManager firestoreManager = new FirestoreManager();
 
-        // Einkaufslisten mit FirestoreManager laden
-        firestoreManager.getLists(userId, new FirestoreManager.FirestoreCallbackList() {
-            @Override
-            public void onSuccess(List<DocumentSnapshot> documents) { //Hier die Listen (Einkaufslisten)
-                // Namen der Einkaufslisten extrahieren
-                List<String> listNames = new ArrayList<>();
-                for (DocumentSnapshot document : documents) {
-                    String listName = document.getString("name");
-                    listNames.add(listName);
-                }
+        firestoreManager.getLists(userId,
+                documents -> {  //verkürzte Schreibweise des onSuccessListeners
+                    // Namen der Einkaufslisten extrahieren
+                    List<String> listNames = new ArrayList<>();
+                    for (DocumentSnapshot document : documents) {
+                        String listName = document.getString("name");
+                        if (listName != null) {
+                            listNames.add(listName);
+                        }
+                    }
 
-                // AlertDialog erstellen und anzeigen
-                if (!listNames.isEmpty()) {
-                    new AlertDialog.Builder(requireContext())
-                            .setTitle("Liste auswählen")
-                            .setItems(listNames.toArray(new String[0]), (dialog, which) -> {
-                                String selectedList = listNames.get(which); // Gewählte Liste
-                                addProductToList(selectedList, userId); // Produkt zur Liste hinzufügen
-                            })
-                            .setNegativeButton("Abbrechen", (dialog, which) -> dialog.dismiss())
-                            .show();
-                } else {
-                    Toast.makeText(getContext(), "Keine Listen gefunden", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(getContext(), "Fehler beim Laden der Listen: " + errorMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
+                    // Alert / PopUp Fenster erstellen
+                    if (!listNames.isEmpty()) {
+                        new AlertDialog.Builder(requireContext())
+                                .setTitle("Liste auswählen")
+                                .setItems(listNames.toArray(new String[0]), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        String selectedList = listNames.get(which); // gewählte Liste
+                                        addProductToList(selectedList, userId);
+                                    }
+                                })
+                                .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .show();
+                    } else {
+                        Toast.makeText(getContext(), "Keine Listen gefunden", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                //e-> kürzere Schreibweise des onFailureListeners
+                e -> Toast.makeText(getContext(), "Fehler beim Laden der Listen: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
     }
 
     private void addProductToList(String selectedList, String userId) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         String productName = getArguments().getString(ARG_NAME, "Unbekannt");
         String imageUrl = getArguments().getString(ARG_IMAGE_URL, "");
         String store = getArguments().getString(ARG_STORE, "Kein Laden verfügbar");
@@ -256,30 +276,15 @@ public class ProductDetailsFragment extends DialogFragment {
         String nutriments = getArguments().getString(ARG_NUTRIMENTS, "Keine Nährwerte verfügbar");
         String allergene = getArguments().getString(ARG_ALLERGENS, "Keine Allergene gefunden!");
 
-        Product neuesProduct = new Product(productName, imageUrl, zutaten, nutriments, store, allergene);  //anderen Konstruktor
+        Product neuesProduct = new Product(productName, imageUrl, zutaten, nutriments, store, allergene);
 
-        // Liste aus Firestore holen
-        db.collection("users").document(userId).collection("lists").document(selectedList)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    ProductList productList = documentSnapshot.toObject(ProductList.class);//Inhalt der Einkaufsliste bzw. Einkaufslisten initialisierne
-                    if (productList == null) {
-                        Toast.makeText(getContext(), "Liste existiert nicht!" + selectedList, Toast.LENGTH_SHORT).show();
-                    }
-                    List<Product> products = productList.getProducts();
-                    products.add(neuesProduct);
-
-                    System.out.println(neuesProduct.getImageURL());
-                    // Liste speichern
-                    db.collection("users").document(userId).collection("lists").document(selectedList)
-                            .update("products", products)
-                            .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show())
-                            .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Hinzufügen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Laden der Liste: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
+        FirestoreManager firestoreManager = new FirestoreManager();
+        firestoreManager.addProductToList(userId, selectedList, neuesProduct,
+                aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show(),
+                e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
     }
+
 
 
 }

@@ -70,26 +70,26 @@ public class HomeFragment extends Fragment {
 
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            firestoreManager.getLists(userId, new FirestoreManager.FirestoreCallbackList() {  //Lädt die Einkaufslisten aus der Datenbank
-                @Override
-                public void onSuccess(List<DocumentSnapshot> documents) {
-                    List<String> listNames = new ArrayList<>();
-                    for (DocumentSnapshot doc : documents) {
-                        listNames.add(doc.getString("name"));  //Zeigt die
-                    }
-                    ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked);  //Wenn Liste geklickt wird, wird die Methode aufgerufen
-                    recyclerView.setAdapter(adapter);
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
-                }
-            });
+            firestoreManager.getLists(userId,
+                    documents -> {
+                        List<String> listNames = new ArrayList<>();
+                        for (DocumentSnapshot doc : documents) {
+                            String listName = doc.getString("name");
+                            if (listName != null) {
+                                listNames.add(listName);
+                            }
+                        }
+                        ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked);
+                        recyclerView.setAdapter(adapter);
+                    },
+                    // Fehlerhandler
+                    e -> Toast.makeText(getContext(), "Fehler beim Laden der Listen: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+            );
         }
 
         return view;
     }
+
 
     /**
      * Hilfsmethode für die onCreateView + sollte noch ausgelagert werden

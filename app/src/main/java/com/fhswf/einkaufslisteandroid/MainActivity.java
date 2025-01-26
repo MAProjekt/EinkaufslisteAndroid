@@ -217,21 +217,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             List<Product> products = new ArrayList<>();  //<---- Liste für Produkte, das muss noch im FirestoreManager korrigiert werden
             if (!listName.isEmpty()) {
                 String userId = mAuth.getCurrentUser().getUid();
-                firestoreManager.saveList(userId, listName, products, new FirestoreManager.FirestoreCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-                        //Damit beim Hinzufügen eines neuen Namens (Einkaufsliste) Seite aktualisiert wird
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container_view_tag, new HomeFragment())
-                                .commit();
-                    }
 
-                    @Override
-                    public void onFailure(String errorMessage) {
-                        Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                firestoreManager.saveList(userId, listName, products,
+                        // Erfolgshandler
+                        message -> {
+                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                            // Fragment aktualisieren, um die neue Liste anzuzeigen
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment_container_view_tag, new HomeFragment())
+                                    .commit();
+                        },
+                        e -> Toast.makeText(MainActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
             } else {
                 Toast.makeText(this, "Listenname darf nicht leer sein!", Toast.LENGTH_SHORT).show();
             }
