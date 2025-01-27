@@ -3,7 +3,9 @@ package com.fhswf.einkaufslisteandroid.fragment;
 import android.app.AlertDialog;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,6 +41,8 @@ public class HomeFragment extends Fragment {
     private String mParam1; // vordef. Parameter
     private String mParam2; // vordef. Parameter
 
+    private FirestoreManager firestoreManager;
+
     public HomeFragment() {
     }
 
@@ -46,10 +50,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        firestoreManager = new FirestoreManager();
     }
 
     /**
@@ -133,6 +134,26 @@ public class HomeFragment extends Fragment {
         //req.Cont: notwendig um Ressourcen wie Layouts etc. laden zu können
         ProductAdapter adapter = new ProductAdapter(requireContext(), products);  //Im Adapter ist auch das Anzeigen des Popup-Fenster bei Klick auf Produkt enthalten
         recyclerView.setAdapter(adapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int aktuellesProduct = viewHolder.getAdapterPosition();
+                Product product = products.get(aktuellesProduct);
+                firestoreManager.deleteProductFromList(FirebaseAuth.getInstance().getCurrentUser().getUid(), listName, product,
+                        aVoid -> {
+                            products.remove(aktuellesProduct);
+                            adapter.notifyItemRemoved(aktuellesProduct);
+                            Toast.makeText(getContext(), "Produkt gelöscht!", Toast.LENGTH_SHORT).show();
+                        },
+                        e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        }).attachToRecyclerView(recyclerView);
 
         //Erstellt Dialog fenster
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
