@@ -5,6 +5,7 @@ import com.fhswf.einkaufslisteandroid.models.ProductList;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 
@@ -63,19 +64,11 @@ public class FirestoreManager {
     public void deleteProductFromList(String userId, String selectedList, Product productToDelete,
                                       OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
         db.collection("users").document(userId).collection("lists").document(selectedList)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    ProductList productList = documentSnapshot.toObject(ProductList.class);
-                    List<Product> products = productList.getProducts();
-                    products.remove(productToDelete);
-
-                    db.collection("users").document(userId).collection("lists").document(selectedList)
-                            .update("products", products)
-                            .addOnSuccessListener(onSuccess)
-                            .addOnFailureListener(onFailure);
-                })
+                .update("products", FieldValue.arrayRemove(productToDelete))
+                .addOnSuccessListener(onSuccess)
                 .addOnFailureListener(onFailure);
     }
+
 
 
 }

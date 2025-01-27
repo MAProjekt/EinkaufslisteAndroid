@@ -1,9 +1,14 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
 import android.app.AlertDialog;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -135,12 +140,14 @@ public class HomeFragment extends Fragment {
         ProductAdapter adapter = new ProductAdapter(requireContext(), products);  //Im Adapter ist auch das Anzeigen des Popup-Fenster bei Klick auf Produkt enthalten
         recyclerView.setAdapter(adapter);
 
+        // für das Swippen nach Links
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
             }
 
+            // Wenn geswiped wurde
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int aktuellesProduct = viewHolder.getAdapterPosition();
@@ -153,6 +160,32 @@ public class HomeFragment extends Fragment {
                         },
                         e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
+
+            // Provisorisch müssen das nochmal druchgenen !!!!!!
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+                if (isCurrentlyActive) {
+                    // Zeichne den roten Hintergrund, wenn das Element nach links gewischt wird
+                    View itemView = viewHolder.itemView;
+                    Paint paint = new Paint();
+                    paint.setColor(Color.RED); // Setzt die Farbe des Hintergrunds auf Rot
+                    c.drawRect(itemView.getLeft(), itemView.getTop(), itemView.getLeft() + dX, itemView.getBottom(), paint);
+
+                    // Zeichne das Löschsymbol (delete_icon.xml als Vektor)
+                    Drawable deleteIcon = ContextCompat.getDrawable(getContext(), R.drawable.delete_icon); // Vektor-Icon
+                    int iconMargin = (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
+                    int iconTop = itemView.getTop() + iconMargin;
+                    int iconBottom = iconTop + deleteIcon.getIntrinsicHeight();
+                    int iconLeft = itemView.getLeft() + iconMargin;
+                    int iconRight = iconLeft + deleteIcon.getIntrinsicWidth();
+
+                    deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                    deleteIcon.draw(c);
+                }
+            }
+
         }).attachToRecyclerView(recyclerView);
 
         //Erstellt Dialog fenster
