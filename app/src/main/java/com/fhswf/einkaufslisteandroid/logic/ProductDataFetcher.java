@@ -35,7 +35,7 @@ public class ProductDataFetcher {
         this.context = context;
         this.recyclerView = recyclerView;
         this.productList = new ArrayList<>();
-        this.adapter = new ProductAdapter(context, productList);
+        this.adapter = new ProductAdapter(context, productList, false);  //false oder true
         this.executor = Executors.newSingleThreadExecutor(); // Für Hintergrundaufgaben
 
         setupRecyclerView();
@@ -51,7 +51,7 @@ public class ProductDataFetcher {
         executor.execute(() -> {
             try {
                 // Datei aus dem assets-Ordner laden
-                InputStream inputStream = context.getAssets().open("daten.json");
+                InputStream inputStream = context.getAssets().open("FoodDaten.json");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 StringBuilder stringBuilder = new StringBuilder();
                 String line;

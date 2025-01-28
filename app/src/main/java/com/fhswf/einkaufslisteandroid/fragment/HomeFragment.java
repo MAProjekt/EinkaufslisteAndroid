@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,7 +78,7 @@ public class HomeFragment extends Fragment {
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
             firestoreManager.getLists(userId,
-                    documents -> {
+                    documents -> {   //documents ist eine Liste von DocumentSnapshots
                         List<String> listNames = new ArrayList<>();
                         for (DocumentSnapshot doc : documents) {
                             String listName = doc.getString("name");
@@ -85,7 +86,9 @@ public class HomeFragment extends Fragment {
                                 listNames.add(listName);
                             }
                         }
-                        ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked);
+                        //Um die Listen anzuzeigen und zwar in HomeFragment
+                        //HomeFragment.this::onEinkaufsListClicked, die Methode soll im aktuellen Homefragment aufgerufen werden
+                        ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked);  //lambda Ausdruck
                         recyclerView.setAdapter(adapter);
                     },
                     // Fehlerhandler
@@ -137,8 +140,9 @@ public class HomeFragment extends Fragment {
 
         //requireContext() um sicherzustellen einen gültigen Kontext zu bekommen der nicht null ist
         //req.Cont: notwendig um Ressourcen wie Layouts etc. laden zu können
-        ProductAdapter adapter = new ProductAdapter(requireContext(), products);  //Im Adapter ist auch das Anzeigen des Popup-Fenster bei Klick auf Produkt enthalten
+        ProductAdapter adapter = new ProductAdapter(requireContext(), products, true, listName);  //Im Adapter ist auch das Anzeigen des Popup-Fenster bei Klick auf Produkt enthalten
         recyclerView.setAdapter(adapter);
+
 
         // für das Swippen nach Links
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {

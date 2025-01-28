@@ -268,6 +268,8 @@ public class ProductDetailsFragment extends DialogFragment {
         );
     }
 
+
+    //TODO: Ausprobieren wie ein boolean in DB abgespeichert wird (wichtig für die Checkbox)
     private void addProductToList(String selectedList, String userId) {
         String productName = getArguments().getString(ARG_NAME, "Unbekannt");
         String imageUrl = getArguments().getString(ARG_IMAGE_URL, "");
@@ -276,7 +278,7 @@ public class ProductDetailsFragment extends DialogFragment {
         String nutriments = getArguments().getString(ARG_NUTRIMENTS, "Keine Nährwerte verfügbar");
         String allergene = getArguments().getString(ARG_ALLERGENS, "Keine Allergene gefunden!");
 
-        Product neuesProduct = new Product(productName, imageUrl, zutaten, nutriments, store, allergene);
+        Product neuesProduct = new Product(productName, imageUrl, zutaten, nutriments, store, allergene, false);
 
         FirestoreManager firestoreManager = new FirestoreManager();
         firestoreManager.addProductToList(userId, selectedList, neuesProduct,

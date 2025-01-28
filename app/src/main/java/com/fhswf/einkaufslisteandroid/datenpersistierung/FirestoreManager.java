@@ -38,7 +38,7 @@ public class FirestoreManager {
                          OnSuccessListener<List<DocumentSnapshot>> onSuccess,
                          OnFailureListener onFailure) {
         db.collection("users").document(userId).collection("lists")
-                .get()
+                .get() //mit get() erhält man eine Sammlung von QuerySnapshots, ist eine Sammlung von Dokumenten
                 .addOnSuccessListener(queryDocumentSnapshots -> onSuccess.onSuccess(queryDocumentSnapshots.getDocuments()))
                 .addOnFailureListener(onFailure); // Exception direkt weitergeben
     }
@@ -66,6 +66,29 @@ public class FirestoreManager {
         db.collection("users").document(userId).collection("lists").document(selectedList)
                 .update("products", FieldValue.arrayRemove(productToDelete))
                 .addOnSuccessListener(onSuccess)
+                .addOnFailureListener(onFailure);
+    }
+
+    //TODO: Methode für das aktualisieren des Gekauft booleans
+    public void updateProductStatus(String userId, String listName, Product product, OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
+        db.collection("users").document(userId).collection("lists").document(listName)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    ProductList productList = documentSnapshot.toObject(ProductList.class);
+                    if (productList != null) {
+                        List<Product> products = productList.getProducts();
+                        for (Product p : products) {
+                            if (p.equals(product)) {
+                                p.setGekauft(product.getGekauft());
+                                break;
+                            }
+                        }
+                        db.collection("users").document(userId).collection("lists").document(listName)
+                                .update("products", products)
+                                .addOnSuccessListener(onSuccess)
+                                .addOnFailureListener(onFailure);
+                    }
+                })
                 .addOnFailureListener(onFailure);
     }
 

@@ -1,13 +1,16 @@
 package com.fhswf.einkaufslisteandroid.logic;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fhswf.einkaufslisteandroid.R;
+import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.fragment.ProductDetailsFragment;
 import com.fhswf.einkaufslisteandroid.models.Product;
 
@@ -16,6 +19,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
 
@@ -27,15 +31,24 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     private Context context;
     private List<Product> productList;
 
+    private boolean checkBoxAnzeige;
+    private String listName;
+
     /**
      * Konstruktor für den ProductAdapter.
      *
      * @param context     der Kontext, in dem der Adapter verwendet wird
      * @param productList die Liste der Produkte, die angezeigt werden sollen
      */
-    public ProductAdapter(Context context, List<Product> productList) {
+    public ProductAdapter(Context context, List<Product> productList, boolean checkBoxAnzeige) {
         this.context = context;
         this.productList = productList;
+        this.checkBoxAnzeige = checkBoxAnzeige;
+    }
+
+    public ProductAdapter(Context context, List<Product> productList, boolean checkBoxAnzeige, String listName){
+        this(context, productList, checkBoxAnzeige);
+        this.listName = listName;
     }
 
     /**
@@ -48,7 +61,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.product_item, parent, false);
+        View view;
+        if (checkBoxAnzeige) {
+            view = LayoutInflater.from(context).inflate(R.layout.product_item_checkbox, parent, false);
+        } else {
+            view = LayoutInflater.from(context).inflate(R.layout.product_item, parent, false);
+        }
         return new ProductViewHolder(view);
     }
 
@@ -65,6 +83,28 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.nameText.setText(product.getName());
         holder.brandText.setText(product.getMarke());
         Glide.with(context).load(product.getImageURL()).into(holder.productImage);
+
+
+        // Prüfen, ob die CheckBox existiert (nur wenn checkBoxAnzeige = true)
+        if (holder.gekauftCheckBox != null) {
+            holder.gekauftCheckBox.setChecked(product.getGekauft());
+            holder.itemView.setAlpha(product.getGekauft() ? 0.5f : 1.0f);
+
+            holder.gekauftCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                product.setGekauft(isChecked);
+                holder.itemView.setAlpha(isChecked ? 0.5f : 1.0f);
+
+                FirestoreManager firestoreManager = new FirestoreManager();
+                firestoreManager.updateProductStatus(
+                        FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                        listName,
+                        product,
+                        aVoid -> Log.d("ProductAdapter", "Produktstatus aktualisiert"),
+                        e -> Log.e("ProductAdapter", "Fehler beim Aktualisieren: " + e.getMessage())
+                );
+            });
+        }
+
 
         //Wenn man auf ein Produkt klickt, wird das PopUp Fenster geöffnet
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -94,12 +134,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         TextView nameText, brandText;
         ImageView productImage;
+        CheckBox gekauftCheckBox;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.nameTextView);
             brandText = itemView.findViewById(R.id.brandTextView);
             productImage = itemView.findViewById(R.id.productImageView);
+            gekauftCheckBox = itemView.findViewById(R.id.checkBox); // Kann null sein
         }
     }
 }
