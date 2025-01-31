@@ -1,5 +1,8 @@
 package com.fhswf.einkaufslisteandroid.datenpersistierung;
 
+import android.content.Context;
+import android.widget.Toast;
+
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.fhswf.einkaufslisteandroid.models.ProductList;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -43,13 +46,21 @@ public class FirestoreManager {
                 .addOnFailureListener(onFailure); // Exception direkt weitergeben
     }
 
-    public void addProductToList(String userId, String selectedList, Product newProduct,
+    public void addProductToList(String userId, Context context, String selectedList, Product newProduct,
                                  OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
         db.collection("users").document(userId).collection("lists").document(selectedList)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     ProductList productList = documentSnapshot.toObject(ProductList.class); // Liste initialisieren
                     List<Product> products = productList.getProducts();
+
+                    for(Product p : products){
+                        if(newProduct.getName().toLowerCase().equals(p.getName().toLowerCase())){
+                            Toast.makeText(context, "Produkt existiert bereits", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+
                     products.add(newProduct);
 
                     // Liste aktualisieren

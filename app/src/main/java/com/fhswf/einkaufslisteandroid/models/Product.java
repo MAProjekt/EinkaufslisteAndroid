@@ -10,6 +10,7 @@ public class Product {
     private String naehrwerte;
 
     private boolean gekauft = false;
+    private String menge;
 
 
     //Für Firestore, damit deserialisiert werden kann
@@ -17,7 +18,7 @@ public class Product {
 
     }
 
-    public Product(String name, String imageUrl, String zutaten, String nutriments, String store, String allergene, boolean gekauft){
+    public Product(String name, String imageUrl, String zutaten, String nutriments, String store, String allergene, boolean gekauft, String menge){
         this.name = name;
         this.imageURL = imageUrl;
         this.store = store;
@@ -25,6 +26,7 @@ public class Product {
         this.zutaten = zutaten;
         this.allergene = allergene;
         this.gekauft = gekauft;
+        this.menge = menge;
     }
 
     public Product(String name, String imageURL, String marke, String store, String nutrients, String zutaten, String allergene) {
@@ -80,5 +82,9 @@ public class Product {
 
     public void setGekauft(boolean gekauft) {
         this.gekauft = gekauft;
+    }
+
+    public String getMenge() {
+        return menge;
     }
 }

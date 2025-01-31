@@ -42,4 +42,5 @@
     <string name="allergene">Allergene</string>
     <string name="herkunft">Herkunft</string>
     <string name="hinzuf_gen">Hinzufügen</string>
+    <string name="produktmenge">Produktmenge</string>
 </resources>

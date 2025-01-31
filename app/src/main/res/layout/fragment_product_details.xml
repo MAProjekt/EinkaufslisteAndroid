@@ -97,6 +97,15 @@
 
 </LinearLayout>
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/productAmount"
+        android:hint="@string/produktmenge"
+        android:inputType="number"
+        android:layout_marginBottom="5dp"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

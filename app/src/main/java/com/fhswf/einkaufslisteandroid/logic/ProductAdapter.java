@@ -12,9 +12,11 @@ import android.widget.TextView;
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.fragment.ProductDetailsFragment;
+import com.fhswf.einkaufslisteandroid.fragment.UebersichtFragment;
 import com.fhswf.einkaufslisteandroid.models.Product;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +35,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     private boolean checkBoxAnzeige;
     private String listName;
+
 
     /**
      * Konstruktor für den ProductAdapter.
@@ -110,6 +113,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 ProductDetailsFragment pdf = ProductDetailsFragment.erstelleFragmentMitDaten(
                         product.getName(),
                         product.getImageURL(),
