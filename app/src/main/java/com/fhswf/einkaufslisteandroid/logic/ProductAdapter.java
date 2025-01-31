@@ -87,6 +87,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.brandText.setText(product.getMarke());
         Glide.with(context).load(product.getImageURL()).into(holder.productImage);
 
+        if(holder.produktItemMenge != null){
+            holder.produktItemMenge.setText("Menge: " + product.getMenge());
+        }
+
 
         // Prüfen, ob die CheckBox existiert (nur wenn checkBoxAnzeige = true)
         if (holder.gekauftCheckBox != null) {
@@ -136,7 +140,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
      * ViewHolder-Klasse für ein einzelnes Produktelement in der RecyclerView.
      */
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
-        TextView nameText, brandText;
+        TextView nameText, brandText, produktItemMenge;
         ImageView productImage;
         CheckBox gekauftCheckBox;
 
@@ -146,6 +150,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             brandText = itemView.findViewById(R.id.brandTextView);
             productImage = itemView.findViewById(R.id.productImageView);
             gekauftCheckBox = itemView.findViewById(R.id.checkBox); // Kann null sein
+            produktItemMenge = itemView.findViewById(R.id.produktItemMenge);
         }
     }
 }

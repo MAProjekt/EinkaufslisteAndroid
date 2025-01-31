@@ -35,6 +35,12 @@
             android:text="Marke"
             android:textSize="14sp"
             android:textColor="#888888" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/produktItemMenge"
+            android:text="Menge"/>
     </LinearLayout>
     <CheckBox
         android:id="@+id/checkBox"
