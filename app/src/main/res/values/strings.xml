@@ -43,4 +43,7 @@
     <string name="herkunft">Herkunft</string>
     <string name="hinzuf_gen">Hinzufügen</string>
     <string name="produktmenge">Produktmenge</string>
+    <string name="darkmode_ein_ausschalten">Darkmode ein-/ausschalten</string>
+    <string name="design">Design</string>
+    <string name="konto">Konto</string>
 </resources>

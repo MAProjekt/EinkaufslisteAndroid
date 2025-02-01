@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirestoreManager firestoreManager;
     private FirebaseAuth mAuth;
 
+    private boolean darkmodeActive = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +131,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new UebersichtFragment();
         } else if (itemId == R.id.nav_ueber_uns) {
             selectedFragment = new UeberUns();
+        } else if (itemId == R.id.darkmode) {
+            activateDarkMode();
+            return true;
         } else if (itemId == R.id.nav_logout) {
             Toast.makeText(MainActivity.this, "Erfolgreich ausgeloggt!", Toast.LENGTH_SHORT).show();
 
@@ -176,12 +181,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(this, Login.class));
             finish();
             return true;
-        } else if (itemId == R.id.darkmode) {
-            activateDarkMode();
-            return true;
-        } else if (itemId == R.id.lightmode) {
-            deactivateDarkMode();
-            return true;
         } else if (itemId == R.id.listeHinzufuegen){
             showCreateListDialog();
             return true;
@@ -191,13 +190,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void activateDarkMode() {
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        Toast.makeText(this, "Darkmode aktiviert", Toast.LENGTH_SHORT).show();
-    }
+        int currentMode = AppCompatDelegate.getDefaultNightMode();
 
-    private void deactivateDarkMode() {
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        Toast.makeText(this, "Darkmode deaktiviert", Toast.LENGTH_SHORT).show();
+        if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            Toast.makeText(this, "Darkmode deaktiviert", Toast.LENGTH_SHORT).show();
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            Toast.makeText(this, "Darkmode aktiviert", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
