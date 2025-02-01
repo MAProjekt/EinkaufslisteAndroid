@@ -78,7 +78,7 @@ public class HomeFragment extends Fragment {
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
             firestoreManager.getLists(userId,
-                    documents -> {   //documents ist eine Liste von DocumentSnapshots
+                    documents -> {   // documents ist eine Liste von DocumentSnapshots
                         List<String> listNames = new ArrayList<>();
                         for (DocumentSnapshot doc : documents) {
                             String listName = doc.getString("name");
@@ -86,18 +86,17 @@ public class HomeFragment extends Fragment {
                                 listNames.add(listName);
                             }
                         }
-                        //Um die Listen anzuzeigen und zwar in HomeFragment
-                        //HomeFragment.this::onEinkaufsListClicked, die Methode soll im aktuellen Homefragment aufgerufen werden
-                        ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked);  //lambda Ausdruck
+                        // ListAdapter mit Kontext, Listennamen und Click-Listener erstellen
+                        ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked, getContext());
                         recyclerView.setAdapter(adapter);
                     },
-                    // Fehlerhandler
                     e -> Toast.makeText(getContext(), "Fehler beim Laden der Listen: " + e.getMessage(), Toast.LENGTH_SHORT).show()
             );
         }
 
         return view;
     }
+
 
 
     /**
@@ -200,7 +199,20 @@ public class HomeFragment extends Fragment {
                 .show();
     }
 
+    private double calculateCompletionOfList(List<Product> productList) {
+        if (productList == null || productList.isEmpty()) {
+            return 0.0;
+        }
 
+        int checkedCount = 0;
+        for (Product product : productList) {
+            if (product.getGekauft()) { // Annahme: Product hat eine isChecked()-Methode
+                checkedCount++;
+            }
+        }
+
+        return (checkedCount * 100.0) / productList.size();
+    }
 
 
 }

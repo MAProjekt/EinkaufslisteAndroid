@@ -61,9 +61,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirestoreManager firestoreManager;
     private FirebaseAuth mAuth;
 
-    private boolean darkmodeActive = false;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
