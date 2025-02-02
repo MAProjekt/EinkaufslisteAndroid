@@ -42,6 +42,7 @@ import com.fhswf.einkaufslisteandroid.models.Group;
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -53,7 +54,11 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -267,10 +272,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(this, "Bitte einen Gruppennamen eingeben!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            int groupId = new Random().nextInt(900000) + 100000;
-            String groupIdString = String.valueOf(groupId);
 
-            firestoreManager.createGroup(groupIdString, groupName, mAuth.getCurrentUser().getUid(),
+            LocalDateTime now = LocalDateTime.now();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyySSSss");
+            String formattedDate = now.format(formatter);
+
+            firestoreManager.createGroup(formattedDate, groupName, mAuth.getCurrentUser().getUid(),
                     successMessage -> Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show(),
                     e -> Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
