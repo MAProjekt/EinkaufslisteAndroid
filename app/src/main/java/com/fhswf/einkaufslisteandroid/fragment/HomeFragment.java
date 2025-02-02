@@ -81,7 +81,7 @@ public class HomeFragment extends Fragment {
 
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            firestoreManager.getLists(userId,
+            firestoreManager.getSingleLists(userId,
                     documents -> {   // documents ist eine Liste von DocumentSnapshots
                         List<String> listNames = new ArrayList<>();
                         for (DocumentSnapshot doc : documents) {

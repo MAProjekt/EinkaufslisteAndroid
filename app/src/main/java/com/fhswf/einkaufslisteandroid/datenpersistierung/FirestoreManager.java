@@ -67,6 +67,46 @@ public class FirestoreManager {
     }
 
     /**
+     * Methode die alle Listen aufruft, die mehr als einen Member haben (also Gruppen-Liste)
+     * @param userId
+     * @param onSuccess
+     * @param onFailure
+     */
+    public void getGroupLists(String userId, OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
+        db.collection("lists")
+                .whereArrayContains("members", userId) // Sicherstellen, dass der User Mitglied ist
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<DocumentSnapshot> groupLists = new ArrayList<>();
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        List<String> members = (List<String>) doc.get("members");
+                        if (members != null && members.size() > 1) { // Prüfen, ob mehr als ein Mitglied existiert
+                            groupLists.add(doc);
+                        }
+                    }
+                    onSuccess.onSuccess(groupLists);
+                })
+                .addOnFailureListener(onFailure);
+    }
+
+    public void getSingleLists(String userId, OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
+        db.collection("lists")
+                .whereArrayContains("members", userId) // Sicherstellen, dass der User Mitglied ist
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<DocumentSnapshot> groupLists = new ArrayList<>();
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        List<String> members = (List<String>) doc.get("members");
+                        if (members != null && members.size() == 1) { // Prüfen, ob mehr als ein Mitglied existiert
+                            groupLists.add(doc);
+                        }
+                    }
+                    onSuccess.onSuccess(groupLists);
+                })
+                .addOnFailureListener(onFailure);
+    }
+
+    /**
      * Fügt ein Produkt zu einer Liste hinzu.
      */
     public void addProductToList(String listId, Context context, Product newProduct,
@@ -170,6 +210,7 @@ public class FirestoreManager {
                 .addOnSuccessListener(onSuccess)
                 .addOnFailureListener(onFailure);
     }
+
 
 
 

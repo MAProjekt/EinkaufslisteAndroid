@@ -49,4 +49,6 @@
     <string name="gruppe_erstellen">Gruppe erstellen</string>
     <string name="uid_kopieren">Uid Kopieren</string>
     <string name="zeige_user_id">Kopiere UserId</string>
+    <string name="gruppeninhalte">Gruppeninhalte</string>
+    <string name="produkte">Produkte</string>
 </resources>

@@ -13,13 +13,13 @@
 
         <item
             android:id="@+id/nav_uebersicht"
-            android:icon="@drawable/uebersicht_icon"
-            android:title="@string/bersicht"/>
+            android:icon="@drawable/shopping_cart_icon"
+            android:title="@string/produkte"/>
 
         <item
-            android:id="@+id/nav_ueber_uns"
-            android:icon="@drawable/info_icon"
-            android:title="@string/ueber_uns"/>
+            android:id="@+id/nav_groups"
+            android:icon="@drawable/groups_icon"
+            android:title="@string/gruppeninhalte"/>
 
     </group>
 

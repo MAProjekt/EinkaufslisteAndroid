@@ -85,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 Toast.makeText(MainActivity.this, "FAB gedrückt!", Toast.LENGTH_SHORT).show();
-                //Produkt produkt = new Produkt("Banane", "3");
             }
         });
 
@@ -116,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new HomeFragment();
         } else if (itemId == R.id.nav_uebersicht) {
             selectedFragment = new UebersichtFragment();
-        } else if (itemId == R.id.nav_ueber_uns) {
+        } else if (itemId == R.id.nav_groups) {
             selectedFragment = new GroupsFragment();
         } else if (itemId == R.id.darkmode) {
             activateDarkMode();
