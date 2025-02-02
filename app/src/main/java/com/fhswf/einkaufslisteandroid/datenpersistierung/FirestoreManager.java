@@ -72,36 +72,29 @@ public class FirestoreManager {
      * @param onSuccess
      * @param onFailure
      */
-    public void getGroupLists(String userId, OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
+    public void getUserOrGroupLists(String userId, boolean group, OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
         db.collection("lists")
                 .whereArrayContains("members", userId) // Sicherstellen, dass der User Mitglied ist
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     List<DocumentSnapshot> groupLists = new ArrayList<>();
+                    List<DocumentSnapshot> singleLists = new ArrayList<>();
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         List<String> members = (List<String>) doc.get("members");
-                        if (members != null && members.size() > 1) { // Prüfen, ob mehr als ein Mitglied existiert
-                            groupLists.add(doc);
+                        if (members != null){
+                            if (members.size() > 1) { // Prüfen, ob mehr als ein Mitglied existiert
+                                groupLists.add(doc);
+                            }else if (members.size() == 1){
+                                singleLists.add(doc);
+                            }
                         }
                     }
-                    onSuccess.onSuccess(groupLists);
-                })
-                .addOnFailureListener(onFailure);
-    }
+                    if (group){
+                        onSuccess.onSuccess(groupLists);
+                    }else {
+                        onSuccess.onSuccess(singleLists);
+                    }
 
-    public void getSingleLists(String userId, OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
-        db.collection("lists")
-                .whereArrayContains("members", userId) // Sicherstellen, dass der User Mitglied ist
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    List<DocumentSnapshot> groupLists = new ArrayList<>();
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        List<String> members = (List<String>) doc.get("members");
-                        if (members != null && members.size() == 1) { // Prüfen, ob mehr als ein Mitglied existiert
-                            groupLists.add(doc);
-                        }
-                    }
-                    onSuccess.onSuccess(groupLists);
                 })
                 .addOnFailureListener(onFailure);
     }

@@ -74,7 +74,7 @@ public class GroupsFragment extends Fragment {
         //Log.d("Testtag", "Test");
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            firestoreManager.getGroupLists(userId,
+            firestoreManager.getUserOrGroupLists(userId, true,
                     documents -> {
                         Log.d("Firestore", "Dokumente empfangen: " + documents.size());
                         List<String> listNames = new ArrayList<>();
