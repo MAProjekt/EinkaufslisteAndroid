@@ -9,5 +9,13 @@
         <item
             android:id="@+id/listeHinzufuegen"
             android:title="@string/liste_hinzuf_gen" />
+
+        <item
+            android:id="@+id/gruppeErstellen"
+            android:title="@string/gruppe_erstellen" />
+
+        <item
+            android:id="@+id/gruppenListeErstellen"
+            android:title="Gruppen-Liste erstellen" />
     </group>
 </menu>

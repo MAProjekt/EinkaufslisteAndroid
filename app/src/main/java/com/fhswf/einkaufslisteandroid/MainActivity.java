@@ -3,10 +3,13 @@ package com.fhswf.einkaufslisteandroid;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,15 +34,17 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 //import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
+import com.fhswf.einkaufslisteandroid.fragment.GroupsFragment;
 import com.fhswf.einkaufslisteandroid.fragment.HomeFragment;
-import com.fhswf.einkaufslisteandroid.fragment.UeberUns;
 import com.fhswf.einkaufslisteandroid.fragment.UebersichtFragment;
 import com.fhswf.einkaufslisteandroid.logic.ProductAdapter;
+import com.fhswf.einkaufslisteandroid.models.Group;
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 //import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
@@ -52,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
@@ -127,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.nav_uebersicht) {
             selectedFragment = new UebersichtFragment();
         } else if (itemId == R.id.nav_ueber_uns) {
-            selectedFragment = new UeberUns();
+            selectedFragment = new GroupsFragment();
         } else if (itemId == R.id.darkmode) {
             activateDarkMode();
             return true;
@@ -181,7 +187,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.listeHinzufuegen){
             showCreateListDialog();
             return true;
-        } else {
+        } else if (itemId == R.id.gruppeErstellen){
+            showCreateGroup();
+            return true;
+        } else if (itemId == R.id.gruppenListeErstellen){
+            showCreateGroupListDialog();
+            return true;
+        }else {
             return super.onOptionsItemSelected(item);
         }
     }
@@ -235,5 +247,111 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
         builder.show();
     }
+
+    /**
+     * Methode um einen Dialog zu öffnen, bei dem der Nutzer eine Gruppe erstellen kann.
+     * Notiz: Prüfung auf bereits vorhandene Namen, etwas komplex je nachdem ob wir prüfen
+     * das ein User aus Gruppen die zwar nicht seine sind, aber in denen er dazugehört.
+     */
+    private void showCreateGroup(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Neue Gruppe erstellen");
+
+        EditText input = new EditText(this);
+        input.setHint("Gruppenname eingeben");
+        builder.setView(input);
+
+        builder.setPositiveButton("Erstellen", (dialog, which) -> {
+            String groupName = input.getText().toString().trim();
+            if (groupName.isEmpty()) {
+                Toast.makeText(this, "Bitte einen Gruppennamen eingeben!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int groupId = new Random().nextInt(900000) + 100000;
+            String groupIdString = String.valueOf(groupId);
+
+            firestoreManager.createGroup(groupIdString, groupName, mAuth.getCurrentUser().getUid(),
+                    successMessage -> Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show(),
+                    e -> Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+        });
+
+        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    /**
+     * Methode um Liste für eine Gruppe zu erstellen
+     */
+    private void showCreateGroupListDialog() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogView = inflater.inflate(R.layout.create_groups_list, null);
+
+        Spinner spinnerGroups = dialogView.findViewById(R.id.spinnerGroupsChoose);
+        EditText editTextListName = dialogView.findViewById(R.id.editTextGroupListName);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Neue Gruppen-Liste erstellen");
+        builder.setView(dialogView);
+
+        // FÜr Ordnung nutzen diese hier
+        Map<String, String> groupMap = new HashMap<>();
+        // Gruppen des aktuellen Users abrufen
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        firestoreManager.getGroupsForUser(userId,
+                groups -> {
+                    List<String> groupNames = new ArrayList<>();
+                    for (Group group : groups) {
+                        groupNames.add(group.getGroupName());
+                        groupMap.put(group.getGroupName(), group.getGroupId()); // Speichert Name -> ID
+                    }
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                            android.R.layout.simple_spinner_item, groupNames);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerGroups.setAdapter(adapter);
+                },
+                e -> Toast.makeText(this, "Fehler beim Laden der Gruppen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+        builder.setPositiveButton("Erstellen", (dialog, which) -> {
+            String listName = editTextListName.getText().toString().trim();
+            if (listName.isEmpty()) {
+                Toast.makeText(this, "Der Listenname darf nicht leer sein!!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Gewählte Gruppe holen
+            String selectedGroupName = (String) spinnerGroups.getSelectedItem();
+            if (selectedGroupName == null) {
+                Toast.makeText(this, "Es wurde keine Gruppe ausgewählt!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Die gespeicherte ID aus der Map abrufen
+            String groupId = groupMap.get(selectedGroupName);
+            if (groupId == null) {
+                Toast.makeText(this, "Fehler: Die Gruppen-ID wurde nicht gefunden!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Log.d("GruppenID", groupId);
+            List<Product> products = new ArrayList<>();
+
+            // Speichere die Liste in Firestore
+            firestoreManager.saveGroupList(groupId, listName, products,
+                    message -> {
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container_view_tag, new HomeFragment())
+                                .commit();
+                    },
+                    e -> Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+            );
+        });
+
+        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
 
 }
