@@ -3,6 +3,7 @@
 package com.fhswf.einkaufslisteandroid.logic;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fhswf.einkaufslisteandroid.R;
+import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.fhswf.einkaufslisteandroid.models.ProductList;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -28,7 +32,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     private final List<String> listNames;
     private final OnListClickListener listener;
-    private Context context;
+
+    private String listId;
 
     /**
      * Interface, wenn auf ein Listenelement geklickt wird.
@@ -44,10 +49,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
      * @param listNames Liste der Namen, die angezeigt werden sollen.
      * @param listener Listener für Klick-Ereignisse auf Listenelementen.
      */
-    public ListAdapter(List<String> listNames, OnListClickListener listener, Context context) {
+    public ListAdapter(List<String> listNames, OnListClickListener listener) {
         this.listNames = listNames;
         this.listener = listener;
-        this.context = context;
     }
 
     @NonNull
@@ -63,31 +67,34 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         holder.listNameTextview.setText(listName);
         holder.itemView.setOnClickListener(v -> listener.onListClick(listName));
 
-        // Hole den aktuellen Nutzer und initialisiere Firestore
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirestoreManager firestoreManager = new FirestoreManager();
 
-        // vlt noch irgendwie mit getLists aus FirestoreManager, aber war bei mir fast genauso viel Code
-        db.collection("users").document(userId)
-                .collection("lists").document(listName)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    ProductList productList = documentSnapshot.toObject(ProductList.class);
-                    if (productList != null) {
-                        List<Product> products = productList.getProducts();
-                        double progress = calculateCompletionOfList(products);
-                        holder.progressBar.setProgress((int) progress);
-                        holder.progressTextView.setText(String.format("%.0f%%", progress));
-                    } else {
-                        holder.progressBar.setProgress(0);
-                        holder.progressTextView.setText("0%");
-                    }
-                })
-                .addOnFailureListener(e -> {
+        firestoreManager.getListIdByName(listName,
+                listId -> {
+                    // ListId erhalten, nun Firestore-Abfrage durchführen
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    db.collection("lists").document(listId)
+                            .get()
+                            .addOnSuccessListener(documentSnapshot -> {
+                                ProductList productList = documentSnapshot.toObject(ProductList.class);
+                                if (productList != null) {
+                                    List<Product> products = productList.getProducts();
+                                    double progress = calculateCompletionOfList(products);
+                                    holder.progressBar.setProgress((int) progress);
+                                    holder.progressTextView.setText(String.format("%.0f%%", progress));
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                holder.progressBar.setProgress(0);
+                                holder.progressTextView.setText("0%");
+                            });
+                },
+                e -> {
+                    Log.e("ListAdapter", "Fehler beim Abrufen der ListId: ", e);
                     holder.progressBar.setProgress(0);
                     holder.progressTextView.setText("0%");
-                });
-
+                }
+        );
     }
 
     /**

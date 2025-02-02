@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.fhswf.einkaufslisteandroid.R;
@@ -48,6 +50,8 @@ public class HomeFragment extends Fragment {
     private String mParam2; // vordef. Parameter
 
     private FirestoreManager firestoreManager;
+
+    private String currentListId;
 
     public HomeFragment() {
     }
@@ -87,7 +91,7 @@ public class HomeFragment extends Fragment {
                             }
                         }
                         // ListAdapter mit Kontext, Listennamen und Click-Listener erstellen
-                        ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked, getContext());
+                        ListAdapter adapter = new ListAdapter(listNames, HomeFragment.this::onEinkaufsListClicked);
                         recyclerView.setAdapter(adapter);
                     },
                     e -> Toast.makeText(getContext(), "Fehler beim Laden der Listen: " + e.getMessage(), Toast.LENGTH_SHORT).show()
@@ -97,13 +101,6 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
-
-
-    /**
-     * Hilfsmethode für die onCreateView + sollte noch ausgelagert werden
-     * @return
-     */
-
     /**
      * Methode wenn eine Liste angeklickt wird.
      * @param listName
@@ -111,29 +108,66 @@ public class HomeFragment extends Fragment {
     private void onEinkaufsListClicked(String listName) {
         Toast.makeText(getContext(), "Liste ausgewählt: " + listName, Toast.LENGTH_SHORT).show();
         //Hier Produkte anzeigen lassen
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String userId = mAuth.getCurrentUser().getUid();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Produkte aus Firestore abrufen
-        db.collection("users").document(userId).collection("lists").document(listName)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    ProductList productList = documentSnapshot.toObject(ProductList.class);
-                    if (productList != null){
-                        List<Product> products = productList.getProducts();
-                        // Dialog anzeigen
-                        showProductsDialog(listName, products);
-                    }else {
-                        Toast.makeText(getContext(), "Keine Produkte gefunden!", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Abrufen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
+        firestoreManager.getListIdByName(listName, listId -> {
+            db.collection("lists").document(listId)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        ProductList productList = documentSnapshot.toObject(ProductList.class);
+                        if (productList != null) {
+                            List<Product> products = productList.getProducts();
+                            showProductsDialog(listId, listName, products); // `listId` übergeben
+                        } else {
+                            Toast.makeText(getContext(), "Keine Produkte gefunden!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Fehler beim Abrufen: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }, e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    private void showProductsDialog(String listName, List<Product> products) {
+    /**
+     * Erstellt ein Dialog fenster um einen Benutzer hinzuzufügen.
+     * Wird in showProductsDialog aufgerufen.
+     * @param listId Id der Liste, zu dem der Benutzer hinzugefügt werden soll.
+     */
+    private void showAddUser(String listId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Benutzer zur Liste hinzufügen");
+
+        // Layout für die Benutzer-Eingabe
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(32, 16, 32, 16);
+
+        // Eingabefeld für Benutzer-UID
+        EditText userIdInput = new EditText(requireContext());
+        userIdInput.setHint("Benutzer-UID eingeben");
+        layout.addView(userIdInput);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Hinzufügen", (dialog, which) -> {
+            String userId = userIdInput.getText().toString().trim();
+            if(userId.isEmpty()){
+                Toast.makeText(getContext(), "UID darf nicht leer sein!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            firestoreManager.addUserToList(listId, userId,
+                    aVoid -> Toast.makeText(getContext(), "Benutzer hinzugefügt!", Toast.LENGTH_SHORT).show(),
+                    e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        });
+
+        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.dismiss());
+
+        // Dialog anzeigen
+        builder.show();
+    }
+
+    private void showProductsDialog(String listId, String listName, List<Product> products) {
+
+        this.currentListId = listId;
         RecyclerView recyclerView = new RecyclerView(requireContext());  //Scroll Liste initialisieren
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
@@ -155,7 +189,8 @@ public class HomeFragment extends Fragment {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int aktuellesProduct = viewHolder.getAdapterPosition();
                 Product product = products.get(aktuellesProduct);
-                firestoreManager.deleteProductFromList(FirebaseAuth.getInstance().getCurrentUser().getUid(), listName, product,
+
+                firestoreManager.deleteProductFromList(listId, product,
                         aVoid -> {
                             products.remove(aktuellesProduct);
                             adapter.notifyItemRemoved(aktuellesProduct);
@@ -191,28 +226,32 @@ public class HomeFragment extends Fragment {
 
         }).attachToRecyclerView(recyclerView);
 
+
         //Erstellt Dialog fenster
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Produkte in der Liste: " + listName)
                 .setView(recyclerView) // RecyclerView in den Dialog einfügen
                 .setPositiveButton("Schließen", (dialog, which) -> dialog.dismiss())
+                .setNegativeButton("Benutzer hinzufügen", (dialog, which) -> {
+                    showAddUser(listId);
+                })
+                .setNeutralButton("Liste löschen", (dialog, which) -> {
+                    AlertDialog.Builder builderJaOderNein = new AlertDialog.Builder(requireContext());
+                    builderJaOderNein.setTitle("Willst du die Liste \"" + listName + "\" wirklich löschen?")
+                            .setPositiveButton("Ja", (dialogJa, whichJa) -> {
+                                firestoreManager.deleteList(listId, aVoid -> {
+                                    Toast.makeText(getContext(), "Liste gelöscht!", Toast.LENGTH_SHORT).show();
+                                    getParentFragmentManager().beginTransaction()  //Homefragment neuladen
+                                            .replace(R.id.fragment_container_view_tag, new HomeFragment())
+                                            .commit();
+                                }, e -> {
+                                    Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                            })
+                            .setNegativeButton("Nein", (dialogJa, whichJa) -> dialogJa.dismiss())
+                            .show();
+                })
                 .show();
+
     }
-
-    private double calculateCompletionOfList(List<Product> productList) {
-        if (productList == null || productList.isEmpty()) {
-            return 0.0;
-        }
-
-        int checkedCount = 0;
-        for (Product product : productList) {
-            if (product.getGekauft()) { // Annahme: Product hat eine isChecked()-Methode
-                checkedCount++;
-            }
-        }
-
-        return (checkedCount * 100.0) / productList.size();
-    }
-
-
 }

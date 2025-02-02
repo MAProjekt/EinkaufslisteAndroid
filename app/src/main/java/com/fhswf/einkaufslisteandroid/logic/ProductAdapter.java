@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
+import com.fhswf.einkaufslisteandroid.fragment.HomeFragment;
 import com.fhswf.einkaufslisteandroid.fragment.ProductDetailsFragment;
 import com.fhswf.einkaufslisteandroid.fragment.UebersichtFragment;
 import com.fhswf.einkaufslisteandroid.models.Product;
@@ -102,13 +103,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 holder.itemView.setAlpha(isChecked ? 0.5f : 1.0f);
 
                 FirestoreManager firestoreManager = new FirestoreManager();
-                firestoreManager.updateProductStatus(
-                        FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                        listName,
-                        product,
-                        aVoid -> Log.d("ProductAdapter", "Produktstatus aktualisiert"),
-                        e -> Log.e("ProductAdapter", "Fehler beim Aktualisieren: " + e.getMessage())
-                );
+
+                firestoreManager.getListIdByName(listName, listId -> {
+                    firestoreManager.updateProductStatus(
+                            listId,
+                            product,
+                            aVoid -> Log.d("ProductAdapter", "Produktstatus aktualisiert"),
+                            e -> Log.e("ProductAdapter", "Fehler beim Aktualisieren: " + e)
+                    );// HomeFragment neu laden, nachdem das Produkt als gekauft markiert wurde
+                    if (context instanceof FragmentActivity) {
+                        FragmentActivity activity = (FragmentActivity) context;
+                        activity.getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container_view_tag, new HomeFragment())  // Hier wird das HomeFragment neu geladen
+                                .commit();
+                    }
+                }, e -> Log.e("ProductAdapter", "Fehler beim Abrufen der List-ID: " + e));
             });
         }
 

@@ -47,4 +47,6 @@
     <string name="design">Design</string>
     <string name="konto">Konto</string>
     <string name="gruppe_erstellen">Gruppe erstellen</string>
+    <string name="uid_kopieren">Uid Kopieren</string>
+    <string name="zeige_user_id">Kopiere UserId</string>
 </resources>

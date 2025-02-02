@@ -299,10 +299,12 @@ public class ProductDetailsFragment extends DialogFragment {
         Log.e("MengeProdukt ", neuesProduct.getMenge());
 
 
-        firestoreManager.addProductToList(userId, getContext(), selectedList, neuesProduct,
-                aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show(),
-                e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-        );
+        firestoreManager.getListIdByName(selectedList, listId -> {
+            firestoreManager.addProductToList(listId, getContext(), neuesProduct,
+                    aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show(),
+                    e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+            );
+        }, e -> Toast.makeText(getContext(), "Fehler: Liste nicht gefunden", Toast.LENGTH_SHORT).show());
     }
 
 
