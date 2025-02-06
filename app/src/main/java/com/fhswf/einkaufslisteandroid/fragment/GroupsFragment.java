@@ -282,4 +282,14 @@ public class GroupsFragment extends Fragment {
                 .commit();
     }
 
+    public void updateProgressBar() {
+        View view = getView();
+        if (view != null) {
+            RecyclerView recyclerView = view.findViewById(R.id.ViewListsForGroups);
+            if (recyclerView != null && recyclerView.getAdapter() != null) {
+                recyclerView.getAdapter().notifyDataSetChanged(); // Nur die Liste neu laden
+            }
+        }
+    }
+
 }

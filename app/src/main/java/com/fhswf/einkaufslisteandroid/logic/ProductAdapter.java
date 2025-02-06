@@ -112,13 +112,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                             aVoid -> Log.d("ProductAdapter", "Produktstatus aktualisiert"),
                             e -> Log.e("ProductAdapter", "Fehler beim Aktualisieren: " + e)
                     );// HomeFragment neu laden, nachdem das Produkt als gekauft markiert wurde
+
                     if (context instanceof FragmentActivity) {
                         FragmentActivity activity = (FragmentActivity) context;
-                        activity.getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container_view_tag, new HomeFragment())  // Hier wird das HomeFragment neu geladen
-                                .replace(R.id.fragment_container_view_tag, new GroupsFragment())
-                                .commit();
+
+                        // Prüfe, ob das aktuelle Fragment HomeFragment oder GroupsFragment ist
+                        Fragment currentFragment = activity.getSupportFragmentManager().findFragmentById(R.id.fragment_container_view_tag);
+
+                        if (currentFragment instanceof HomeFragment) {
+                            ((HomeFragment) currentFragment).updateProgressBar();
+                        } else if (currentFragment instanceof GroupsFragment) {
+                            ((GroupsFragment) currentFragment).updateProgressBar();
+                        }
                     }
+
                 }, e -> Log.e("ProductAdapter", "Fehler beim Abrufen der List-ID: " + e));
             });
         }

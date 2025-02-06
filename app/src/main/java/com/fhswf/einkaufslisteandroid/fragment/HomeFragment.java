@@ -54,6 +54,7 @@ public class HomeFragment extends Fragment {
 
     private String currentListId;
 
+
     public HomeFragment() {
     }
 
@@ -168,6 +169,21 @@ public class HomeFragment extends Fragment {
         // Dialog anzeigen
         builder.show();
     }
+
+    /**
+     * Aktualisiert die ProgressBar der HomeFragment.
+     */
+    public void updateProgressBar() {
+        View view = getView();
+        if (view != null) {
+            RecyclerView recyclerView = view.findViewById(R.id.ViewLists);
+            if (recyclerView != null && recyclerView.getAdapter() != null) {
+                recyclerView.getAdapter().notifyDataSetChanged(); // Nur die Liste neu laden
+            }
+        }
+    }
+
+
 
     /**
      * Methode zum Aktualisieren des HomeFragment.

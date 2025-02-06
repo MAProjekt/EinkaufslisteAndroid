@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -126,7 +127,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
      * @return Prozentsatz der gekauften/abgehakten Produkte
      */
     private double calculateCompletionOfList(List<Product> productList) {
-        if (productList == null || productList.isEmpty()) {
+        if(productList == null){
+            throw new NullPointerException("productList darf nicht null sein!");
+        }
+        if (productList.isEmpty()) {
             return 0.0;
         }
         int checkedCount = 0;
@@ -137,5 +141,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         }
         return (checkedCount * 100.0) / productList.size();
     }
+
 
 }
