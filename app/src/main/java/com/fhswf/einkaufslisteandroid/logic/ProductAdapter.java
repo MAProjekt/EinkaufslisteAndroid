@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
+import com.fhswf.einkaufslisteandroid.fragment.GroupsFragment;
 import com.fhswf.einkaufslisteandroid.fragment.HomeFragment;
 import com.fhswf.einkaufslisteandroid.fragment.ProductDetailsFragment;
 import com.fhswf.einkaufslisteandroid.fragment.UebersichtFragment;
@@ -115,6 +116,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                         FragmentActivity activity = (FragmentActivity) context;
                         activity.getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.fragment_container_view_tag, new HomeFragment())  // Hier wird das HomeFragment neu geladen
+                                .replace(R.id.fragment_container_view_tag, new GroupsFragment())
                                 .commit();
                     }
                 }, e -> Log.e("ProductAdapter", "Fehler beim Abrufen der List-ID: " + e));

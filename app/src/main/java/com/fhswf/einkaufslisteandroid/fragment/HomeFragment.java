@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -150,12 +151,15 @@ public class HomeFragment extends Fragment {
 
         builder.setPositiveButton("Hinzufügen", (dialog, which) -> {
             String userId = userIdInput.getText().toString().trim();
-            if(userId.isEmpty()){
+            if (userId.isEmpty()) {
                 Toast.makeText(getContext(), "UID darf nicht leer sein!", Toast.LENGTH_SHORT).show();
                 return;
             }
             firestoreManager.addUserToList(listId, userId,
-                    aVoid -> Toast.makeText(getContext(), "Benutzer hinzugefügt!", Toast.LENGTH_SHORT).show(),
+                    aVoid -> {
+                        Toast.makeText(getContext(), "Benutzer hinzugefügt!", Toast.LENGTH_SHORT).show();
+                        refreshFragment(); // HomeFragment neu laden
+                    },
                     e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         });
 
@@ -163,6 +167,16 @@ public class HomeFragment extends Fragment {
 
         // Dialog anzeigen
         builder.show();
+    }
+
+    /**
+     * Methode zum Aktualisieren des HomeFragment.
+     */
+    private void refreshFragment() {
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container_view_tag, new HomeFragment());
+        transaction.addToBackStack(null); // Optional: Falls du zurück navigieren willst
+        transaction.commit();
     }
 
     private void showProductsDialog(String listId, String listName, List<Product> products) {

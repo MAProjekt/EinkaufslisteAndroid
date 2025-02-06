@@ -99,6 +99,36 @@ public class FirestoreManager {
                 .addOnFailureListener(onFailure);
     }
 
+    public void getCreator(String listId, OnSuccessListener<String> onSuccess, OnFailureListener onFailure){
+        db.collection("lists").document(listId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    List<String> members = (List<String>) documentSnapshot.get("members");
+                    onSuccess.onSuccess(members.get(0));
+                }).addOnFailureListener(onFailure);
+    }
+
+    /**
+     * Entfernt einen Benutzer aus einer Liste.
+     * @param listId
+     * @param userID
+     * @param onSuccess
+     * @param onFailure
+     */
+    public void leaveList(String listId, String userID, OnSuccessListener<String> onSuccess, OnFailureListener onFailure){
+        db.collection("lists").document(listId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    List<String> members = (List<String>) documentSnapshot.get("members");
+                    members.remove(userID);
+
+                    db.collection("lists").document(listId)
+                            .update("members", members)
+                            .addOnSuccessListener(aVoid -> onSuccess.onSuccess(null))
+                            .addOnFailureListener(onFailure);
+                }).addOnFailureListener(onFailure);
+    }
+
     /**
      * Fügt ein Produkt zu einer Liste hinzu.
      */

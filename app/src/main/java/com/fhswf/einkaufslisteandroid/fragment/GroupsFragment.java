@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -71,7 +72,6 @@ public class GroupsFragment extends Fragment {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirestoreManager firestoreManager = new FirestoreManager();
 
-        //Log.d("Testtag", "Test");
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
             firestoreManager.getUserOrGroupLists(userId, true,
@@ -166,6 +166,14 @@ public class GroupsFragment extends Fragment {
         builder.show();
     }
 
+
+    /**
+     * Zeigt die Produkte einer Liste an.
+     * Zudem gibt es unter dem Dialog die Möglichkeit einen Benutzer hinzuzufügen oder die Liste zu löschen.
+     * @param listId
+     * @param listName
+     * @param products
+     */
     private void showProductsDialog(String listId, String listName, List<Product> products) {
 
         this.currentListId = listId;
@@ -228,31 +236,50 @@ public class GroupsFragment extends Fragment {
         }).attachToRecyclerView(recyclerView);
 
 
-        //Erstellt Dialog fenster
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Produkte in der Liste: " + listName)
-                .setView(recyclerView) // RecyclerView in den Dialog einfügen
-                .setPositiveButton("Schließen", (dialog, which) -> dialog.dismiss())
-                .setNegativeButton("Benutzer hinzufügen", (dialog, which) -> {
-                    showAddUser(listId);
-                })
-                .setNeutralButton("Liste löschen", (dialog, which) -> {
+        // Erstellt Dialog-Fenster
+        firestoreManager.getCreator(listId, creatorId -> {
+            String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            boolean isCreator = currentUserId.equals(creatorId);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Produkte in der Liste: " + listName)
+                    .setView(recyclerView) // RecyclerView in den Dialog einfügen
+                    .setPositiveButton("Schließen", (dialog, which) -> dialog.dismiss())
+                    .setNegativeButton("Benutzer hinzufügen", (dialog, which) -> showAddUser(listId))
+                    .setNeutralButton("Gruppe verlassen", (dialog, which) -> {
+                        firestoreManager.leaveList(listId, currentUserId,
+                                aVoid -> {
+                                    Toast.makeText(getContext(), "Gruppe verlassen!", Toast.LENGTH_SHORT).show();
+                                    refreshFragment();
+                                    },
+                                e-> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    });
+
+            if (isCreator) {
+                builder.setNeutralButton("Liste löschen", (dialog, which) -> {
                     AlertDialog.Builder builderJaOderNein = new AlertDialog.Builder(requireContext());
                     builderJaOderNein.setTitle("Willst du die Liste \"" + listName + "\" wirklich löschen?")
                             .setPositiveButton("Ja", (dialogJa, whichJa) -> {
                                 firestoreManager.deleteList(listId, aVoid -> {
                                     Toast.makeText(getContext(), "Liste gelöscht!", Toast.LENGTH_SHORT).show();
-                                    getParentFragmentManager().beginTransaction()  //Homefragment neuladen
-                                            .replace(R.id.fragment_container_view_tag, new HomeFragment())
-                                            .commit();
-                                }, e -> {
-                                    Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                });
+                                    refreshFragment();
+                                }, e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                             })
                             .setNegativeButton("Nein", (dialogJa, whichJa) -> dialogJa.dismiss())
                             .show();
-                })
-                .show();
+                });
+            }
+
+            builder.show();
+        }, error -> Toast.makeText(getContext(), "Fehler: " + error.getMessage(), Toast.LENGTH_SHORT).show());
+
 
     }
+
+    private void refreshFragment(){
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container_view_tag, new GroupsFragment())
+                .commit();
+    }
+
 }
