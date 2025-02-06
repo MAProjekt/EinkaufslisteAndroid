@@ -10,7 +10,7 @@
             android:id="@+id/listeHinzufuegen"
             android:title="@string/liste_hinzuf_gen" />
         <item
-            android:id="@+id/zeigeUID"
+            android:id="@+id/kopiereUID"
             android:title="@string/zeige_user_id" />
     </group>
 </menu>

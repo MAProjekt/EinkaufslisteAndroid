@@ -1,5 +1,7 @@
 package com.fhswf.einkaufslisteandroid;
 
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -167,8 +169,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(this, Login.class));
             finish();
             return true;
-        } else if (itemId == R.id.listeHinzufuegen){
+        } else if (itemId == R.id.listeHinzufuegen) {
             showCreateListDialog();
+            return true;
+        } else if (itemId == R.id.kopiereUID){
+            FirebaseUser user = mAuth.getCurrentUser();
+            if (user != null) {
+                String userId = user.getUid();
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard != null) {
+                    // Erstellen eines Clip-Objekts und Kopieren der UID in die Zwischenablage
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("User UID", userId);
+                    clipboard.setPrimaryClip(clip);
+
+                    Toast.makeText(this, "UID in die Zwischenablage kopiert", Toast.LENGTH_SHORT).show();
+                }
+            }
             return true;
         }else {
             return super.onOptionsItemSelected(item);
