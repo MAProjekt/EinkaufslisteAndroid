@@ -24,6 +24,17 @@ public class FirestoreManager {
         db = FirebaseFirestore.getInstance();
     }
 
+    public void saveUser(String uid, String email){
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("email", email);
+        db.collection("benutzer").document(uid).set(userData)
+                .addOnSuccessListener(aVoid -> {
+                    System.out.println("Benutzer erfolgreich gespeichert");
+                })
+                .addOnFailureListener(e -> {System.err.println("Fehler beim Speichern des Benutzers: " + e.getMessage());
+                });
+    }
+
     /**
      * Erstellt eine neue Einkaufsliste mit einer automatisch generierten ID.
      */
@@ -72,32 +83,32 @@ public class FirestoreManager {
      * @param onSuccess
      * @param onFailure
      */
-    public void getUserOrGroupLists(String userId, boolean group, OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
+    public void getUserOrGroupLists(String userId, boolean group,
+                                            OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
+
         db.collection("lists")
-                .whereArrayContains("members", userId) // Sicherstellen, dass der User Mitglied ist
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
+                .whereArrayContains("members", userId)
+                .addSnapshotListener((querySnapshot, error) -> {
+                    if (error != null) {
+                        onFailure.onFailure(error);
+                        return;
+                    }
                     List<DocumentSnapshot> groupLists = new ArrayList<>();
                     List<DocumentSnapshot> singleLists = new ArrayList<>();
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         List<String> members = (List<String>) doc.get("members");
-                        if (members != null){
-                            if (members.size() > 1) { // Prüfen, ob mehr als ein Mitglied existiert
+                        if (members != null) {
+                            if (members.size() > 1) {
                                 groupLists.add(doc);
-                            }else if (members.size() == 1){
+                            } else {
                                 singleLists.add(doc);
                             }
                         }
                     }
-                    if (group){
-                        onSuccess.onSuccess(groupLists);
-                    }else {
-                        onSuccess.onSuccess(singleLists);
-                    }
-
-                })
-                .addOnFailureListener(onFailure);
+                    onSuccess.onSuccess(group ? groupLists : singleLists);
+                });
     }
+
 
     public void getCreator(String listId, OnSuccessListener<String> onSuccess, OnFailureListener onFailure){
         db.collection("lists").document(listId)

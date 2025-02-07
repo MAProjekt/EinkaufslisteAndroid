@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <!-- Das zweite Menü -->
     <item
         android:id="@+id/itemLogout"
@@ -8,7 +9,9 @@
     <group android:title="@string/einstellungen">
         <item
             android:id="@+id/listeHinzufuegen"
-            android:title="@string/liste_hinzuf_gen" />
+            android:title="@string/liste_hinzuf_gen"
+            android:icon="@android:drawable/ic_input_add"
+            app:showAsAction="always"/>
         <item
             android:id="@+id/kopiereUID"
             android:title="@string/zeige_user_id" />

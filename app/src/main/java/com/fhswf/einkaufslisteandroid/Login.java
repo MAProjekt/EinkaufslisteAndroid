@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -217,10 +218,13 @@ public class Login extends AppCompatActivity {
 
     private void firebaseAuth(String idToken){
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        FirestoreManager firestoreManager = new FirestoreManager();
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    firestoreManager.saveUser(user.getUid(), user.getEmail());  //Zu Benutzern hinzufügen
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(intent);
                     finish();

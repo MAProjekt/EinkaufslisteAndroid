@@ -3,6 +3,7 @@
 package com.fhswf.einkaufslisteandroid.logic;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,6 +84,17 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                                     double progress = calculateCompletionOfList(products);
                                     holder.progressBar.setProgress((int) progress);
                                     holder.progressTextView.setText(String.format("%.0f%%", progress));
+                                    holder.listNameTextview.setAlpha(1.0f);
+
+                                    if (progress == 100.0) {
+                                        holder.listNameTextview.setAlpha(0.5f);
+                                        holder.progressBar.getProgressDrawable()
+                                                .setTint(holder.itemView.getContext().getResources().getColor(R.color.progressBar_green, null)); // Setzt die ProgressBar-Farbe auf Grün
+                                    } else {
+                                        holder.listNameTextview.setTypeface(null, Typeface.BOLD);
+                                        holder.progressBar.getProgressDrawable()
+                                                .setTint(holder.itemView.getContext().getResources().getColor(R.color.progressBar_color, null)); // Standardfarbe (z. B. Blau)
+                                    }
                                 }
                             })
                             .addOnFailureListener(e -> {
@@ -141,6 +153,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         }
         return (checkedCount * 100.0) / productList.size();
     }
+
 
 
 }

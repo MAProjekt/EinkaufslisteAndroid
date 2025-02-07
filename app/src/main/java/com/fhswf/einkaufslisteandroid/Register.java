@@ -12,6 +12,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.validator.PasswordValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -120,6 +121,8 @@ public class Register extends AppCompatActivity {
                                 if(task.isSuccessful()){
                                     FirebaseUser user = mAuth.getCurrentUser();
                                     if (user != null){
+                                        FirestoreManager firestoreManager = new FirestoreManager();
+                                        firestoreManager.saveUser(user.getUid(), user.getEmail());
                                         user.sendEmailVerification()
                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
