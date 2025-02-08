@@ -2,6 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="white_from_fragment">#FCF5FD</color>
+    <color name="black_from_fragment">#141218</color>
     <color name="default_ThemeOverlay_AppCompat">#6100EC</color>
     <color name="progressBar_color">#3F51B5</color>
     <color name="progressBar_green">#4CAF50</color> <!-- Grün-->

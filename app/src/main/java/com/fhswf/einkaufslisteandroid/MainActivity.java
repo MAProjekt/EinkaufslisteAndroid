@@ -3,50 +3,43 @@ package com.fhswf.einkaufslisteandroid;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
-//import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.fragment.GroupsFragment;
 import com.fhswf.einkaufslisteandroid.fragment.HomeFragment;
 import com.fhswf.einkaufslisteandroid.fragment.UebersichtFragment;
+import com.fhswf.einkaufslisteandroid.logic.AuthService;
+import com.fhswf.einkaufslisteandroid.logic.DialogHelper;
+import com.fhswf.einkaufslisteandroid.logic.ThemeLogic;
 import com.fhswf.einkaufslisteandroid.models.Product;
+import com.fhswf.einkaufslisteandroid.Login;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-//import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -93,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         // User im nav_menu 1 (nav_header) anzeigen
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null && user.getEmail() != null) {
             View headerView = navigationView.getHeaderView(0);
@@ -119,13 +111,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ImageButton editUsernameButton = headerView.findViewById(R.id.editSideMenuUsernameButton);
         editUsernameButton.setOnClickListener(v -> showEditUsernameDialog());
 
+        // Farbe der NavigationBar ändern je nach Mode (Darkmode)
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.black_from_fragment));
+        } else {
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.white_from_fragment));
+        }
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        //FirebaseUser user = mAuth.getCurrentUser();
 
         Fragment selectedFragment = null;
 
@@ -136,13 +133,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.nav_groups) {
             selectedFragment = new GroupsFragment();
         } else if (itemId == R.id.darkmode) {
-            activateDarkMode();
+            ThemeLogic.toggleDarkMode(this);
             return true;
         } else if (itemId == R.id.nav_logout) {
             Toast.makeText(MainActivity.this, "Erfolgreich ausgeloggt!", Toast.LENGTH_SHORT).show();
-
-            mAuth.signOut();
-            startActivity(new Intent(this, Login.class));
+            AuthService.getInstance().signOut(this);
             finish();
         }
 
@@ -179,10 +174,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         if (itemId == R.id.itemLogout) {
-            mAuth.signOut();
-            startActivity(new Intent(this, Login.class));
+            AuthService.getInstance().signOut(this);
             finish();
             return true;
         } else if (itemId == R.id.listeHinzufuegen) {
@@ -202,20 +195,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
             return true;
-        }else {
-            return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void activateDarkMode() {
-        int currentMode = AppCompatDelegate.getDefaultNightMode();
-
-        if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            Toast.makeText(this, "Darkmode deaktiviert", Toast.LENGTH_SHORT).show();
         } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            Toast.makeText(this, "Darkmode aktiviert", Toast.LENGTH_SHORT).show();
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -224,37 +205,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      *
      */
     private void showCreateListDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Neue Liste erstellen");
+        DialogHelper.showCreateListDialog(this, listName -> {
+            List<Product> products = new ArrayList<>();
+            String userId = mAuth.getCurrentUser().getUid();
 
-        EditText input = new EditText(this);
-        input.setHint("Listenname eingeben");
-        builder.setView(input);
-
-        builder.setPositiveButton("Erstellen", (dialog, which) -> {
-            String listName = input.getText().toString().trim();
-            List<Product> products = new ArrayList<>();  //<---- Liste für Produkte, das muss noch im FirestoreManager korrigiert werden
-            if (!listName.isEmpty()) {
-                String userId = mAuth.getCurrentUser().getUid();
-
-                firestoreManager.saveList(userId, listName, products,
-                        // Erfolgshandler
-                        message -> {
-                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-                            // Fragment aktualisieren, um die neue Liste anzuzeigen
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.fragment_container_view_tag, new HomeFragment())
-                                    .commit();
-                        },
-                        e -> Toast.makeText(MainActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                );
-            } else {
-                Toast.makeText(this, "Listenname darf nicht leer sein!", Toast.LENGTH_SHORT).show();
-            }
+            firestoreManager.saveList(userId, listName, products,
+                    // Erfolgshandler
+                    message -> {
+                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                        // Fragment aktualisieren, um die neue Liste anzuzeigen
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container_view_tag, new HomeFragment())
+                                .commit();
+                    },
+                    e -> Toast.makeText(MainActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+            );
         });
-
-        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
-        builder.show();
     }
 
     /**
@@ -265,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         EditText input = new EditText(this);
         input.setHint("Neuer Nutzername");
 
-        new AlertDialog.Builder(this)
+        new android.app.AlertDialog.Builder(this)
                 .setTitle("Neuer Nutzername")
                 .setView(input)
                 .setPositiveButton("Bestätigen", (dialog, which) -> {
@@ -275,9 +241,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         return;
                     }
 
-                    mAuth.getCurrentUser().updateProfile(
-                            new UserProfileChangeRequest.Builder().setDisplayName(newUsername).build()
-                    ).addOnCompleteListener(task -> Toast.makeText(this,
+                    AuthService.getInstance().updateDisplayName(newUsername, task -> Toast.makeText(this,
                             task.isSuccessful() ? "Nutzername aktualisiert!" : "Fehler beim Aktualisieren!",
                             Toast.LENGTH_SHORT).show());
 
