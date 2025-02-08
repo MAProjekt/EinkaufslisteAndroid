@@ -131,23 +131,39 @@ public class GroupsFragment extends BaseFragment {
     }
 
 
-    //TODO: Geht noch nicht richtig
+    /**
+     * Zeichnet beim Linkswischen den roten Hintergrund und das Mülleimer-Icon an der rechten Seite.
+     * Dabei wird nur gezeichnet, wenn dX negativ ist (Linkswisch).
+     */
     private void drawSwipeBackground(Canvas c, RecyclerView.ViewHolder viewHolder, float dX) {
         View itemView = viewHolder.itemView;
         Paint paint = new Paint();
         paint.setColor(Color.RED);
-        c.drawRect(itemView.getLeft(), itemView.getTop(), itemView.getLeft() + dX, itemView.getBottom(), paint);
 
-        Drawable deleteIcon = ContextCompat.getDrawable(getContext(), R.drawable.delete_icon);
-        if (deleteIcon != null) {
-            int iconMargin = (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
-            int iconTop = itemView.getTop() + iconMargin;
-            int iconBottom = iconTop + deleteIcon.getIntrinsicHeight();
-            int iconLeft = itemView.getLeft() + iconMargin;
-            int iconRight = iconLeft + deleteIcon.getIntrinsicWidth();
+        if (dX < 0) {  // Nur beim Swipe nach links
+            float left = itemView.getRight() + dX;  // dX ist negativ
+            float right = itemView.getRight();
+            c.drawRect(left, itemView.getTop(), right, itemView.getBottom(), paint);
 
-            deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
-            deleteIcon.draw(c);
+            Drawable deleteIcon = ContextCompat.getDrawable(getContext(), R.drawable.delete_icon);
+            if (deleteIcon != null) {
+                int intrinsicWidth = deleteIcon.getIntrinsicWidth();
+                int intrinsicHeight = deleteIcon.getIntrinsicHeight();
+                int iconMargin = (itemView.getHeight() - intrinsicHeight) / 2;
+                int iconTop = itemView.getTop() + iconMargin;
+                int iconRight = itemView.getRight() - iconMargin;
+                int iconLeft = iconRight - intrinsicWidth;
+
+                // Falls iconLeft kleiner als backgroundLeft (also der linke Rand des sichtbaren Hintergrunds) ist,
+                // wird iconLeft auf backgroundLeft gesetzt, sodass der Eimer im Hintergrund bleibt.
+                if (iconLeft < left) {
+                    iconLeft = (int) left;
+                    iconRight = iconLeft + intrinsicWidth;
+                }
+
+                deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconTop + intrinsicHeight);
+                deleteIcon.draw(c);
+            }
         }
     }
 
