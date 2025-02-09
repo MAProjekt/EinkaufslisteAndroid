@@ -183,26 +183,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.itemLogout) {
-            AuthService.getInstance().signOut(this);
-            finish();
-            return true;
-        } else if (itemId == R.id.listeHinzufuegen) {
+        if (itemId == R.id.listeHinzufuegen) {
             showCreateListDialog();
-            return true;
-        } else if (itemId == R.id.kopiereUID){
-            FirebaseUser user = mAuth.getCurrentUser();
-            if (user != null) {
-                String userId = user.getUid();
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                if (clipboard != null) {
-                    // Erstellen eines Clip-Objekts und Kopieren der UID in die Zwischenablage
-                    android.content.ClipData clip = android.content.ClipData.newPlainText("User UID", userId);
-                    clipboard.setPrimaryClip(clip);
-
-                    Toast.makeText(this, "UID in die Zwischenablage kopiert", Toast.LENGTH_SHORT).show();
-                }
-            }
             return true;
         } else {
             return super.onOptionsItemSelected(item);

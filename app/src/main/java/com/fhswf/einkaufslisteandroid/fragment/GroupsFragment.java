@@ -54,7 +54,7 @@ public class GroupsFragment extends BaseFragment {
      */
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.fragment_groups;
+        return R.layout.fragment_universal;
     }
 
     @Override

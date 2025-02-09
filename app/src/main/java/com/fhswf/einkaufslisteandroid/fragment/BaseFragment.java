@@ -46,7 +46,7 @@ public abstract class BaseFragment extends Fragment {
         View view = inflater.inflate(getLayoutResourceId(), container, false);
         RecyclerView recyclerView = view.findViewById(R.id.ViewLists);
         if (recyclerView == null) {
-            recyclerView = view.findViewById(R.id.ViewListsForGroups); // Fallback für GroupsFragment
+            recyclerView = view.findViewById(R.id.ViewLists); // Fallback für GroupsFragment
         }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -157,7 +157,7 @@ public abstract class BaseFragment extends Fragment {
             recyclerView = view.findViewById(R.id.ViewLists);
             recyclerView.getAdapter().notifyDataSetChanged();
         }else if(currentFragment instanceof GroupsFragment){
-            recyclerView = view.findViewById(R.id.ViewListsForGroups);
+            recyclerView = view.findViewById(R.id.ViewLists);
             recyclerView.getAdapter().notifyDataSetChanged();
         }
 

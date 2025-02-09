@@ -2,13 +2,11 @@ package com.fhswf.einkaufslisteandroid.fragment;
 
 import android.app.AlertDialog;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -55,7 +53,7 @@ public class HomeFragment extends BaseFragment {
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.fragment_home;
+        return R.layout.fragment_universal;
     }
 
     @Override

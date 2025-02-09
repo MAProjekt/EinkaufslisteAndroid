@@ -52,4 +52,7 @@
     <string name="gruppeninhalte">Gruppeninhalte</string>
     <string name="produkte">Produkte</string>
     <string name="profile_image_description">Bild des Users aus Firebase/Google-Account</string>
+    <string name="e_mail_des_users">E-Mail des Users</string>
+    <string name="profil_bearbeiten">Profil bearbeiten</string>
+    <string name="name_user">Name User</string>
 </resources>

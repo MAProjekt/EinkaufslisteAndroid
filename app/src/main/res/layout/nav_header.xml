@@ -12,7 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:layout_marginStart="5dp"
+        >
 
         <ImageView
             android:id="@+id/profileImage"
@@ -31,9 +33,9 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Name User"
+            android:text="@string/name_user"
             android:textColor="@color/black"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:paddingStart="8dp"
             android:paddingEnd="8dp" />
@@ -43,7 +45,7 @@
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Profil bearbeiten"
+            android:contentDescription="@string/profil_bearbeiten"
             android:src="@drawable/edit_icon" />
     </LinearLayout>
 
@@ -51,8 +53,10 @@
         android:id="@+id/nutzerNameSlideshow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="E-Mail des Users"
+        android:text="@string/e_mail_des_users"
         android:textColor="@color/black"
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        android:layout_marginStart="10dp"
+        />
 
 </LinearLayout>
