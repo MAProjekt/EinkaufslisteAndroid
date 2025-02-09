@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -110,6 +111,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View headerView = navigationView.getHeaderView(0);
         ImageButton editUsernameButton = headerView.findViewById(R.id.editSideMenuUsernameButton);
         editUsernameButton.setOnClickListener(v -> showEditUsernameDialog());
+
+        // Profilbild laden (falls vorhanden) oder Standardbild anzeigen
+        ImageView profileImage = headerView.findViewById(R.id.profileImage);
+        if (profileImage != null) {
+            AuthService.getInstance().loadUserProfileImage(this, profileImage);
+        } else {
+            Toast.makeText(this, "Profilbild-ImageView wurde nicht gefunden.", Toast.LENGTH_SHORT).show();
+        }
 
         // Farbe der NavigationBar ändern je nach Mode (Darkmode)
         int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;

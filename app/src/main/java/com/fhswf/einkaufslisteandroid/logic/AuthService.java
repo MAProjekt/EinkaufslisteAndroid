@@ -2,8 +2,11 @@ package com.fhswf.einkaufslisteandroid.logic;
 
 import android.content.Context;
 import android.content.Intent;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.fhswf.einkaufslisteandroid.Login;
+import com.fhswf.einkaufslisteandroid.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -61,6 +64,25 @@ public class AuthService {
         if (user != null) {
             user.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(newDisplayName).build())
                     .addOnCompleteListener(listener);
+        }
+    }
+
+    /**
+     * Lädt das Profilbild des aktuell eingeloggten Benutzers in das übergebene ImageView.
+     * Falls kein Profilbild vorhanden ist, wird ein Standardbild angezeigt.
+     *
+     * @param context   Kontext für Glide
+     * @param imageView Das ImageView, in dem das Profilbild angezeigt werden soll
+     */
+    public void loadUserProfileImage(Context context, ImageView imageView) {
+        FirebaseUser user = getCurrentUser();
+        if (user != null && user.getPhotoUrl() != null) {
+            Glide.with(context)
+                    .load(user.getPhotoUrl())
+                    .placeholder(R.drawable.default_user_icon)
+                    .into(imageView);
+        } else {
+            imageView.setImageResource(R.drawable.default_user_icon);
         }
     }
 }

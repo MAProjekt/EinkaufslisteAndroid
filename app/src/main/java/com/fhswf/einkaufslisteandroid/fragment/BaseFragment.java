@@ -83,29 +83,31 @@ public abstract class BaseFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Benutzer zur Liste hinzufügen");
 
-        // Layout für die Benutzer-Eingabe
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(32, 16, 32, 16);
 
-        // Eingabefeld für Benutzer-UID
-        EditText userIdInput = new EditText(requireContext());
-        userIdInput.setHint("Benutzer-UID eingeben");
-        layout.addView(userIdInput);
+        EditText emailInput = new EditText(requireContext());
+        emailInput.setHint("E-Mail des Benutzers eingeben");
+        layout.addView(emailInput);
 
         builder.setView(layout);
 
         builder.setPositiveButton("Hinzufügen", (dialog, which) -> {
-            String userId = userIdInput.getText().toString().trim();
-            if (userId.isEmpty()) {
-                Toast.makeText(getContext(), "UID darf nicht leer sein!", Toast.LENGTH_SHORT).show();
+            String email = emailInput.getText().toString().trim();
+            if (email.isEmpty()) {
+                Toast.makeText(getContext(), "E-Mail darf nicht leer sein!", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("benutzer").document(userId).get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
+
+            db.collection("benutzer")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            String userId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
                             firestoreManager.addUserToList(listId, userId,
                                     aVoid -> {
                                         Toast.makeText(getContext(), "Benutzer hinzugefügt!", Toast.LENGTH_SHORT).show();
@@ -114,18 +116,15 @@ public abstract class BaseFragment extends Fragment {
                                     e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                             );
                         } else {
-                            // Benutzer existiert NICHT
                             Toast.makeText(getContext(), "Benutzer nicht gefunden!", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Fehler beim Überprüfen der UID!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Fehler beim Suchen der E-Mail!", Toast.LENGTH_SHORT).show();
                     });
         });
 
         builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.dismiss());
-
-        // Dialog anzeigen
         builder.show();
     }
 

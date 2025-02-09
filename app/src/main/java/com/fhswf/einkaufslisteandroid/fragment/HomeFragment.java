@@ -122,7 +122,8 @@ public class HomeFragment extends BaseFragment {
     private void drawSwipeBackground(Canvas c, RecyclerView.ViewHolder viewHolder, float dX) {
         View itemView = viewHolder.itemView;
         Paint paint = new Paint();
-        paint.setColor(Color.RED);
+        int customColor = ContextCompat.getColor(getContext(), R.color.red_for_delete_swipe);
+        paint.setColor(customColor);
 
         if (dX < 0) { // Nur wenn nach links geswiped wird
             float left = itemView.getRight() + dX; // dX ist negativ
