@@ -14,13 +14,16 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/login"
+        android:layout_marginBottom="5dp"
 
         />
     <ImageView
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_gravity="center"
-        android:src="@drawable/account_icon" />
+        android:src="@drawable/login_icon_app"
+        android:layout_marginBottom="5dp"
+        />
 
 
     <EditText
@@ -33,10 +36,11 @@
         android:inputType="textEmailAddress"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
-        android:background="@color/white"
+        android:background="@drawable/edittext_borderradius"
         android:textSize="20sp"
         android:maxLines="1"
         android:scrollHorizontally="true"
+        android:paddingStart="15dp"
         />
 
     <EditText
@@ -50,10 +54,11 @@
         android:textColor="@color/black"
         android:textColorHint="@color/black"
         android:textSize="20sp"
-        android:background="@color/white"
+        android:background="@drawable/edittext_borderradius"
         android:layout_marginTop="5dp"
         app:endIconMode="password_toggle"
         android:singleLine="true"
+        android:paddingStart="15dp"
             />
     <ProgressBar
         android:id="@+id/progressBar"

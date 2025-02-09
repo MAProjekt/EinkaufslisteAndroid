@@ -25,7 +25,7 @@
                 android:id="@+id/toolBar"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:background="@color/design_default_color_primary"
+                android:background="#E8B654"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 android:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 

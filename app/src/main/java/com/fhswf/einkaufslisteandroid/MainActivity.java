@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //EdgeToEdge.enable(this);
         setContentView(com.fhswf.einkaufslisteandroid.R.layout.activity_main);
         // Farbe der Statusleiste setzen
-        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.default_ThemeOverlay_AppCompat));
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.dataLeiste));
 
         Toolbar toolbar = findViewById(R.id.toolBar);
         setSupportActionBar(toolbar);
@@ -142,7 +142,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.nav_groups) {
             selectedFragment = new GroupsFragment();
         } else if (itemId == R.id.darkmode) {
-            ThemeLogic.toggleDarkMode(this);
+            ThemeLogic.toggleDarkMode(this, this);
+
             return true;
         } else if (itemId == R.id.nav_logout) {
             Toast.makeText(MainActivity.this, "Erfolgreich ausgeloggt!", Toast.LENGTH_SHORT).show();

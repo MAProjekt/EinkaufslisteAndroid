@@ -8,4 +8,6 @@
     <color name="default_ThemeOverlay_AppCompat">#6100EC</color>
     <color name="progressBar_color">#3F51B5</color>
     <color name="progressBar_green">#4CAF50</color> <!-- Grün-->
+    <color name="dataLeiste">#E8B654</color> <!-- Rot-->
+    <color name="darkModeWhite">#E3D9F2</color>
 </resources>
