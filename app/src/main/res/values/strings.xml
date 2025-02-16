@@ -55,4 +55,7 @@
     <string name="e_mail_des_users">E-Mail des Users</string>
     <string name="profil_bearbeiten">Profil bearbeiten</string>
     <string name="name_user">Name User</string>
+    <string name="wische_nach_links_um_einen_nutzer_zu_entfernen">Wische nach links, um einen Nutzer zu entfernen.</string>
+    <string name="mitglieder_der_liste">Mitglieder der Liste</string>
+    <string name="wische_nach_links_um_produkt_zu_entfernen">Wische nach links, um Produkt zu entfernen</string>
 </resources>

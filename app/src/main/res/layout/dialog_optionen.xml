@@ -36,6 +36,15 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/textViewSwipeHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wische_nach_links_um_produkt_zu_entfernen"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"
+        android:gravity="center" />
+
     <!-- RecyclerView für die Liste -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewDialog"

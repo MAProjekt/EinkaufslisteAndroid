@@ -9,11 +9,21 @@
         android:id="@+id/textViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Mitglieder der Liste"
+        android:text="@string/mitglieder_der_liste"
         android:textSize="18sp"
         android:textStyle="bold"
         android:gravity="center"
         android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/textViewSwipeHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wische_nach_links_um_einen_nutzer_zu_entfernen"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"
+        android:gravity="center"
+        android:paddingTop="1dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewMembers"
