@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.nav_groups) {
             selectedFragment = new GroupsFragment();
         } else if (itemId == R.id.darkmode) {
-            ThemeLogic.toggleDarkMode(this, this);
+            ThemeLogic.toggleDarkMode(this);
 
             return true;
         } else if (itemId == R.id.nav_logout) {

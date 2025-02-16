@@ -273,8 +273,53 @@ public class FirestoreManager {
                 .addOnFailureListener(onFailure);
     }
 
+    /**
+     * Entfernt einen Benutzer aus einer Liste basierend auf dessen E-Mail.
+     *
+     * @param listId die ID der Liste.
+     * @param userEmail Die E-Mail des zu entfernenden Benutzers.
+     * @param onSuccess Callback-Funktion mit einer Liste der E-Mails.
+     * @param onFailure Callback-Funktion bei Fehlern.
+     */
+    public void removeUserFromList(String listId, String userEmail,
+                                   OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
+        // Suche in der "benutzer"-Collection nach dem Benutzer mit der angegebenen E-Mail.
+        db.collection("benutzer")
+                .whereEqualTo("email", userEmail)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                        // Wir nehmen den ersten Treffer (es sollte nur einen Benutzer mit dieser E-Mail geben)
+                        String userId = queryDocumentSnapshots.getDocuments().get(0).getId();
 
+                        // Entferne den gefundenen Benutzer aus dem Array-Feld "members" der Liste
+                        db.collection("lists").document(listId)
+                                .update("members", FieldValue.arrayRemove(userId))
+                                .addOnSuccessListener(onSuccess)
+                                .addOnFailureListener(onFailure);
+                    } else {
+                        onFailure.onFailure(new Exception("Benutzer nicht gefunden!"));
+                    }
+                })
+                .addOnFailureListener(onFailure);
+    }
 
+    /**
+     * Hilfsfunktion für das Swippen der User in GroupsFragment
+     * @param listId die ID der Liste.
+     * @param onSuccess Callback-Funktion mit einer Liste der E-Mails.
+     * @param onFailure Callback-Funktion bei Fehlern.
+     */
+    public void getOwnerEmail(String listId, OnSuccessListener<String> onSuccess, OnFailureListener onFailure) {
+        getCreator(listId, creatorId -> {
+            db.collection("benutzer").document(creatorId).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        String email = documentSnapshot.getString("email");
+                        onSuccess.onSuccess(email);
+                    })
+                    .addOnFailureListener(onFailure);
+        }, onFailure);
+    }
 
 
 
