@@ -180,7 +180,6 @@ public class HomeFragment extends BaseFragment {
             }
         });
 
-        // Buttons für den Dialog
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Liste teilen", (d, which) -> showAddUser(listId));
         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Schließen", (d, which) -> d.dismiss());
 
@@ -188,16 +187,8 @@ public class HomeFragment extends BaseFragment {
             dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Liste löschen", (d, which) -> deleteListBestaetigen(listId, listName));
         }
 
-        // Swipe-to-Delete für den RecyclerView im Dialog einbinden
         swipeToDelete(recyclerView, listId, products);
 
         dialog.show();
-    }
-
-    public void openProdukte() {
-        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container_view_tag, new UebersichtFragment());
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 }

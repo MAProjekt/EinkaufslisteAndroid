@@ -245,6 +245,36 @@ public class FirestoreManager {
                 .addOnFailureListener(onFailure);
     }
 
+    /**
+     * Holt die E-Mail-Adressen aller Mitglieder einer Liste.
+     *
+     * @param listId    Die ID der Liste.
+     * @param onSuccess Callback-Funktion mit einer Liste der E-Mails.
+     * @param onFailure Callback-Funktion bei Fehlern.
+     */
+    public void getUserEmailsByListId(String listId, OnSuccessListener<List<String>> onSuccess, OnFailureListener onFailure) {
+        db.collection("lists").document(listId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    List<String> userIds = (List<String>) documentSnapshot.get("members");
+
+                    List<String> emails = new ArrayList<>();
+                    for (String userId : userIds) {
+                        db.collection("benutzer").document(userId).get()
+                                .addOnSuccessListener(userDoc -> {
+                                    String email = userDoc.getString("email");
+                                    emails.add(email);
+                                    if (emails.size() == userIds.size()) {
+                                        onSuccess.onSuccess(emails);
+                                    }
+                                })
+                                .addOnFailureListener(onFailure);
+                    }
+                })
+                .addOnFailureListener(onFailure);
+    }
+
+
+
 
 
 

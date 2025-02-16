@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.logic.ListAdapter;
+import com.fhswf.einkaufslisteandroid.logic.MemberAdapter;
 import com.fhswf.einkaufslisteandroid.logic.ProductAdapter;
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.fhswf.einkaufslisteandroid.models.ProductList;
@@ -88,7 +89,7 @@ public class GroupsFragment extends BaseFragment {
 
         firestoreManager.getCreator(listId, creatorId -> {
             boolean isCreator = FirebaseAuth.getInstance().getCurrentUser().getUid().equals(creatorId);
-            showDialogOptionenGroup(listId, listName, recyclerView, isCreator);
+            showDialogOptionenGroup(listId, listName, products, isCreator);
         }, e -> Toast.makeText(getContext(), "Fehler" + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
@@ -168,20 +169,49 @@ public class GroupsFragment extends BaseFragment {
     }
 
 
-    private void showDialogOptionenGroup(String listId, String listName, RecyclerView recyclerView, boolean isCreator) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Produkte in der Liste: " + listName)
-                .setView(recyclerView)
-                .setPositiveButton("Schließen", (dialog, which) -> dialog.dismiss())
-                .setNegativeButton("Benutzer hinzufügen", (dialog, which) -> showAddUser(listId))
-                .setNeutralButton("Gruppe verlassen", (dialog, which) -> gruppeVerlassen(listId));
 
-        if (isCreator) {
-            builder.setNeutralButton("Liste löschen", (dialog, which) -> deleteListBestaetigen(listId, listName));
+    private void showDialogOptionenGroup(String listId, String listName, List<Product> products, boolean isCreator) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Produkte in der Liste: " + listName);
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_optionen, null);
+
+        AlertDialog dialog = builder.setView(dialogView).create();
+
+        LinearLayout layout = dialogView.findViewById(R.id.addProductLinearLayout);
+        layout.setOnClickListener(v -> {
+            dialog.dismiss();
+            openProdukte();
+        });
+
+        RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewDialog);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setAdapter(new ProductAdapter(requireContext(), products, true, listName));
+
+        int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln
+        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            if (recyclerView.getHeight() > maxHeight) {
+                ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+                params.height = maxHeight;
+                recyclerView.setLayoutParams(params);
+            }
+        });
+
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Liste teilen", (d, which) -> showAddUser(listId));
+        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Gruppe verlassen", (d, which) -> gruppeVerlassen(listId));
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Benutzer anzeigen", (d, which) -> showMemberListDialog(listId));
+
+        if(isCreator){
+            dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Liste löschen", (d, which) -> deleteListBestaetigen(listId, listName));
         }
 
-        builder.show();
+        swipeToDelete(recyclerView, listId, products);
+
+        dialog.show();
     }
+
+
 
     private void gruppeVerlassen(String listId) {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -191,19 +221,35 @@ public class GroupsFragment extends BaseFragment {
         }, e -> Toast.makeText(getContext(), "Fehler" + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    //TODO:In BaseFragment auslagern
-//    private void deleteListBestaetigen(String listId, String listName) {
-//        AlertDialog.Builder confirmDialog = new AlertDialog.Builder(requireContext());
-//        confirmDialog.setTitle("Willst du die Liste \"" + listName + "\" wirklich löschen?")
-//                .setPositiveButton("Ja", (dialog, which) -> {
-//                    firestoreManager.deleteList(listId, aVoid -> {
-//                        Toast.makeText(getContext(), "Liste gelöscht!", Toast.LENGTH_SHORT).show();
-//                        refreshFragment();
-//                    }, e -> Toast.makeText(getContext(), "Fehler" + e.getMessage(), Toast.LENGTH_SHORT).show());
-//                })
-//                .setNegativeButton("Nein", (dialog, which) -> dialog.dismiss())
-//                .show();
-//    }
+
+    /**
+     * Zeigt eine RecyclerView mit den Mitgliedern (User-IDs) in der Liste an.
+     * Die E-Mail-Adressen werden dynamisch aus Firestore geladen.
+     *
+     * @param listId Die ID der Liste, deren Mitglieder angezeigt werden sollen.
+     */
+    private void showMemberListDialog(String listId) {
+        firestoreManager.getUserEmailsByListId(listId, emails -> {
+            AlertDialog.Builder memberDialog = new AlertDialog.Builder(requireContext());
+
+            View view = LayoutInflater.from(requireContext()).inflate(R.layout.member_list_dialog, null);
+            RecyclerView recyclerView = view.findViewById(R.id.recyclerViewMembers);
+            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+            MemberAdapter adapter = new MemberAdapter(requireContext(), emails);
+            recyclerView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+
+            memberDialog.setView(view);
+            memberDialog.setPositiveButton("Schließen", (dialog, which) -> dialog.dismiss());
+            memberDialog.show();
+        }, e -> Toast.makeText(getContext(), "Fehler beim Laden der Mitglieder: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+
+
+
+
 
 
 }

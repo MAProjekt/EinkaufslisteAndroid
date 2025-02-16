@@ -160,8 +160,6 @@ public abstract class BaseFragment extends Fragment {
             recyclerView = view.findViewById(R.id.ViewLists);
             recyclerView.getAdapter().notifyDataSetChanged();
         }
-
-
     }
 
     public void refreshFragment() {
@@ -189,6 +187,13 @@ public abstract class BaseFragment extends Fragment {
                 })
                 .setNegativeButton("Nein", (dialog, which) -> dialog.dismiss())
                 .show();
+    }
+
+    public void openProdukte() {
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container_view_tag, new UebersichtFragment());
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
 
