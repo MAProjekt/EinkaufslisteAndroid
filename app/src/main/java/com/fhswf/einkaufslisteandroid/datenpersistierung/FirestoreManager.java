@@ -17,13 +17,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Klasse für den Umgang mit Firestore, um Listen und Gruppenlisten zu verwalten
+ */
 public class FirestoreManager {
     private final FirebaseFirestore db;
 
+    /**
+     * Der Konstruktor der die Verbindung zur Datenbank aufbaut
+     */
     public FirestoreManager() {
         db = FirebaseFirestore.getInstance();
     }
 
+    /**
+     * Methode um registrierenden Nutzer abzuspeichern in der FirestoreDB
+     * @param uid des Nutzers
+     * @param email des Nutzers
+     */
     public void saveUser(String uid, String email){
         Map<String, Object> userData = new HashMap<>();
         userData.put("email", email);
@@ -37,6 +48,11 @@ public class FirestoreManager {
 
     /**
      * Erstellt eine neue Einkaufsliste mit einer automatisch generierten ID.
+     * @param userId ID des Nutzers der die Einkaufsliste erstellt.
+     * @param listName Name der zu erstellenden Liste.
+     * @param products eine Liste die später mit Instanzen der Klasse Product gefüllt werden soll.
+     * @param onSuccess Callback mit der erzeugten listId.
+     * @param onFailure Callback bei Fehlern.
      */
     public void saveList(String userId, String listName, List<Product> products,
                          OnSuccessListener<String> onSuccess, OnFailureListener onFailure) {
@@ -55,6 +71,10 @@ public class FirestoreManager {
 
     /**
      * Fügt einen neuen Benutzer zu einer bestehenden Liste hinzu.
+     * @param listId ID der jeweiligen Liste.
+     * @param newUserId die ID des Nutzers der einer Liste hinzugefügt werden soll.
+     * @param onSuccess Callback bei Erfolg.
+     * @param onFailure Callback bei Fehlern.
      */
     public void addUserToList(String listId, String newUserId,
                               OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
@@ -66,6 +86,9 @@ public class FirestoreManager {
 
     /**
      * Ruft alle Listen ab, die ein Benutzer besitzt oder mit ihm geteilt wurden.
+     * @param userId ID des Benutzers.
+     * @param onSuccess Callback mit einer Liste der DokumentSnapshots.
+     * @param onFailure Callback bei Fehlern.
      */
     public void getLists(String userId, OnSuccessListener<List<DocumentSnapshot>> onSuccess,
                          OnFailureListener onFailure) {
@@ -79,9 +102,10 @@ public class FirestoreManager {
 
     /**
      * Methode die alle Listen aufruft, die mehr als einen Member haben (also Gruppen-Liste)
-     * @param userId
-     * @param onSuccess
-     * @param onFailure
+     * @param userId ID des Nutzers der gerade die App verwendet.
+     * @param group true, wenn es Gruppen-Listen sind, false für Einzel-Listen.
+     * @param onSuccess Callback mit einer Liste der DokumentSnapshots.
+     * @param onFailure Callback bei Fehlern.
      */
     public void getUserOrGroupLists(String userId, boolean group,
                                             OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
@@ -110,6 +134,12 @@ public class FirestoreManager {
     }
 
 
+    /**
+     * Methode die den Ersteller einer Liste zurückgeben soll (über onSuccess)
+     * @param listId ID der Liste dessen Ersteller ausgegeben werden soll.
+     * @param onSuccess Callback mit der ErstellerID.
+     * @param onFailure Callback-Funktion bei Fehlern.
+     */
     public void getCreator(String listId, OnSuccessListener<String> onSuccess, OnFailureListener onFailure){
         db.collection("lists").document(listId)
                 .get()
@@ -121,10 +151,10 @@ public class FirestoreManager {
 
     /**
      * Entfernt einen Benutzer aus einer Liste.
-     * @param listId
-     * @param userID
-     * @param onSuccess
-     * @param onFailure
+     * @param listId ID der Liste aus der ein Nutzer entfernt werden soll.
+     * @param userID ID des Nutzers der aus der Liste entfernt werden soll.
+     * @param onSuccess Callback bei Erfolg.
+     * @param onFailure Callback bei Fehlern.
      */
     public void leaveList(String listId, String userID, OnSuccessListener<String> onSuccess, OnFailureListener onFailure){
         db.collection("lists").document(listId)
@@ -142,6 +172,11 @@ public class FirestoreManager {
 
     /**
      * Fügt ein Produkt zu einer Liste hinzu.
+     * @param listId ID der Liste zu der ein Produkt hinzuzufügen ist.
+     * @param context wird benötigt, um eine Toast-Meldung anzuzeigen (in der Activity)
+     * @param newProduct das ausgewählte Produkt.
+     * @param onSuccess Callback bei Erfolg.
+     * @param onFailure Callback bei Fehlern.
      */
     public void addProductToList(String listId, Context context, Product newProduct,
                                  OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
@@ -177,9 +212,12 @@ public class FirestoreManager {
     }
 
 
-
     /**
      * Entfernt ein Produkt aus einer Liste.
+     * @param listId ID der Liste aus der ein Produkt entfernt werden soll.
+     * @param productToDelete das zu löschende Produkt.
+     * @param onSuccess Callback bei Erfolg.
+     * @param onFailure Callback bei Fehlern.
      */
     public void deleteProductFromList(String listId, Product productToDelete,
                                       OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
@@ -190,7 +228,10 @@ public class FirestoreManager {
     }
 
     /**
-     * Ermittelt die `listId` anhand des `listName`.
+     * Ermittelt die "listId" anhand des "listName".
+     * @param listName Name der Liste.
+     * @param onSuccess Callback mit der gefundenen listId.
+     * @param onFailure Callback bei Fehlern.
      */
     public void getListIdByName(String listName, OnSuccessListener<String> onSuccess,
                                 OnFailureListener onFailure) {
@@ -208,6 +249,13 @@ public class FirestoreManager {
                 .addOnFailureListener(onFailure);
     }
 
+    /**
+     * Aktualisiert den Gekauft-Status eines Produkts in einer Liste.
+     * @param listId ID der Liste.
+     * @param product Das Produkt mit dem neuen Status.
+     * @param onSuccess Callback bei Erfolg.
+     * @param onFailure Callback bei Fehlern.
+     */
     public void updateProductStatus(String listId, Product product,
                                     OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
         db.collection("lists").document(listId)
@@ -238,6 +286,12 @@ public class FirestoreManager {
                 .addOnFailureListener(onFailure);
     }
 
+    /**
+     * Löscht eine Liste.
+     * @param listId ID der zu löschenden Liste.
+     * @param onSuccess Callback bei Erfolg.
+     * @param onFailure Callback bei Fehlern.
+     */
     public void deleteList(String listId, OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
         db.collection("lists").document(listId)
                 .delete()
@@ -248,7 +302,7 @@ public class FirestoreManager {
     /**
      * Holt die E-Mail-Adressen aller Mitglieder einer Liste.
      *
-     * @param listId    Die ID der Liste.
+     * @param listId die ID der Liste.
      * @param onSuccess Callback-Funktion mit einer Liste der E-Mails.
      * @param onFailure Callback-Funktion bei Fehlern.
      */
@@ -278,8 +332,8 @@ public class FirestoreManager {
      *
      * @param listId die ID der Liste.
      * @param userEmail Die E-Mail des zu entfernenden Benutzers.
-     * @param onSuccess Callback-Funktion mit einer Liste der E-Mails.
-     * @param onFailure Callback-Funktion bei Fehlern.
+     * @param onSuccess Callback bei Erfolg.
+     * @param onFailure Callback bei Fehlern.
      */
     public void removeUserFromList(String listId, String userEmail,
                                    OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
@@ -305,9 +359,10 @@ public class FirestoreManager {
     }
 
     /**
-     * Hilfsfunktion für das Swippen der User in GroupsFragment
+     * Hilfsfunktion für das Wischen der User in GroupsFragment, beim Creator kann nicht gewischt
+     * werden.
      * @param listId die ID der Liste.
-     * @param onSuccess Callback-Funktion mit einer Liste der E-Mails.
+     * @param onSuccess Callback-Funktion mit der E-Mail des Erstellers.
      * @param onFailure Callback-Funktion bei Fehlern.
      */
     public void getOwnerEmail(String listId, OnSuccessListener<String> onSuccess, OnFailureListener onFailure) {
@@ -320,7 +375,4 @@ public class FirestoreManager {
                     .addOnFailureListener(onFailure);
         }, onFailure);
     }
-
-
-
 }
