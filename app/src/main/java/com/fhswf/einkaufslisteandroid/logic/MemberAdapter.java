@@ -15,6 +15,8 @@ import java.util.List;
 
 /**
  * Adapter für die Anzeige der Mitglieder (E-Mail-Adressen) in einer RecyclerView.
+ * Dieser Adapter übernimmt eine Liste von E-Mail-Adressen und sorgt dafür, dass jede E-Mail in
+ * einem eigenen Listenelement angezeigt wird.
  */
 public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberViewHolder> {
     private List<String> emails;
@@ -31,6 +33,13 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
         this.emails = emails;
     }
 
+    /**
+     * Hier wird das Layout für ein einzelnes Listenelement (Member) aufgeblasen.
+     * @param parent Die übergeordnete ViewGroup, in der das Element später angezeigt wird.
+     * @param viewType Der Typ der Ansicht
+     *
+     * @return einen neuen MemberViewHolder, der das aufgeblasene Layout enthält.
+     */
     @NonNull
     @Override
     public MemberViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -42,8 +42,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     /**
      * Konstruktor für den ProductAdapter.
      *
-     * @param context     der Kontext, in dem der Adapter verwendet wird
-     * @param productList die Liste der Produkte, die angezeigt werden sollen
+     * @param context der Kontext, in dem der Adapter verwendet wird.
+     * @param productList die Liste der Produkte, die angezeigt werden sollen.
+     * @param checkBoxAnzeige Prüfwert der angibt, ob ein Produkt abgehakt ist.
      */
     public ProductAdapter(Context context, List<Product> productList, boolean checkBoxAnzeige) {
         this.context = context;
@@ -51,6 +52,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.checkBoxAnzeige = checkBoxAnzeige;
     }
 
+    /**
+     * Konstruktor mit dem dazugehörigen Listennamen, verwendet den ersten Konstruktor.
+     * @param context der Kontext, in dem der Adapter verwendet wird.
+     * @param productList die Liste der Produkte, die angezeigt werden sollen.
+     * @param checkBoxAnzeige Prüfwert der angibt, ob ein Produkt abgehakt ist.
+     * @param listName Name der Liste.
+     */
     public ProductAdapter(Context context, List<Product> productList, boolean checkBoxAnzeige, String listName){
         this(context, productList, checkBoxAnzeige);
         this.listName = listName;
@@ -149,6 +157,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         });
     }
 
+    /**
+     * Methode die die Anzahl der Produkte der Liste zurückgibt.
+     * @return Größe bzw. Anzahl der Produkte.
+     */
     @Override
     public int getItemCount() {
         return productList.size();

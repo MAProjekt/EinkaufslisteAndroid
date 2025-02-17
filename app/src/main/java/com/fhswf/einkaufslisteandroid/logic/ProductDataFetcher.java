@@ -31,6 +31,11 @@ public class ProductDataFetcher {
     private List<Product> productList;
     private ExecutorService executor;
 
+    /**
+     * Konstruktor
+     * @param context der MainActivity
+     * @param recyclerView die recyclerView für die Produkte unter UebersichtFragment
+     */
     public ProductDataFetcher(Context context, RecyclerView recyclerView) {
         this.context = context;
         this.recyclerView = recyclerView;
@@ -38,15 +43,15 @@ public class ProductDataFetcher {
         this.adapter = new ProductAdapter(context, productList, false);  //false oder true
         this.executor = Executors.newSingleThreadExecutor(); // Für Hintergrundaufgaben
 
-        setupRecyclerView();
-    }
-
-    private void setupRecyclerView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(adapter);
     }
 
-
+    /**
+     * Methode um passende Produkte je nach Suchbegriff anzuzeigen bzw. in der RecyclerView
+     * einzusetzen.
+     * @param searchTerm Befriff nach dem der Nutzer sucht.
+     */
     public void fetchProductData(String searchTerm) {
         executor.execute(() -> {
             try {

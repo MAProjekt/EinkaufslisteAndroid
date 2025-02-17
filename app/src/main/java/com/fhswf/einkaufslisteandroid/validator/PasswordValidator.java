@@ -11,7 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 
-
+/**
+ * Klasse für die Validation von Passwörtern, die bei der Registrierung erstellt werden.
+ */
 public class PasswordValidator extends AppCompatActivity {
 
     private final TextView checkLength;
@@ -21,6 +23,14 @@ public class PasswordValidator extends AppCompatActivity {
     private final Context context;
     private LinearLayout linearLayoutAnforderung;
 
+    /**
+     * Konstruktor für die passwort Validation.
+     * @param context der Activity, hier Register.
+     * @param checkLength TextView für Feedback über Länge des Passwortes.
+     * @param checkUppercase TextView für Feedback über enthaltene Großbuchstaben.
+     * @param checkSpecialChar TextView für Feedback über enthaltene Sonderzeichen.
+     * @param checkNumber TextView für Feedback über enthaltene Zahlen.
+     */
     public PasswordValidator(Context context, TextView checkLength, TextView checkUppercase, TextView checkSpecialChar, TextView checkNumber) {
         this.context = context;
         this.checkLength = checkLength;
@@ -31,12 +41,27 @@ public class PasswordValidator extends AppCompatActivity {
         this.linearLayoutAnforderung = ((AppCompatActivity) context).findViewById(com.fhswf.einkaufslisteandroid.R.id.validation_password);
     }
 
+    /**
+     * Textwatcher Komponente die das eingegebene Passwort, bei jeder eingabe kontrolliert bzw. jede
+     * Änderung registriert.
+     * @return einen TextWatcher, der onTextChanged überschreibt, um das eingegebene Passwort zu
+     * validieren.
+     */
     public TextWatcher getPasswordTextWatcher() {
         return new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
+            /**
+             * Diese Methode wird während der Textänderung aufgerufen.
+             * Hier wird das eingegebene Passwort überprüft und das UI-Feedback entsprechend
+             * aktualisiert.
+             * @param s Das aktuelle Text-CharsSequence.
+             * @param start Der Startindex der Änderung.
+             * @param before Anzahl der Zeichen vor der Änderung.
+             * @param count Anzahl der geänderten Zeichen.
+             */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String password = s.toString();
