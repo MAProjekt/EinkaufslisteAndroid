@@ -28,6 +28,8 @@ import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.logic.ListAdapter;
 import com.fhswf.einkaufslisteandroid.logic.MemberAdapter;
 import com.fhswf.einkaufslisteandroid.logic.ProductAdapter;
+import com.fhswf.einkaufslisteandroid.logic.SwipeMember;
+import com.fhswf.einkaufslisteandroid.logic.SwipeProduct;
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.fhswf.einkaufslisteandroid.models.ProductList;
 import com.google.firebase.auth.FirebaseAuth;
@@ -84,89 +86,12 @@ public class GroupsFragment extends BaseFragment {
     protected void showProductsDialog(String listId, String listName, List<Product> products) {
         this.currentListId = listId;
 
-        RecyclerView recyclerView = createRecyclerView(products, listName);
-        swipeToDelete(recyclerView, listId, products);
-
         firestoreManager.getCreator(listId, creatorId -> {
             boolean isCreator = FirebaseAuth.getInstance().getCurrentUser().getUid().equals(creatorId);
             showDialogOptionenGroup(listId, listName, products, isCreator);
         }, e -> Toast.makeText(getContext(), "Fehler" + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-
-    //TODO: In BaseFragment auslagern
-    private RecyclerView createRecyclerView(List<Product> products, String listName) {
-        RecyclerView recyclerView = new RecyclerView(requireContext());
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(new ProductAdapter(requireContext(), products, true, listName));
-        return recyclerView;
-    }
-
-    //TODO: In BaseFragment auslagern
-    private void swipeToDelete(RecyclerView recyclerView, String listId, List<Product> products) {
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
-                Product product = products.get(position);
-
-                firestoreManager.deleteProductFromList(listId, product, aVoid -> {
-                    products.remove(position);
-                    recyclerView.getAdapter().notifyItemRemoved(position);
-                    refreshFragment();
-                    Toast.makeText(getContext(), "Produkt gelöscht!", Toast.LENGTH_SHORT).show();
-                }, e -> Toast.makeText(getContext(), "Fehler" + e.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-
-            @Override
-            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-                drawSwipeBackground(c, viewHolder, dX);
-            }
-        }).attachToRecyclerView(recyclerView);
-    }
-
-
-    /**
-     * Zeichnet beim Linkswischen den roten Hintergrund und das Mülleimer-Icon an der rechten Seite.
-     * Dabei wird nur gezeichnet, wenn dX negativ ist (Linkswisch).
-     */
-    private void drawSwipeBackground(Canvas c, RecyclerView.ViewHolder viewHolder, float dX) {
-        View itemView = viewHolder.itemView;
-        Paint paint = new Paint();
-        paint.setColor(Color.RED);
-
-        if (dX < 0) {  // Nur beim Swipe nach links
-            float left = itemView.getRight() + dX;  // dX ist negativ
-            float right = itemView.getRight();
-            c.drawRect(left, itemView.getTop(), right, itemView.getBottom(), paint);
-
-            Drawable deleteIcon = ContextCompat.getDrawable(getContext(), R.drawable.delete_icon);
-            if (deleteIcon != null) {
-                int intrinsicWidth = deleteIcon.getIntrinsicWidth();
-                int intrinsicHeight = deleteIcon.getIntrinsicHeight();
-                int iconMargin = (itemView.getHeight() - intrinsicHeight) / 2;
-                int iconTop = itemView.getTop() + iconMargin;
-                int iconRight = itemView.getRight() - iconMargin;
-                int iconLeft = iconRight - intrinsicWidth;
-
-                // Falls iconLeft kleiner als backgroundLeft (also der linke Rand des sichtbaren Hintergrunds) ist,
-                // wird iconLeft auf backgroundLeft gesetzt, sodass der Eimer im Hintergrund bleibt.
-                if (iconLeft < left) {
-                    iconLeft = (int) left;
-                    iconRight = iconLeft + intrinsicWidth;
-                }
-
-                deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconTop + intrinsicHeight);
-                deleteIcon.draw(c);
-            }
-        }
-    }
 
 
 
@@ -182,7 +107,7 @@ public class GroupsFragment extends BaseFragment {
         LinearLayout layout = dialogView.findViewById(R.id.addProductLinearLayout);
         layout.setOnClickListener(v -> {
             dialog.dismiss();
-            openProdukte();
+            openProdukte(listId);
         });
 
         RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewDialog);
@@ -206,7 +131,7 @@ public class GroupsFragment extends BaseFragment {
             dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Liste löschen", (d, which) -> deleteListBestaetigen(listId, listName));
         }
 
-        swipeToDelete(recyclerView, listId, products);
+        new ItemTouchHelper(new SwipeProduct(requireContext(), recyclerView.getAdapter(), products, firestoreManager, listId)).attachToRecyclerView(recyclerView);
 
         dialog.show();
     }
@@ -242,97 +167,13 @@ public class GroupsFragment extends BaseFragment {
                 recyclerView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
 
-                // ItemTouchHelper für Swipe-to-Delete (außer für den Besitzer)
-                new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-                    @Override
-                    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                        int position = viewHolder.getAdapterPosition();
-                        // Falls das aktuelle Element dem Besitzer entspricht, wird kein Swipe erlaubt.
-                        if (emails.get(position).equals(ownerEmail)) {
-                            return 0;
-                        }
-                        return super.getMovementFlags(recyclerView, viewHolder);
-                    }
-
-                    @Override
-                    public boolean onMove(@NonNull RecyclerView recyclerView,
-                                          @NonNull RecyclerView.ViewHolder viewHolder,
-                                          @NonNull RecyclerView.ViewHolder target) {
-                        return false;
-                    }
-
-                    @Override
-                    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                        int position = viewHolder.getAdapterPosition();
-                        String emailToRemove = emails.get(position);
-
-                        // Aufruf der Methode zum Entfernen des Benutzers
-                        firestoreManager.removeUserFromList(listId, emailToRemove, aVoid -> {
-                            emails.remove(position);
-                            adapter.notifyItemRemoved(position);
-                            Toast.makeText(getContext(), "Mitglied entfernt", Toast.LENGTH_SHORT).show();
-                        }, e -> {
-                            adapter.notifyItemChanged(position);
-                            Toast.makeText(getContext(), "Fehler beim Entfernen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
-                    }
-
-                    @Override
-                    public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
-                                            @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY,
-                                            int actionState, boolean isCurrentlyActive) {
-                        int position = viewHolder.getAdapterPosition();
-                        // bei Besitzer kein Swipe zeichnen
-                        if (emails.get(position).equals(ownerEmail)) {
-                            super.onChildDraw(c, recyclerView, viewHolder, 0, dY, actionState, isCurrentlyActive);
-                            return;
-                        }
-
-                        // Zeichne roten Hintergrund und Mülleimer-Icon
-                        View itemView = viewHolder.itemView;
-                        Paint paint = new Paint();
-                        paint.setColor(Color.RED);
-
-                        if (dX < 0) { // Swipe nach links
-                            float left = itemView.getRight() + dX;
-                            float right = itemView.getRight();
-                            c.drawRect(left, itemView.getTop(), right, itemView.getBottom(), paint);
-
-                            Drawable deleteIcon = ContextCompat.getDrawable(getContext(), R.drawable.delete_icon);
-                            if (deleteIcon != null) {
-                                int intrinsicWidth = deleteIcon.getIntrinsicWidth();
-                                int intrinsicHeight = deleteIcon.getIntrinsicHeight();
-                                int iconMargin = (itemView.getHeight() - intrinsicHeight) / 2;
-                                int iconTop = itemView.getTop() + iconMargin;
-                                int iconRight = itemView.getRight() - iconMargin;
-                                int iconLeft = iconRight - intrinsicWidth;
-
-                                if (iconLeft < left) {
-                                    iconLeft = (int) left;
-                                    iconRight = iconLeft + intrinsicWidth;
-                                }
-
-                                deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconTop + intrinsicHeight);
-                                deleteIcon.draw(c);
-                            }
-                        }
-                        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-                    }
-                }).attachToRecyclerView(recyclerView);
+                new ItemTouchHelper(new SwipeMember(adapter, emails, ownerEmail, firestoreManager, listId, requireContext())).attachToRecyclerView(recyclerView);
 
                 memberDialog.setView(view);
                 memberDialog.setPositiveButton("Schließen", (dialog, which) -> dialog.dismiss());
                 memberDialog.show();
+
             }, e -> Toast.makeText(getContext(), "Fehler beim Laden der Mitglieder: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         }, e -> Toast.makeText(getContext(), "Fehler beim Laden des Besitzers: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
-
-
-
-
-
-
-
-
 }

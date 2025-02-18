@@ -1,6 +1,7 @@
 package com.fhswf.einkaufslisteandroid.logic;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +38,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     private boolean checkBoxAnzeige;
     private String listName;
+    private String listId;
 
 
     /**
@@ -62,6 +64,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public ProductAdapter(Context context, List<Product> productList, boolean checkBoxAnzeige, String listName){
         this(context, productList, checkBoxAnzeige);
         this.listName = listName;
+    }
+    public ProductAdapter(Context context, List<Product> productList, String listId, boolean checkBoxAnzeige) {
+        this.listId = listId; // Speichere die listId
+        this.context = context;
+        this.productList = productList;
+        this.checkBoxAnzeige = checkBoxAnzeige;
     }
 
     /**
@@ -140,21 +148,27 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
 
         //Wenn man auf ein Produkt klickt, wird das PopUp Fenster geöffnet
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.itemView.setOnClickListener(v -> {
+            Log.d("DEBUG", "Produkt wird geöffnet: " + product.getName() + " | listId: " + listId);
 
-                ProductDetailsFragment pdf = ProductDetailsFragment.erstelleFragmentMitDaten(
-                        product.getName(),
-                        product.getImageURL(),
-                        product.getZutaten(),
-                        product.getNaehrwerte(),
-                        product.getAllergene(),
-                        product.getStore()
-                );
-                pdf.show(((FragmentActivity) context).getSupportFragmentManager(), "ProductDetailsFragment");  //Zeigt das Popup-Fenster an
-            }
+            Bundle args = new Bundle();
+            args.putString("listId", listId);
+            args.putString("product_name", product.getName());
+            args.putString("image_url", product.getImageURL());
+            args.putString("ingredients", product.getZutaten());
+            args.putString("nutriments", product.getNaehrwerte());
+            args.putString("allergens_from_ingredients", product.getAllergene());
+            args.putString("stores", product.getStore());
+
+            ProductDetailsFragment pdf = new ProductDetailsFragment();
+            pdf.setArguments(args);
+
+            pdf.show(((FragmentActivity) context).getSupportFragmentManager(), "ProductDetailsFragment");
         });
+
+
+
+
     }
 
     /**

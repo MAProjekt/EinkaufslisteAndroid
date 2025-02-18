@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/produktname"
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="24sp"
                 android:layout_marginBottom="10dp"
                 />
             <TextView
@@ -104,6 +104,7 @@
         android:id="@+id/productAmount"
         android:hint="@string/produktmenge"
         android:inputType="number"
+        android:gravity="center"
         android:layout_marginBottom="5dp"/>
 
     <Button

@@ -59,33 +59,6 @@ public class ProductDetailsFragment extends DialogFragment {
             "energy-kj","proteins", "salt", "sugars", "sodium" ));
 
 
-    /**
-     * Erzeugt ein neues ProductDetailsFragment mit den übergebenen Daten.
-     *
-     * Diese Methode dient als Factory-Methode, um sicherzustellen, dass die notwendigen Daten
-     *  korrekt an das Fragment übergeben werden. Die Daten werden in einem Bundle gespeichert und
-     *  über setArguments() dem Fragment hinzugefügt, damit sie später abgerufen werden können.
-     * @param name Name des Produktes
-     * @param imageUrl Bild des Produkts
-     * @param ingredients Zutaten des Produkts
-     * @param nutriments Nährwerte des Produkts
-     * @param allergens Allergene des Produkts
-     * @param store LAden, in dem das Produkt verfügbar ist
-     * @return
-     */
-    public static ProductDetailsFragment erstelleFragmentMitDaten(String name, String imageUrl, String ingredients, String nutriments,
-                                                                  String allergens, String store) {
-        ProductDetailsFragment fragment = new ProductDetailsFragment();
-        Bundle args = new Bundle();  //Bundle wie Map, speichert Key-Value Paare, hier z.B. arg mit dem übergebenen Namen
-        args.putString(ARG_NAME, name);
-        args.putString(ARG_IMAGE_URL, imageUrl);
-        args.putString(ARG_INGREDIENTS, ingredients);
-        args.putString(ARG_NUTRIMENTS, nutriments);
-        args.putString(ARG_ALLERGENS, allergens);
-        args.putString(ARG_STORE, store);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     //TODO: getArguments() anschauen und verstehen, wie greift man überhaupt auf die Daten eines Produktes zu
     //Zeigt im PopUp-Fnester die gefetchten Daten an
@@ -131,11 +104,24 @@ public class ProductDetailsFragment extends DialogFragment {
             }
         }
 
+        Bundle args1 = getArguments();
+        String productName = (args1 != null) ? args1.getString(ARG_NAME, "Kein Name") : null;
+        String imageUrl = (args1 != null) ? args1.getString(ARG_IMAGE_URL, "") : null;
+
+
 
         //Button zum Hinzufügen des Produktes zu einer Liste
-        produktHinzufuegenButton.setOnClickListener(v -> {
+        Bundle args = getArguments();
+        String listId = (args != null) ? args.getString("listId") : null;
+        Log.d("DEBUG", "Liste ID aus DetailsFragment: " + listId);
+        Log.d("DEBUG", "ProductDetailsFragment - Name: " + productName + ", listId: " + listId + ", ImageURL: " + imageUrl);
 
-            showSelectionDialog(userId);
+        produktHinzufuegenButton.setOnClickListener(v -> {
+            if (listId != null) {
+                addProductToListById(listId, userId);
+            } else {
+                showSelectionDialog(userId);
+            }
         });
 
 
@@ -241,25 +227,33 @@ public class ProductDetailsFragment extends DialogFragment {
         firestoreManager.getLists(userId,
                 documents -> {  //verkürzte Schreibweise des onSuccessListeners
                     // Namen der Einkaufslisten extrahieren
-                    List<String> listNames = new ArrayList<>();
+                    List<String> listNamesSingle = new ArrayList<>();
+                    List<String> listNamesGruppe = new ArrayList<>();
                     for (DocumentSnapshot document : documents) {
                         String listName = document.getString("name");
-                        if (listName != null) {
-                            listNames.add(listName);
+                        List<String> members = (List<String>) document.get("members");
+                        if(members.size() > 1){
+                            listNamesGruppe.add(listName + " (Gruppe)");
+                        } else {
+                            listNamesSingle.add(listName);
                         }
                     }
 
+                    List<String> gemeinsameListe = new ArrayList<>();
+                    gemeinsameListe.addAll(listNamesSingle);
+                    gemeinsameListe.addAll(listNamesGruppe);
 
                     // Alert / PopUp Fenster erstellen
-                    if (!listNames.isEmpty()) {
+                    if (!gemeinsameListe.isEmpty()) {
 
                         new AlertDialog.Builder(requireContext())
                                 .setTitle("Liste auswählen")
-                                .setItems(listNames.toArray(new String[0]), new DialogInterface.OnClickListener() {
+                                .setItems(gemeinsameListe.toArray(new String[0]), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        String selectedList = listNames.get(which); // gewählte Liste
-                                        addProductToList(selectedList, userId);
+                                        String selectedList = gemeinsameListe.get(which); // gewählte Liste
+                                        selectedList = selectedList.replace(" (Gruppe)",""); //Um Liste finden zu können
+                                        addProductToListByName(selectedList, userId);
                                     }
                                 })
                                 .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
@@ -280,7 +274,7 @@ public class ProductDetailsFragment extends DialogFragment {
 
 
     //TODO: Ausprobieren wie ein boolean in DB abgespeichert wird (wichtig für die Checkbox)
-    private void addProductToList(String selectedList, String userId) {
+    private void addProductToListById(String listId, String userId) {
         FirestoreManager firestoreManager = new FirestoreManager();
         String productName = getArguments().getString(ARG_NAME, "Unbekannt");
         String imageUrl = getArguments().getString(ARG_IMAGE_URL, "");
@@ -293,17 +287,21 @@ public class ProductDetailsFragment extends DialogFragment {
         String productMenge = editText.getText().toString();
 
         Log.e("Menge", productMenge);
-
         Product neuesProduct = new Product(productName, imageUrl, zutaten, nutriments, store, allergene, false, productMenge);
 
-        Log.e("MengeProdukt ", neuesProduct.getMenge());
+        firestoreManager.addProductToList(listId, getContext(), neuesProduct,
+                aVoid -> {Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show();
+                          dismiss();
+                },
+                e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
+    }
 
+    private void addProductToListByName(String selectedList, String userId) {
+        FirestoreManager firestoreManager = new FirestoreManager();
 
         firestoreManager.getListIdByName(selectedList, listId -> {
-            firestoreManager.addProductToList(listId, getContext(), neuesProduct,
-                    aVoid -> Toast.makeText(getContext(), "Produkt hinzugefügt", Toast.LENGTH_SHORT).show(),
-                    e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-            );
+            addProductToListById(listId, userId);
         }, e -> Toast.makeText(getContext(), "Fehler: Liste nicht gefunden", Toast.LENGTH_SHORT).show());
     }
 

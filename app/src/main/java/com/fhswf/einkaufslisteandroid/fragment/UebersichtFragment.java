@@ -3,6 +3,7 @@ package com.fhswf.einkaufslisteandroid.fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,9 +39,13 @@ public class UebersichtFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_uebersicht, container, false);
 
+        Bundle args = getArguments();
+        String listId = (args != null) ? args.getString("listId") : null;
+
+        Log.d("DEBUG", "Liste ID aus ÜbersichtFragment: " + listId);
         eingabeProdukt = view.findViewById(R.id.eingabeProduktEditText);
         RecyclerView recyclerView = view.findViewById(R.id.productRecyclerView);
-        productDataFetcher = new ProductDataFetcher(getContext(), recyclerView);
+        productDataFetcher = new ProductDataFetcher(getContext(), recyclerView, listId);
 
 
         loadLastSearch(); //letzte Suche laden

@@ -189,12 +189,18 @@ public abstract class BaseFragment extends Fragment {
                 .show();
     }
 
-    public void openProdukte() {
+    public void openProdukte(String listId) {
+        UebersichtFragment fragment = new UebersichtFragment();
+        Bundle args = new Bundle();
+        args.putString("listId", listId); // listId übergeben
+        fragment.setArguments(args);
+
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container_view_tag, new UebersichtFragment());
+        transaction.replace(R.id.fragment_container_view_tag, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
+
 
 
 

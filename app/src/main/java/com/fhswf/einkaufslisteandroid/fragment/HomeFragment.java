@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -21,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.logic.ProductAdapter;
+import com.fhswf.einkaufslisteandroid.logic.SwipeMember;
+import com.fhswf.einkaufslisteandroid.logic.SwipeProduct;
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -71,85 +74,6 @@ public class HomeFragment extends BaseFragment {
         }, e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    // Erstellt einen RecyclerView für die Produktliste (optional nutzbar)
-    private RecyclerView createRecyclerView(List<Product> products, String listName) {
-        RecyclerView recyclerView = new RecyclerView(requireContext());
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(new ProductAdapter(requireContext(), products, true, listName));
-        return recyclerView;
-    }
-
-    // Bindet den ItemTouchHelper ein, um Swipe-to-Delete zu ermöglichen
-    private void swipeToDelete(RecyclerView recyclerView, String listId, List<Product> products) {
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView,
-                                  @NonNull RecyclerView.ViewHolder viewHolder,
-                                  @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
-                Product product = products.get(position);
-
-                firestoreManager.deleteProductFromList(listId, product, aVoid -> {
-                    products.remove(position);
-                    recyclerView.getAdapter().notifyItemRemoved(position);
-                    refreshFragment();
-                    Toast.makeText(getContext(), "Produkt gelöscht!", Toast.LENGTH_SHORT).show();
-                }, e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-
-            @Override
-            public void onChildDraw(@NonNull Canvas c,
-                                    @NonNull RecyclerView recyclerView,
-                                    @NonNull RecyclerView.ViewHolder viewHolder,
-                                    float dX, float dY,
-                                    int actionState, boolean isCurrentlyActive) {
-                // Zuerst den Standard-Zeichenvorgang aufrufen
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-                // Anschließend den eigenen Hintergrund zeichnen
-                drawSwipeBackground(c, viewHolder, dX);
-            }
-        }).attachToRecyclerView(recyclerView);
-    }
-
-    // Zeichnet den roten Hintergrund und das Mülleimer-Icon beim Swipe (nur bei einem Linkswisch)
-    private void drawSwipeBackground(Canvas c, RecyclerView.ViewHolder viewHolder, float dX) {
-        View itemView = viewHolder.itemView;
-        Paint paint = new Paint();
-        int customColor = ContextCompat.getColor(getContext(), R.color.red_for_delete_swipe);
-        paint.setColor(customColor);
-
-        if (dX < 0) { // Nur wenn nach links geswiped wird
-            float left = itemView.getRight() + dX; // dX ist negativ
-            float right = itemView.getRight();
-            c.drawRect(left, itemView.getTop(), right, itemView.getBottom(), paint);
-
-            Drawable deleteIcon = ContextCompat.getDrawable(getContext(), R.drawable.delete_icon);
-            if (deleteIcon != null) {
-                int intrinsicWidth = deleteIcon.getIntrinsicWidth();
-                int intrinsicHeight = deleteIcon.getIntrinsicHeight();
-                int iconMargin = (itemView.getHeight() - intrinsicHeight) / 2;
-                int iconTop = itemView.getTop() + iconMargin;
-                int iconBottom = iconTop + intrinsicHeight;
-                int iconRight = itemView.getRight() - iconMargin;
-                int iconLeft = iconRight - intrinsicWidth;
-
-                // Falls iconLeft kleiner als backgroundLeft (also der linke Rand des sichtbaren Hintergrunds) ist,
-                // wird iconLeft auf backgroundLeft gesetzt, sodass der Eimer im Hintergrund bleibt.
-                if (iconLeft < left) {
-                    iconLeft = (int) left;
-                    iconRight = iconLeft + intrinsicWidth;
-                }
-
-                deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
-                deleteIcon.draw(c);
-            }
-        }
-    }
 
     // Zeigt den Dialog mit den Produktoptionen an und bindet hier auch den Swipe-to-Delete-Mechanismus ein
     private void showDialogOptionenHome(String listId, String listName, List<Product> products, boolean isCreator) {
@@ -164,7 +88,8 @@ public class HomeFragment extends BaseFragment {
         LinearLayout layout = dialogView.findViewById(R.id.addProductLinearLayout);
         layout.setOnClickListener(v -> {
             dialog.dismiss();
-            openProdukte();
+            openProdukte(listId);
+            Log.d("DEBUG", "Liste ID aus HomeFragment: " + listId);
         });
 
         RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewDialog);
@@ -187,7 +112,8 @@ public class HomeFragment extends BaseFragment {
             dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Liste löschen", (d, which) -> deleteListBestaetigen(listId, listName));
         }
 
-        swipeToDelete(recyclerView, listId, products);
+        new ItemTouchHelper(new SwipeProduct(requireContext(), recyclerView.getAdapter(), products, firestoreManager, listId)).attachToRecyclerView(recyclerView);
+
 
         dialog.show();
     }
