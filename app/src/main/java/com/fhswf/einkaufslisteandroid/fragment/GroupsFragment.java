@@ -44,10 +44,14 @@ import java.util.List;
  * um die Produkte anzuzeigen.
  */
 public class GroupsFragment extends BaseFragment {
+    // FirestoreManager zur Verwaltung der Datenbankoperationen mit Firestore.
     private FirestoreManager firestoreManager;
-
+    // Die Liste die man im Fragment auswählt.
     private String currentListId;
 
+    /**
+     * Konstruktor der das Gruppen-Fragment initialisiert.
+     */
     public GroupsFragment() {
     }
 
@@ -60,20 +64,25 @@ public class GroupsFragment extends BaseFragment {
         return R.layout.fragment_universal;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     protected boolean isGroupFragment() {
         return true;
     }
 
-
+    /**
+     * Wird beim Erstellen des Fragments aufgerufen. Hier wird der FirestoreManager initialisiert,
+     * um später Datenbankabfragen durchführen zu können.
+     * @param savedInstanceState Falls vorhanden, der zuvor gespeicherte Zustand des Fragments.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         firestoreManager = new FirestoreManager();
     }
-
-
-
 
     /**
      * Zeigt die Produkte einer Liste an.

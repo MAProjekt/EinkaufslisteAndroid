@@ -26,21 +26,42 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Klasse um Gemeinsamkeiten des Home- und GroupFragments auszulagern
+ */
 public abstract class BaseFragment extends Fragment {
+    // FirestoreManager zur Verwaltung der Datenbankoperationen mit Firestore
     protected FirestoreManager firestoreManager;
-    protected String currentListId;
 
 
+    /**
+     * Wird beim Erstellen des Fragments aufgerufen. Hier wird der FirestoreManager initialisiert,
+     * um später Datenbankabfragen durchführen zu können.
+     *
+     * @param savedInstanceState Falls vorhanden, der zuvor gespeicherte Zustand des Fragments.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         firestoreManager = new FirestoreManager();
     }
 
+    // Abstrakte Methoden, die von den abgeleiteten Klassen implementiert werden müssen.
     protected abstract int getLayoutResourceId();
     protected abstract boolean isGroupFragment();
     protected abstract void showProductsDialog(String listId, String listName, List<Product> products);
 
+    /**
+     * Wird aufgerufen, um die Benutzeroberfläche des Fragments zu erstellen.
+     * Hier wird das Layout inflatiert, die RecyclerView initialisiert und die Listen
+     * (Benutzer- oder Gruppenlisten) aus Firestore geladen.
+     *
+     * @param inflater LayoutInflater zum Erzeugen der View.
+     * @param container Container in den das Fragment eingefügt wird.
+     * @param savedInstanceState Falls vorhanden, der zuvor gespeicherte Zustand des Fragments,
+     *                           damit das ganze nicht erneut geladen werden muss.
+     * @return Die erstellte View des Fragments.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(getLayoutResourceId(), container, false);
@@ -75,7 +96,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     /**
-     * Erstellt ein Dialog fenster um einen Benutzer hinzuzufügen.
+     * Erstellt ein Dialog-Fenster um einen Benutzer hinzuzufügen.
      * Wird in showProductsDialog aufgerufen.
      * @param listId Id der Liste, zu dem der Benutzer hinzugefügt werden soll.
      */
@@ -128,6 +149,11 @@ public abstract class BaseFragment extends Fragment {
         builder.show();
     }
 
+    /**
+     * Methode um den Nutzer auf die jeweiligen Listen klicken zu können, bzw. die Liste und ihre
+     * Inhalte anzeigen zu lassen.
+     * @param listName Name der Liste die ausgewählt wurde.
+     */
     protected void onEinkaufsListClicked(String listName) {
         Toast.makeText(getContext(), "Liste ausgewählt: " + listName, Toast.LENGTH_SHORT).show();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -148,6 +174,9 @@ public abstract class BaseFragment extends Fragment {
         }, e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Methode um die Progress-Bar zu aktualisieren
+     */
     public void updateProgressBar() {
         View view = getView();
         Fragment currentFragment = this;
@@ -162,6 +191,9 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
+    /**
+     * Methode um das gerade ausgewählte Fragment zu aktualisieren.
+     */
     public void refreshFragment() {
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
         Fragment currentFragment = this;
@@ -176,6 +208,11 @@ public abstract class BaseFragment extends Fragment {
         transaction.commit();
     }
 
+    /**
+     * Methode um ein Bestätigungsfenster zum Bestätigen vor dem Löschen einer Liste.
+     * @param listId die Id der zu löschenden Liste.
+     * @param listName Name der zu löschenden Liste für den Dialog.
+     */
     protected void deleteListBestaetigen(String listId, String listName) {
         AlertDialog.Builder confirmDialog = new AlertDialog.Builder(requireContext());
         confirmDialog.setTitle("Willst du die Liste \"" + listName + "\" wirklich löschen?")
@@ -189,6 +226,10 @@ public abstract class BaseFragment extends Fragment {
                 .show();
     }
 
+    /**
+     *
+     * @param listId Id der Liste in denen das Produkt das man hinzufügen möchte hinzugefügt wird.
+     */
     public void openProdukte(String listId) {
         UebersichtFragment fragment = new UebersichtFragment();
         Bundle args = new Bundle();

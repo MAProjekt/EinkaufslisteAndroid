@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
 import com.fhswf.einkaufslisteandroid.fragment.GroupsFragment;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
 
@@ -39,7 +40,15 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        // Hole die E-Mail des aktuell angemeldeten Benutzers
+        String currentUserEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        // Wenn der aktuelle Benutzer nicht der Creator ist, deaktiviere den Swipe (alle Swipe-Aktionen)
+        if (currentUserEmail == null || !currentUserEmail.equals(ownerEmail)) {
+            return 0;
+        }
+
         int position = viewHolder.getAdapterPosition();
+        // Verhindere, dass der Creator sich selbst swipen kann
         if (emails.get(position).equals(ownerEmail)) {
             return 0;
         }

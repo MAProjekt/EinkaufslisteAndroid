@@ -35,8 +35,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private final List<String> listNames;
     private final OnListClickListener listener;
 
-    private String listId;
-
     /**
      * Interface, wenn auf ein Listenelement geklickt wird.
      */

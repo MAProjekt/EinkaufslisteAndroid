@@ -32,38 +32,56 @@ import java.util.List;
 /**
  * Zeigt die Einkaufslisten an, welche die Produkte speichern,
  * zudem kann man auf die Einkaufsliste klicken, um die Produkte anzuzeigen.
+ * Hier sind nur die eigenen Listen anzuzeigen.
  */
 public class HomeFragment extends BaseFragment {
-
-    private static final String ARG_PARAM1 = "param1"; // vordefinierter Parameter
-    private static final String ARG_PARAM2 = "param2"; // vordefinierter Parameter
-
-    private String mParam1;
-    private String mParam2;
-
+    // FirestoreManager zur Verwaltung der Datenbankoperationen mit Firestore.
     private FirestoreManager firestoreManager;
+    // Die Liste die man im Fragment auswählt.
     private String currentListId;
 
+    /**
+     * Konstruktor für das Home-Fragment.
+     */
     public HomeFragment() {
         // Leerer Konstruktor
     }
 
+    /**
+     * Wird beim Erstellen des Fragments aufgerufen. Hier wird der FirestoreManager initialisiert,
+     * um später Datenbankabfragen durchführen zu können.
+     * @param savedInstanceState Falls vorhanden, der zuvor gespeicherte Zustand des Fragments.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         firestoreManager = new FirestoreManager();
     }
 
+    /**
+     * Methode, um das GroupFragment XML-Layout bereitzustellen.
+     * @return gibt das fragment_groups XML Layout zurück.
+     */
     @Override
     protected int getLayoutResourceId() {
         return R.layout.fragment_universal;
     }
 
+    /**
+     * Wert für die Methode aus BaseFragment, die prüft bzw. angibt, ob es ein Gruppen-Fragment ist.
+     * @return immer false, da es nur die eigenen Listen sind im HomeFragment.
+     */
     @Override
     protected boolean isGroupFragment() {
         return false;
     }
 
+    /**
+     * Methode um Inhalte der Produkte als Dialog anzeigen zu lassen.
+     * @param listId ID der ausgewählten Liste.
+     * @param listName Name der Liste die ausgewählt worden ist.
+     * @param products Liste der Produkte die in der Liste enthalten sind.
+     */
     @Override
     protected void showProductsDialog(String listId, String listName, List<Product> products) {
         this.currentListId = listId;
@@ -75,7 +93,14 @@ public class HomeFragment extends BaseFragment {
     }
 
 
-    // Zeigt den Dialog mit den Produktoptionen an und bindet hier auch den Swipe-to-Delete-Mechanismus ein
+    /**
+     * Zeigt den Dialog mit den Produkt-Optionen an und bindet hier auch den
+     * Swipe-to-Delete-Mechanismus ein.
+     * @param listId ID der Liste.
+     * @param listName Name der Liste.
+     * @param products Liste der Produkte.
+     * @param isCreator Ersteller der Liste.
+     */
     private void showDialogOptionenHome(String listId, String listName, List<Product> products, boolean isCreator) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Produkte in der Liste: " + listName);
