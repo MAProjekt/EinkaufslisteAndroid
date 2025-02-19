@@ -59,9 +59,15 @@ public class ProductDetailsFragment extends DialogFragment {
             "energy-kj","proteins", "salt", "sugars", "sodium" ));
 
 
-
-    //TODO: getArguments() anschauen und verstehen, wie greift man überhaupt auf die Daten eines Produktes zu
-    //Zeigt im PopUp-Fnester die gefetchten Daten an
+    /**
+     * Zeigt das Product-Details-Fragment (Pop-Up-Fenster) an und lädt die Informationen des Produkts.
+     *
+     * @param inflater wandelt XML-Layout in UI-Element um, damit sie im Fragment angezeigt werden können.
+     * @param container Ist das übergeordnete Layout, in das das Fragment eingefügt wird (z.B. einem Layout in einer Activity).
+     * @param savedInstanceState Falls vorhanden, der zuvor gespeicherte Zustand des Fragments.
+     *
+     * @return Die erstellte View des Fragments.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -128,7 +134,11 @@ public class ProductDetailsFragment extends DialogFragment {
         return view;
     }
 
-    //Eine Funktion, um bei den Allergenen alle Wörter mit "en:" zu entfernen
+    /**
+     * Bereinigt bei den Allergenen die Wörter mit "en:".
+     * @param allergene Das zu übergebende Wort (allergen), welches bereinigt werden soll.
+     * @return Gibt das bereinigte Wort zurück.
+     */
     private String cleanAllergene(String allergene){
         String cleanA = allergene.replaceAll(",?\\s*en:[^,]*", "").trim();
 
@@ -198,7 +208,11 @@ public class ProductDetailsFragment extends DialogFragment {
     }
 
 
-    //Die ganzen Zutaten, Nährwerte rausholen
+    /**
+     * Holt und formatiert die Zutatenliste aus einer JSON String.
+     * @param ingredientsJson Json String der Zutaten.
+     * @return Gibt einen formatierten und mit Komma getrennten String zurück, welcher die Zutaten enthält.
+     */
     private String jsonZutaten(String ingredientsJson) {
         StringBuilder builder = new StringBuilder();
         try {
@@ -273,7 +287,11 @@ public class ProductDetailsFragment extends DialogFragment {
     }
 
 
-    //TODO: Ausprobieren wie ein boolean in DB abgespeichert wird (wichtig für die Checkbox)
+    /**
+     * Fügt ein Produkt anhand der List-ID der entsprechenden Einkaufsliste hinzu.
+     * @param listId ID der Einkaufsliste.
+     * @param userId
+     */
     private void addProductToListById(String listId, String userId) {
         FirestoreManager firestoreManager = new FirestoreManager();
         String productName = getArguments().getString(ARG_NAME, "Unbekannt");
@@ -297,6 +315,11 @@ public class ProductDetailsFragment extends DialogFragment {
         );
     }
 
+    /**
+     * Fügt ein Produkt anhand des Namens der entsprechenden Einkaufsliste hinzu.
+     * @param selectedList Name der gewählten Liste.
+     * @param userId Die ID des aktuellen Benutzers.
+     */
     private void addProductToListByName(String selectedList, String userId) {
         FirestoreManager firestoreManager = new FirestoreManager();
 

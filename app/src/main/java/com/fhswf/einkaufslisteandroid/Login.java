@@ -35,7 +35,10 @@ import com.google.firebase.database.Logger;
 
 import java.util.regex.Pattern;
 
-
+/**
+ * Verwaltet die Benutzer Anmeldung mit E-Mail/Passwort und Google-Signin.
+ * Prüft, ob ein Benutzer bereits eingeloggt ist, ermöglicht auch das Zurücksetzen des Passworts.
+ */
 public class Login extends AppCompatActivity {
 
     EditText editTextEmail, editTextPasswort;
@@ -48,6 +51,10 @@ public class Login extends AppCompatActivity {
     TextView textViewForgotPassword;
     private static final int RC_SIGN_IN = 2000;
 
+    /**
+     * Prüft beim Starten der App, ob Benutzer bereits eingeloggt ist.
+     * Wenn er bereits eingeloggt sein sollte, dann wird die MainActivity gestartet.
+     */
     @Override
     protected void onStart() { //Wenn man bereits eingeloggt ist
         super.onStart();
@@ -60,21 +67,19 @@ public class Login extends AppCompatActivity {
         }
     }
 
+    /**
+     * Setzt die Benutzeroberfläche für die Anmeldung.
+     * Blendet zusätzlich die Systemleisten aus.
+     * @param savedInstanceState Der zuvor gespeicherte Zustand der Activity.
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        // Systemleisten ausblenden
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        uiHide();
 
         editTextEmail = findViewById(R.id.emailText);
         editTextPasswort = findViewById(R.id.passwordText);
@@ -85,12 +90,7 @@ public class Login extends AppCompatActivity {
         googleBtn = findViewById(R.id.googleBtn);
         textViewForgotPassword = findViewById(R.id.forgotPasswordText);
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+        setupGoogleLogin();
 
         googleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,17 +99,8 @@ public class Login extends AppCompatActivity {
             }
         });
 
-
-        FirebaseUser user = mAuth.getCurrentUser();
-
-        //Prüfen, ob bereits verifiziert
-        if(user != null && user.isEmailVerified()){
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-            finish();
-        }else{
-            mAuth.signOut(); //Bessere Sicherheit, kann aber vllt weg
-        }
+        //TODO Hier Methode checUServeri
+        checkUserVerif();
 
         textViewRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,45 +114,7 @@ public class Login extends AppCompatActivity {
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressBar.setVisibility(View.VISIBLE);
-                String email, password;
-                email = String.valueOf(editTextEmail.getText());
-                password = String.valueOf(editTextPasswort.getText());
-
-                if(email.isEmpty()){
-                    Toast.makeText(Login.this, "Gebe bitte eine E-Mail-Adresse ein!", Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    return;
-                }
-                if(password.isEmpty()){
-                    Toast.makeText(Login.this, "Gebe bitte ein Passwort ein!", Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    return;
-                }
-                if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
-                    Toast.makeText(Login.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    return;
-                }
-
-                mAuth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                progressBar.setVisibility(View.GONE);
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "Login erfolgreich", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                    startActivity(intent);
-                                    finish();  //Das schließt das Login-Fenster
-                                } else {
-                                    // If sign in fails, display a message to the user.
-                                    Toast.makeText(Login.this, "Authentifizierung fehlgeschlagen",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
-
+                handleLogin();
             }
         });
 
@@ -169,32 +122,122 @@ public class Login extends AppCompatActivity {
         textViewForgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = String.valueOf(editTextEmail.getText());
-                if (email.isEmpty()) {
-                    Toast.makeText(Login.this, "Gebe bitte eine E-Mail-Adresse ein!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
-                    Toast.makeText(Login.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // Firebase Passwort Zurücksetzen E-Mail senden
-                mAuth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(Login.this, "E-Mail zum Zurücksetzen des Passworts wurde gesendet.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(Login.this, "Fehler beim Senden der E-Mail.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                handlePasswordForgot();
             }
         });
 
     }
 
+    /**
+     * Verarbeitet die Anmeldung des Benutzers.
+     */
+    private void handleLogin(){
+        progressBar.setVisibility(View.VISIBLE);
+        String email, password;
+        email = String.valueOf(editTextEmail.getText());
+        password = String.valueOf(editTextPasswort.getText());
+
+        if(email.isEmpty()){
+            Toast.makeText(Login.this, "Gebe bitte eine E-Mail-Adresse ein!", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+        if(password.isEmpty()){
+            Toast.makeText(Login.this, "Gebe bitte ein Passwort ein!", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+        if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
+            Toast.makeText(Login.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        progressBar.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Login erfolgreich", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(intent);
+                            finish();  //Das schließt das Login-Fenster
+                        } else {
+                            Toast.makeText(Login.this, "Authentifizierung fehlgeschlagen",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Verarbeitet das Zurücksetzen des Passworts.
+     */
+    private void handlePasswordForgot(){
+        String email = String.valueOf(editTextEmail.getText());
+        if (email.isEmpty()) {
+            Toast.makeText(Login.this, "Gebe bitte eine E-Mail-Adresse ein!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
+            Toast.makeText(Login.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Firebase Passwort Zurücksetzen E-Mail senden
+        mAuth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(Login.this, "E-Mail zum Zurücksetzen des Passworts wurde gesendet.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(Login.this, "Fehler beim Senden der E-Mail.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    /**
+     * Versteckt die Systemleisten.
+     */
+    private void uiHide(){
+        // Systemleisten ausblenden
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+
+    private void checkUserVerif(){
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        //Prüfen, ob bereits verifiziert
+        if(user != null && user.isEmailVerified()){
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+        }else{
+            mAuth.signOut(); //Bessere Sicherheit, kann aber vllt weg
+        }
+    }
+
+    private void setupGoogleLogin(){
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
+    }
+
+    /**
+     * Startet den Google Sign-In-Prozess.
+     */
     private void signIn(){
         Intent intent = googleSignInClient.getSignInIntent();
         startActivityForResult(intent, RC_SIGN_IN);

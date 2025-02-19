@@ -24,6 +24,10 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.regex.Pattern;
 
 
+/**
+ * Klasse zum Registrieren eines Benutzers.
+ * Nutzt die Klasse PasswordValidator, um das Passwort zu validieren.
+ */
 public class Register extends AppCompatActivity {
     TextInputEditText editTextEmail, editTextPassword;
     Button buttonreg;
@@ -31,10 +35,12 @@ public class Register extends AppCompatActivity {
     ProgressBar progressBar;
     TextView textView;
 
+    /**
+     * Prüft beim Starten der App, ob Benutzer bereits eingeloggt ist.
+     */
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -43,20 +49,31 @@ public class Register extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-
+    /**
+     * Versteckt die Systemleisten.
+     */
+    private void uiHide(){
         // Systemleisten ausblenden
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // Hides the navigation bar
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN // Hides the status bar
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY); // Keeps immersive mode active
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+
+    /**
+     * Setzt die Benutzeroberfläche für das Registrieren.
+     * @param savedInstanceState Der zuvor gespeicherte Zustand der Activity.
+     */
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+
+        uiHide();
 
         setContentView(R.layout.activity_register);
         editTextEmail = findViewById(R.id.emailText);
@@ -87,71 +104,78 @@ public class Register extends AppCompatActivity {
         buttonreg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressBar.setVisibility(View.VISIBLE);
-                String email, password;
-                email = String.valueOf(editTextEmail.getText());
-                password = String.valueOf(editTextPassword.getText());
-
-                if(TextUtils.isEmpty(email)){
-                    Toast.makeText(Register.this, "Gebe eine Mail ein", Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    return;
-                }
-                if(TextUtils.isEmpty(password)){
-                    Toast.makeText(Register.this, "Gebe ein Passwort ein", Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    return;
-                }
-                if (!password.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$")) {
-                    Toast.makeText(Register.this, "Passwort muss mind. 8 Zeichen, eine Zahl, ein Sonderzeichen und ein Großbuchstaben haben ", Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    return;
-                }
-
-                if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
-                    Toast.makeText(Register.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    return;
-                }
-
-                mAuth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if(task.isSuccessful()){
-                                    FirebaseUser user = mAuth.getCurrentUser();
-                                    if (user != null){
-                                        FirestoreManager firestoreManager = new FirestoreManager();
-                                        firestoreManager.saveUser(user.getUid(), user.getEmail());
-                                        user.sendEmailVerification()
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()){
-                                                            Toast.makeText(Register.this, "Verifizierungs E-Mail gesendet. Bitte bestÃ¤tigen Sie ihre E-Mail!",
-                                                                    Toast.LENGTH_SHORT).show();
-                                                            progressBar.setVisibility(View.GONE);
-                                                            //Zur Login-Seite weiterleiten
-                                                            Intent intent = new Intent(getApplicationContext(), Login.class);
-                                                            startActivity(intent);
-                                                            finish();
-                                                        }else {
-                                                            Toast.makeText(Register.this, "Fehler beim senden der E-Mail",
-                                                                    Toast.LENGTH_SHORT).show();
-                                                            progressBar.setVisibility(View.GONE);
-                                                        }
-                                                    }
-                                                });
-                                    }
-                                }else{
-                                    //Fehler bei Erstellung
-                                    Toast.makeText(Register.this, "Fehler bei der Registrierung!",
-                                            Toast.LENGTH_SHORT).show();
-                                    progressBar.setVisibility(View.GONE);
-                                }
-                            }
-                        });
+                handleReg();
             }
         });
+    }
+
+    /**
+     * Verarbeitet das Registrieren des Benutzers.
+     */
+    private void handleReg(){
+        progressBar.setVisibility(View.VISIBLE);
+        String email, password;
+        email = String.valueOf(editTextEmail.getText());
+        password = String.valueOf(editTextPassword.getText());
+
+        if(TextUtils.isEmpty(email)){
+            Toast.makeText(Register.this, "Gebe eine Mail ein", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+        if(TextUtils.isEmpty(password)){
+            Toast.makeText(Register.this, "Gebe ein Passwort ein", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+        if (!password.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$")) {
+            Toast.makeText(Register.this, "Passwort muss mind. 8 Zeichen, eine Zahl, ein Sonderzeichen und ein Großbuchstaben haben ", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+
+        if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
+            Toast.makeText(Register.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            if (user != null){
+                                FirestoreManager firestoreManager = new FirestoreManager();
+                                firestoreManager.saveUser(user.getUid(), user.getEmail());
+                                user.sendEmailVerification()
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()){
+                                                    Toast.makeText(Register.this, "Verifizierungs E-Mail gesendet. Bitte bestÃ¤tigen Sie ihre E-Mail!",
+                                                            Toast.LENGTH_SHORT).show();
+                                                    progressBar.setVisibility(View.GONE);
+                                                    //Zur Login-Seite weiterleiten
+                                                    Intent intent = new Intent(getApplicationContext(), Login.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }else {
+                                                    Toast.makeText(Register.this, "Fehler beim senden der E-Mail",
+                                                            Toast.LENGTH_SHORT).show();
+                                                    progressBar.setVisibility(View.GONE);
+                                                }
+                                            }
+                                        });
+                            }
+                        }else{
+                            //Fehler bei Erstellung
+                            Toast.makeText(Register.this, "Fehler bei der Registrierung!",
+                                    Toast.LENGTH_SHORT).show();
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    }
+                });
     }
 }

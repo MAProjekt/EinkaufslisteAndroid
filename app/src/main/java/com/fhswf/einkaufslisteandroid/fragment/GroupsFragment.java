@@ -40,8 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *Zeigt die Einkaufslisten an, welche die Produkte speichern, zudem kann man auf die Einkaufsliste klicken,
- * um die Produkte anzuzeigen.
+ * Eine Klasse die von BaseFragment erbt.
+ * Dient für die Anzeige von Gruppen-Listen unter dem Menü-Punkt "Gruppeninhalte".
  */
 public class GroupsFragment extends BaseFragment {
     // FirestoreManager zur Verwaltung der Datenbankoperationen mit Firestore.
@@ -65,8 +65,9 @@ public class GroupsFragment extends BaseFragment {
     }
 
     /**
-     *
-     * @return
+     * Um zwischen HomeFragment und GroupFragment zu unterscheiden.
+     * Wichtig für die Anzeige der Listen, also ob sie in einem HomeFragment oder in einem GroupFragment angezeigt werden sollen.
+     * @return gibt true zurück, da das GroupFragment ein Gruppen-Fragment ist.
      */
     @Override
     protected boolean isGroupFragment() {
@@ -102,8 +103,13 @@ public class GroupsFragment extends BaseFragment {
     }
 
 
-
-
+    /**
+     * Zeigt für die Gruppenlisten ein Dialog mit den Optionen an.
+     * @param listId Die ListId von der Liste in der man sich gerade befindet.
+     * @param listName Name der Liste in der man sich gerade befindet.
+     * @param products Die Liste der Produkte in der akutellen Liste.
+     * @param isCreator Gibt an, ob der aktuelle Nutzer der Ersteller der Liste ist.
+     */
     private void showDialogOptionenGroup(String listId, String listName, List<Product> products, boolean isCreator) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Produkte in der Liste: " + listName);
@@ -146,7 +152,10 @@ public class GroupsFragment extends BaseFragment {
     }
 
 
-
+    /**
+     * Ermöglicht es einem Benutzer die Gruppe zu verlassen.
+     * @param listId Die ID der Liste, welcher der Benutzer verlassen will.
+     */
     private void gruppeVerlassen(String listId) {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         firestoreManager.leaveList(listId, currentUserId, aVoid -> {
@@ -158,7 +167,7 @@ public class GroupsFragment extends BaseFragment {
 
     /**
      * Zeigt eine RecyclerView mit den Mitgliedern (User-IDs) in der Liste an.
-     * Die E-Mail-Adressen werden dynamisch aus Firestore geladen.
+     * Lädt dazu die Mitglieder aus der Firestore-Datenbank und stellt sie in einer RecyclerView dar.
      *
      * @param listId Die ID der Liste, deren Mitglieder angezeigt werden sollen.
      */

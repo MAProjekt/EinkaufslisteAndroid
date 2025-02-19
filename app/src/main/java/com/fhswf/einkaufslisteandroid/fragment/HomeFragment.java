@@ -121,6 +121,7 @@ public class HomeFragment extends BaseFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(new ProductAdapter(requireContext(), products, true, listName));
 
+
         int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
             if (recyclerView.getHeight() > maxHeight) {

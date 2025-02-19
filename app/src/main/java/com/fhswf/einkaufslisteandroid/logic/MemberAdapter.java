@@ -14,7 +14,7 @@ import com.fhswf.einkaufslisteandroid.R;
 import java.util.List;
 
 /**
- * Adapter für die Anzeige der Mitglieder (E-Mail-Adressen) in einer RecyclerView.
+ * Adapter für die Anzeige der Mitglieder "Mail-Adressen" in einer RecyclerView.
  * Dieser Adapter übernimmt eine Liste von E-Mail-Adressen und sorgt dafür, dass jede E-Mail in
  * einem eigenen Listenelement angezeigt wird.
  */
@@ -34,11 +34,11 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
     }
 
     /**
-     * Hier wird das Layout für ein einzelnes Listenelement (Member) aufgeblasen.
-     * @param parent Die übergeordnete ViewGroup, in der das Element später angezeigt wird.
-     * @param viewType Der Typ der Ansicht
+     * Diese Methode wird aufgerufen, um ein neues ViewHolder zu erstellen.
+     * @param parent Die übergeordnete ViewGroup, in der die neue ViewHolder eingefügt wird.
+     * @param viewType Typ der Ansicht.
      *
-     * @return einen neuen MemberViewHolder, der das aufgeblasene Layout enthält.
+     * @return Ein neues ViewHolder für die Anzeige eines E-Mails.
      */
     @NonNull
     @Override
@@ -47,19 +47,35 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
         return new MemberViewHolder(view);
     }
 
+    /**
+     * Bindet die Daten an eine View und stellt die enstprechenden E-Mail dar.
+     * @param holder Ist der ViewHolder, der die Ansicht enthält.
+     * @param position Postion des Elements in der Liste.
+     */
     @Override
     public void onBindViewHolder(@NonNull MemberViewHolder holder, int position) {
         holder.emailTextView.setText(emails.get(position));
     }
 
+    /**
+     * Gibt die Anzahl der E-Mails in der Liste zurück.
+     * @return Die Anzahl der E-Mails.
+     */
     @Override
     public int getItemCount() {
         return emails.size();
     }
 
+    /**
+     * ViewHolder für die Anzeige einer einzelnen E-Mail.
+     */
     public static class MemberViewHolder extends RecyclerView.ViewHolder {
         TextView emailTextView;
 
+        /**
+         * Konstruktor für den ViewHolder.
+         * @param itemView Die View des einzelnen Elements der Liste.
+         */
         public MemberViewHolder(@NonNull View itemView) {
             super(itemView);
             emailTextView = itemView.findViewById(R.id.textViewEmail);

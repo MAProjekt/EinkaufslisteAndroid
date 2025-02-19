@@ -127,7 +127,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                             product,
                             aVoid -> Log.d("ProductAdapter", "Produktstatus aktualisiert"),
                             e -> Log.e("ProductAdapter", "Fehler beim Aktualisieren: " + e)
-                    );// HomeFragment neu laden, nachdem das Produkt als gekauft markiert wurde
+                    );
 
                     if (context instanceof FragmentActivity) {
                         FragmentActivity activity = (FragmentActivity) context;
@@ -188,6 +188,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         ImageView productImage;
         CheckBox gekauftCheckBox;
 
+        /**
+         * Konstruktor für das ViewHolder.
+         *
+         * @param itemView Die View des Elements.
+         */
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.nameTextView);

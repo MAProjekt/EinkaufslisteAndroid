@@ -20,6 +20,10 @@ public class ProductList {
         // Leerer Konstruktor für Firestore
     }
 
+    /**
+     * Gibt die Liste der Produkte zurück.
+     * @return Liste der Produkte.
+     */
     public List<Product> getProducts() {
         return products;
     }
