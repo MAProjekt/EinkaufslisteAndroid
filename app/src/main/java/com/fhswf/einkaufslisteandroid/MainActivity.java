@@ -111,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ImageView profileImage = headerView.findViewById(R.id.profileImage);
         if (profileImage != null) {
             AuthService.getInstance().loadUserProfileImage(this, profileImage);
-            profileImage.setColorFilter(null); // damit der Darkmode das Profilbild nicht anpasst.
         } else {
             Toast.makeText(this, "Profilbild-ImageView wurde nicht gefunden.", Toast.LENGTH_SHORT).show();
         }
