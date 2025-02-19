@@ -1,16 +1,20 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
+import static androidx.core.util.TypedValueCompat.dpToPx;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -28,6 +32,8 @@ import com.fhswf.einkaufslisteandroid.models.ProductList;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import androidx.core.content.ContextCompat;
+
 
 
 import org.json.JSONArray;
@@ -119,8 +125,21 @@ public class ProductDetailsFragment extends DialogFragment {
         //Button zum Hinzufügen des Produktes zu einer Liste
         Bundle args = getArguments();
         String listId = (args != null) ? args.getString("listId") : null;
+        boolean fromUebersicht = (args != null) && args.getBoolean("fromUebersicht", false);
         Log.d("DEBUG", "Liste ID aus DetailsFragment: " + listId);
         Log.d("DEBUG", "ProductDetailsFragment - Name: " + productName + ", listId: " + listId + ", ImageURL: " + imageUrl);
+
+        Button schliessenButton = new Button(requireContext());
+
+        if (listId == null && !fromUebersicht) {
+            produktHinzufuegenButton.setVisibility(View.GONE);
+            produktMenge.setVisibility(View.GONE);
+            schliessenButton.setText("Schließen");
+            schliessenButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white));
+            schliessenButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.default_ThemeOverlay_AppCompat));
+            schliessenButton.setOnClickListener(v -> dismiss());
+            ((ViewGroup) view).addView(schliessenButton);
+        }
 
         produktHinzufuegenButton.setOnClickListener(v -> {
             if (listId != null) {
@@ -133,6 +152,11 @@ public class ProductDetailsFragment extends DialogFragment {
 
         return view;
     }
+
+    private int dpToPx(int dp) {
+        return (int) (dp * requireContext().getResources().getDisplayMetrics().density);
+    }
+
 
     /**
      * Bereinigt bei den Allergenen die Wörter mit "en:".

@@ -160,6 +160,19 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             args.putString("allergens_from_ingredients", product.getAllergene());
             args.putString("stores", product.getStore());
 
+            boolean fromUebersicht = false;
+
+            if (context instanceof FragmentActivity) {
+                FragmentActivity activity = (FragmentActivity) context;
+                Fragment currentFragment = activity.getSupportFragmentManager().findFragmentById(R.id.fragment_container_view_tag);
+
+                if (currentFragment instanceof UebersichtFragment) {
+                    fromUebersicht = true;
+                }
+            }
+
+            args.putBoolean("fromUebersicht", fromUebersicht);
+
             ProductDetailsFragment pdf = new ProductDetailsFragment();
             pdf.setArguments(args);
 
