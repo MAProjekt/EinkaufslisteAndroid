@@ -1,12 +1,9 @@
 package com.fhswf.einkaufslisteandroid.logic;
 
 import android.content.Context;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDelegate;
-
-import com.fhswf.einkaufslisteandroid.R;
 
 /**
  * Klasse um Theme anzupassen

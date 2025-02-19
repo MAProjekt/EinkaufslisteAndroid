@@ -49,6 +49,13 @@ public class PasswordValidator extends AppCompatActivity {
      */
     public TextWatcher getPasswordTextWatcher() {
         return new TextWatcher() {
+            /**
+             * Wird nicht genutzt!
+             * @param s
+             * @param start
+             * @param count
+             * @param after
+             */
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -102,6 +109,10 @@ public class PasswordValidator extends AppCompatActivity {
                 }
             }
 
+            /**
+             * Wird nicht genutzt!
+             * @param s
+             */
             @Override
             public void afterTextChanged(Editable s) {
             }

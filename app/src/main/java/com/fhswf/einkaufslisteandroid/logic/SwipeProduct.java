@@ -18,6 +18,9 @@ import com.fhswf.einkaufslisteandroid.models.Product;
 
 import java.util.List;
 
+/**
+ * Klasse um Produkte aus der Liste zu entfernen, indem man nach links wischt.
+ */
 public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
     private final RecyclerView.Adapter adapter;
     private final List<Product> products;
@@ -25,6 +28,15 @@ public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
     private final String listId;
     private final Context context;
 
+    /**
+     * Konstruktor für SwipeProduct.
+     * @param context der Kontext, der für den Zugriff auf Ressourcen der Activity benötigt wird.
+     * @param adapter der RecyclerView-Adapter, der die Produkte verwaltet.
+     * @param products die Liste der Produkte, die angezeigt werden.
+     * @param firestoreManager der FirestoreManager, der für die Kommunikation mit der Datenbank
+     *                         zuständig ist.
+     * @param listId die ID der Liste, aus der das Produkt gelöscht werden soll.
+     */
     public SwipeProduct(Context context, RecyclerView.Adapter adapter, List<Product> products, FirestoreManager firestoreManager, String listId) {
         super(0, ItemTouchHelper.LEFT);
         this.context = context;
@@ -34,12 +46,27 @@ public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
         this.listId = listId;
     }
 
-
+    /**
+     * Wird für Drag&Drop-Aktionen verwendet. Da in diesem Fall keine Drag-Aktionen unterstützt
+     * werden, wird immer false zurückgegeben.
+     * @param recyclerView die RecyclerView, in dem der Drag-Vorgang stattfindet.
+     * @param viewHolder der aktuelle ViewHolder.
+     * @param target der Ziel-ViewHolder.
+     * @return false, da Drag-Aktionen nicht unterstützt werden.
+     */
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
         return false;
     }
 
+    /**
+     * Diese Methode wird aufgerufen, wenn ein Produkt durch einen Swipe entfernt wird.
+     * Es wird versucht, das entsprechende Produkt aus der Firestore zu löschen.
+     * Bei Erfolg wird das Produkt aus der lokalen Liste entfernt und der dazugehörige Adapter
+     * informiert.
+     * @param viewHolder der ViewHolder, der geswiped wurde.
+     * @param direction die Richtung, in die geswiped wurde (hier ist nur links erlaubt).
+     */
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         int position = viewHolder.getAdapterPosition();
@@ -55,6 +82,18 @@ public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
         });
     }
 
+    /**
+     * Methode, um das Aussehen des geswipeten Elements während des Swipes anzupassen.
+     * Hier wird geprüft, ob nach links geswiped wird. Falls ja, wird der Swipe-Hintergrund
+     * gezeichnet.
+     * @param c die Canvas, auf der gezeichnet wird.
+     * @param recyclerView der RecyclerView, in dem der Swipe stattfindet.
+     * @param viewHolder der ViewHolder des geswipeten Elements.
+     * @param dX die horizontale Verschiebung des Elements während des Swipes.
+     * @param dY die vertikale Verschiebung des Elements während des Swipes.
+     * @param actionState der aktuelle Aktionszustand (hier Swipe).
+     * @param isCurrentlyActive gibt an, ob das Element aktuell aktiv geswiped/genutzt wird.
+     */
     @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         if (dX < 0) {
@@ -63,6 +102,12 @@ public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 
+    /**
+     * Zeichnet den Hintergrund (rot) und das Symbol (Mülleimer), während der Swipe-Geste.
+     * @param c die Canvas (Leinwandbereich), auf der gezeichnet wird.
+     * @param viewHolder der ViewHolder des geswipeten Elements.
+     * @param dX die horizontale Verschiebung des Elements während des Swipes.
+     */
     private void drawSwipeBackground(Canvas c, RecyclerView.ViewHolder viewHolder, float dX) {
         View itemView = viewHolder.itemView;
         Paint paint = new Paint();

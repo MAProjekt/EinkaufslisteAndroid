@@ -1,10 +1,6 @@
 package com.fhswf.einkaufslisteandroid;
 
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,16 +28,18 @@ import com.fhswf.einkaufslisteandroid.logic.AuthService;
 import com.fhswf.einkaufslisteandroid.logic.DialogHelper;
 import com.fhswf.einkaufslisteandroid.logic.ThemeLogic;
 import com.fhswf.einkaufslisteandroid.models.Product;
-import com.fhswf.einkaufslisteandroid.Login;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MainActivity ist der zentrale Einstiegspunkt der App.
+ * Diese Activity verwaltet den Navigation Drawer, Toolbar und den Wechsel zwischen den Fragmenten,
+ * hier mithilfe des Menüs.
+ */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private DrawerLayout drawerLayout; // Verwaltet das Hauptlayout des Navigation Drawers
@@ -49,10 +47,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirestoreManager firestoreManager;
     private FirebaseAuth mAuth;
 
+    /**
+     * Initialisiert die MainActivity, setzt Layout, Toolbar, Navigation Drawer und lädt das
+     * Standardfragment.
+     * @param savedInstanceState der zuvor gespeicherte Zustand der Activity.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialisiere FirestoreManager und FirebaseAuth
         firestoreManager = new FirestoreManager();
         mAuth = FirebaseAuth.getInstance();
 
@@ -76,15 +80,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container_view_tag, new HomeFragment()).commit();
             navigationView.setCheckedItem(R.id.nav_home);
         }
-
-        // Teil um Produkt hinzuzufügen
-        FloatingActionButton add_button = findViewById(R.id.add_button);
-        add_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "FAB gedrückt!", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         // User im nav_menu 1 (nav_header) anzeigen
         FirebaseUser user = mAuth.getCurrentUser();
@@ -129,6 +124,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * Behandelt die Auswahl von Menü-Elementen im Navigation-Drawer und lädt das entsprechende
+     * Fragment dann.
+     * @param item das ausgewählte Menü-Item
+     * @return true, wenn das Item verarbeitet wurde, sonst false
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
@@ -161,6 +162,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    /**
+     * Überschreibt das Verhalten der Zurück-Taste.
+     * Schließt den Navigation Drawer, wenn dieser geöffnet ist, ansonsten wird die Standardaktion
+     * ausgeführt. Dieses Verhalten verhindert, dass Benutzer versehentlich die App verlassen,
+     * während sie noch im Menü navigieren. Es ist also eine Verbesserung der Usability.
+     */
     @Override
     public void onBackPressed() {
         if(drawerLayout.isDrawerOpen(GravityCompat.START)){
@@ -171,9 +178,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     /**
-     * Methode um das zweite Menü aufzurufen und einzubinden
-     * @param menu
-     * @return
+     * Methode um das zweite Menü aufzurufen und einzubinden.
+     * @param menu Element aus der XML das ein klassisches Menü darstellt
+     * @return true
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -181,6 +188,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    /**
+     * Behandelt die Auswahl von Menüelementen im Optionsmenü.
+     * @param item das ausgewählte Menü-Item.
+     * @return true, wenn das Item verabeitet wurde, ansonsten die Standard-Aktion.
+     */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
@@ -193,8 +205,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     /**
-     * Dialog in dem der User einen Namen für die Liste vergeben muss
-     *
+     * Dialog in dem der User einen Namen für die Liste vergeben muss. Nach der Bestätigung
+     * wird die Liste erstellt.
      */
     private void showCreateListDialog() {
         DialogHelper.showCreateListDialog(this, listName -> {

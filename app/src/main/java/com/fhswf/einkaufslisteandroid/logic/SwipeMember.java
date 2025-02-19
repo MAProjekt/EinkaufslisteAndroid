@@ -15,11 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fhswf.einkaufslisteandroid.R;
 import com.fhswf.einkaufslisteandroid.datenpersistierung.FirestoreManager;
-import com.fhswf.einkaufslisteandroid.fragment.GroupsFragment;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
 
+/**
+ * Klasse um Member aus der Liste zu entfernen, indem man nach links wischt.
+ */
 public class SwipeMember extends ItemTouchHelper.SimpleCallback {
     private MemberAdapter adapter;
     private List<String> emails;
@@ -28,8 +30,18 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
     private String listId;
     private Context context;
 
+    /**
+     * Konstruktor
+     * @param adapter der Adapter, der die Mitgliedsdaten im RecyclerView verwaltet.
+     * @param emails Liste der E-Mail-Adressen der Mitglieder.
+     * @param ownerEmail Die E-Mail-Adresse des Erstellers der Liste.
+     * @param firestoreManager der FirestoreManager, der für Datenbankoperationen zuständig ist.
+     * @param listId die ID der Liste, aus der Mitglieder entfernt werden sollen.
+     * @param context der Kontext, der für UI-Operationen und zum Abrufen von Ressourcen benötigt
+     *                wird.
+     */
     public SwipeMember(MemberAdapter adapter, List<String> emails, String ownerEmail, FirestoreManager firestoreManager, String listId, Context context){
-        super(0, ItemTouchHelper.LEFT);
+        super(0, ItemTouchHelper.LEFT); // Swippen nach links
         this.adapter = adapter;
         this.emails = emails;
         this.ownerEmail = ownerEmail;
@@ -38,6 +50,15 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
         this.context = context;
     }
 
+    /**
+     * Diese Methode bestimmt, welche Swipe- oder Drag-Aktionen für einen bestimmten
+     * ViewHolder erlaubt sind.
+     * Hier wird geprüft, ob der aktuell angemeldete Benutzer der Listen-Ersteller ist.
+     * Falls dies nicht der Fall ist, werden alle Swipe-Aktionen deaktiviert.
+     * @param recyclerView die RecyclerView, an die der ItemTouchHelper gebunden ist.
+     * @param viewHolder der ViewHolder, für den die Bewegungsinformationen benötigt werden.
+     * @return erlaubte Bewegungsflags.
+     */
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         // Hole die E-Mail des aktuell angemeldeten Benutzers
@@ -55,12 +76,26 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
         return super.getMovementFlags(recyclerView, viewHolder);
     }
 
-
+    /**
+     * Wird für Drag&Drop-Aktionen verwendet. Da in diesem Fall keine Drag-Aktionen unterstützt
+     * werden, wird immer false zurückgegeben.
+     * @param recyclerView die RecyclerView, in dem der Drag-Vorgang stattfindet.
+     * @param viewHolder der aktuelle ViewHolder.
+     * @param target der Ziel-ViewHolder.
+     * @return false, da Drag-Aktionen nicht unterstützt werden.
+     */
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
         return false;
     }
 
+    /**
+     * Diese Methode wird aufgerufen, wenn ein Element durch einen Swipe entfernt wurde.
+     * Es wird versucht, das entsprechende Mitglied aus der Datenbank zu entfernen.
+     * Bei Erfolg wird das Element aus der Liste gelöscht und der dazugehörige Adapter informiert.
+     * @param viewHolder der ViewHolder, der geswiped wurde.
+     * @param direction die Richtung, in die geswiped wurde (hier ist nur links erlaubt).
+     */
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         int position = viewHolder.getAdapterPosition();
@@ -76,6 +111,12 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
         });
     }
 
+    /**
+     * Zeichnet den Hintergrund (rot) und das Symbol (Mülleimer), während der Swipe-Geste.
+     * @param c die Canvas (Leinwandbereich), auf der gezeichnet wird.
+     * @param viewHolder der ViewHolder des geswipeten Elements.
+     * @param dX die horizontale Verschiebung des Elements während des Swipes.
+     */
     public void drawSwipeBackground(Canvas c, RecyclerView.ViewHolder viewHolder, float dX) {
         View itemView = viewHolder.itemView;
         Paint paint = new Paint();
@@ -108,6 +149,18 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
         }
     }
 
+    /**
+     * Passt das Aussehen des geswipeten Elements während der Swipe-Geste an.
+     * Diese Methode sorgt dafür, dass der Swipe-Hintergrund nur gezeichnet wird, wenn das Element
+     * eine gültige Position hat und nicht der Creator selbst ist.
+     * @param c die Canvas (Leinwandbereich), auf der gezeichnet wird.
+     * @param recyclerView der RecyclerView, der das Element enthält.
+     * @param viewHolder der ViewHolder des geswipeten Elements.
+     * @param dX die horizontale Verschiebung des Elements während des Swipes.
+     * @param dY die vertikale Verschiebung des Elements während des Swipes.
+     * @param actionState der aktuelle Aktionszustand (hier Swipe).
+     * @param isCurrentlyActive gibt an, ob das Element aktuell aktiv geswiped/genutzt wird.
+     */
     @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         int position = viewHolder.getAdapterPosition();
