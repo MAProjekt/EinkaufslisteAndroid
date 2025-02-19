@@ -24,7 +24,7 @@
             android:scaleType="centerCrop"
             android:src="@drawable/default_user_icon"
             android:contentDescription="@string/profile_image_description"
-            app:tint="?attr/colorOnBackground" /> <!-- dynamisch für Darkmode -->
+            /> <!-- dynamisch für Darkmode -->
 
         <!-- Angepasster TextView: Breite 0dp und Gewicht 1, plus Ellipsize -->
         <TextView
