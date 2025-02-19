@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:text="E-Mail"
-        android:textSize="16sp"
-        android:textColor="@android:color/black" />
+        android:text="@string/e_mail_input_member"
+        android:textSize="16sp"/>
 </LinearLayout>

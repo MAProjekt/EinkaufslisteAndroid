@@ -13,6 +13,7 @@
         android:layout_marginTop="50dp"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:textColor="@color/black"
         android:text="@string/login"
         android:layout_marginBottom="5dp"
 
@@ -41,7 +42,7 @@
         android:maxLines="1"
         android:scrollHorizontally="true"
         android:paddingStart="15dp"
-        />
+        android:paddingEnd="15dp"/>
 
     <EditText
         android:id="@+id/passwordText"
@@ -59,7 +60,8 @@
         app:endIconMode="password_toggle"
         android:singleLine="true"
         android:paddingStart="15dp"
-            />
+        android:paddingEnd="15dp"/>
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -74,7 +76,8 @@
         android:layout_marginTop="15dp"
         android:layout_gravity="center"
         android:textSize="15sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
     <Button
         android:id="@+id/loginBtn"
         android:layout_width="150dp"
@@ -92,6 +95,7 @@
         android:text="@string/login_via_google"
         android:layout_gravity="center"
         android:textStyle="bold"
+        android:textColor="@color/black"
         />
     <com.google.android.gms.common.SignInButton
         android:id="@+id/googleBtn"
@@ -108,7 +112,8 @@
         android:layout_marginTop="15dp"
         android:layout_gravity="center"
         android:textSize="15sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
 
 
 </LinearLayout>

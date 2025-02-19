@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
  * Nutzt die Klasse PasswordValidator, um das Passwort zu validieren.
  */
 public class Register extends AppCompatActivity {
-    TextInputEditText editTextEmail, editTextPassword;
+    EditText editTextEmail, editTextPassword;
     Button buttonreg;
     FirebaseAuth mAuth;
     ProgressBar progressBar;
