@@ -24,7 +24,7 @@
             android:id="@+id/nameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/produktname_xml"
+            android:text="@string/produktname"
             android:textSize="16sp"
             android:textStyle="bold" />
 
