@@ -60,4 +60,12 @@
     <string name="wische_nach_links_um_produkt_zu_entfernen">Wische nach links, um Produkt zu entfernen</string>
     <string name="e_mail_input_member">E-Mail</string>
     <string name="app_logo">App-Logo</string>
+    <string name="produkt_hinzufuegen">Produkt hinzufügen</string>
+    <string name="n_hrstoffe">Nährstoffe</string>
+    <string name="menge_pro_100g">Menge (pro 100g)</string>
+    <string name="einheit">Einheit</string>
+    <string name="produkt_eingeben">Produkt eingeben</string>
+    <string name="_0perc">0%</string>
+    <string name="marke">Marke</string>
+    <string name="menge">Menge</string>
 </resources>

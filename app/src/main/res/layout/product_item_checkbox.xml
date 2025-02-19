@@ -24,7 +24,7 @@
             android:id="@+id/nameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Produktname"
+            android:text="@string/produktname"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -32,7 +32,7 @@
             android:id="@+id/brandTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Marke"
+            android:text="@string/marke"
             android:textSize="14sp"
             android:textColor="#888888" />
 
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/produktItemMenge"
-            android:text="Menge"/>
+            android:text="@string/menge"/>
     </LinearLayout>
     <CheckBox
         android:id="@+id/checkBox"

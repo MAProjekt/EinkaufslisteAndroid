@@ -73,15 +73,15 @@
                     android:layout_height="wrap_content">
                     <TableRow>
                         <TextView
-                            android:text="Nährstoffe"
+                            android:text="@string/n_hrstoffe"
                             android:textStyle="bold"
                             android:padding="8dp"/>
                         <TextView
-                            android:text="Menge (pro 100g)"
+                            android:text="@string/menge_pro_100g"
                             android:textStyle="bold"
                             android:padding="8dp"/>
                         <TextView
-                            android:text="Einheit"
+                            android:text="@string/einheit"
                             android:textStyle="bold"
                             android:padding="8dp"/>
                     </TableRow>
