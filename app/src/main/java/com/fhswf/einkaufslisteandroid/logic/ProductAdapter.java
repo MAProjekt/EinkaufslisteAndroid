@@ -26,6 +26,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -64,12 +66,27 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public ProductAdapter(Context context, List<Product> productList, boolean checkBoxAnzeige, String listName){
         this(context, productList, checkBoxAnzeige);
         this.listName = listName;
+        sortProducts();
     }
     public ProductAdapter(Context context, List<Product> productList, String listId, boolean checkBoxAnzeige) {
         this.listId = listId; // Speichere die listId
         this.context = context;
         this.productList = productList;
         this.checkBoxAnzeige = checkBoxAnzeige;
+        sortProducts();
+    }
+
+    /**
+     * Sortiert die Produkte nach dem Status "gekauft".
+     * Die als gekauft markierten Produkte stehen am Ende der Liste.
+     */
+    private void sortProducts(){
+        Collections.sort(productList, new Comparator<Product>() {
+            @Override
+            public int compare(Product o1, Product o2) {
+                return Boolean.compare(o1.getGekauft(), o2.getGekauft());
+            }
+        });
     }
 
     /**
@@ -109,8 +126,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             holder.produktItemMenge.setText("Menge: " + product.getMenge());
         }
 
+        holder.itemView.post(() -> {
+            int itemWidth = holder.itemView.getWidth();
+            Log.d("ItemSize", "Breite des Items an Position " + position + ": " + itemWidth + "px");
+        });
 
-        // Prüfen, ob die CheckBox existiert (nur wenn checkBoxAnzeige = true)
+
         if (holder.gekauftCheckBox != null) {
             holder.gekauftCheckBox.setChecked(product.getGekauft());
             holder.itemView.setAlpha(product.getGekauft() ? 0.5f : 1.0f);

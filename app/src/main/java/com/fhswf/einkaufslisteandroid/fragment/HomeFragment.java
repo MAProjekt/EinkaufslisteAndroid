@@ -118,9 +118,15 @@ public class HomeFragment extends BaseFragment {
         });
 
         RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewDialog);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(new ProductAdapter(requireContext(), products, true, listName));
 
+        //Debugger für die RecyclerView Breite
+//        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+//            int recyclerViewWidth = recyclerView.getWidth();
+//            Log.d("RecyclerViewSize", "Breite der RecyclerView: " + recyclerViewWidth + "px");
+//        });
 
         int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
