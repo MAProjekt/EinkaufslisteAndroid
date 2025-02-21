@@ -54,6 +54,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         this.listener = listener;
     }
 
+    /**
+     * Wird aufgerufen, um ein neues ViewHolder-Objekt zu erstellen. Hier wird das Layout für ein
+     * einzelnes Listenelement (aus item_list.xml) aufgebaut.
+     * @param parent die jeweils übergeordnete ViewGroup.
+     * @param viewType der Typ der Ansicht.
+     * @return ein neuer ViewHolder, der das Layout enthält.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -61,6 +68,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+    /**
+     * Bindet Daten an den ViewHolder, d.h. es füllt das Listenelement mit dem entsprechenden
+     * Einkaufslisten-Namen und aktualisiert den Fortschrittsbalken basierend auf dem Kauf-Status.
+     *
+     * @param holder der ViewHolder, der aktualisiert werden soll.
+     * @param position die Position des Elements in der Datenliste.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String listName = listNames.get(position);
