@@ -56,18 +56,32 @@ public class FirestoreManager {
      */
     public void saveList(String userId, String listName, List<Product> products,
                          OnSuccessListener<String> onSuccess, OnFailureListener onFailure) {
-        String listId = db.collection("lists").document().getId();  // Generiere eindeutige ID
+        db.collection("lists")
+                .whereArrayContains("members", userId)
+                .whereEqualTo("name", listName)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // Falls eine Liste mit demselben Namen für diesen User existiert
+                        onFailure.onFailure(new Exception("Eine Liste mit diesem Namen existiert bereits."));
+                    } else {
+                        // Neue Liste erstellen, da noch keine existiert
+                        String listId = db.collection("lists").document().getId();
 
-        Map<String, Object> listData = new HashMap<>();
-        listData.put("name", listName);
-        listData.put("products", products);
-        listData.put("members", Arrays.asList(userId));  // Der Ersteller wird als erstes Mitglied gespeichert
+                        Map<String, Object> listData = new HashMap<>();
+                        listData.put("name", listName);
+                        listData.put("products", products);
+                        listData.put("members", Arrays.asList(userId));
 
-        db.collection("lists").document(listId)
-                .set(listData)
-                .addOnSuccessListener(aVoid -> onSuccess.onSuccess(listId))
+                        db.collection("lists").document(listId)
+                                .set(listData)
+                                .addOnSuccessListener(aVoid -> onSuccess.onSuccess(listId))
+                                .addOnFailureListener(onFailure);
+                    }
+                })
                 .addOnFailureListener(onFailure);
     }
+
 
     /**
      * Fügt einen neuen Benutzer zu einer bestehenden Liste hinzu.

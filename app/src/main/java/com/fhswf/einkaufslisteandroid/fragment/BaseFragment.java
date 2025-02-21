@@ -25,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Klasse um Gemeinsamkeiten des Home- und GroupFragments auszulagern
@@ -79,8 +80,9 @@ public abstract class BaseFragment extends Fragment {
             RecyclerView finalRecyclerView = recyclerView;
             firestoreManager.getUserOrGroupLists(userId, isGroupFragment(),
                     documents -> {
+                        List<DocumentSnapshot> sortLists = sortListsNachGekauftProgress(documents);
                         List<String> listNames = new ArrayList<>();
-                        for (DocumentSnapshot doc : documents) {
+                        for (DocumentSnapshot doc : sortLists) {
                             String listName = doc.getString("name");
                             if (listName != null) {
                                 listNames.add(listName);
@@ -91,9 +93,47 @@ public abstract class BaseFragment extends Fragment {
                     },
                     e -> Toast.makeText(getContext(), "Fehler beim Laden der Listen: " + e.getMessage(), Toast.LENGTH_SHORT).show()
             );
+
         }
         return view;
     }
+
+    /**
+     * Sortiert die Listen nach dem Progress.
+     * Listen mit höheren Prozentsatz werden weiter unten angezeigt.
+     * @param documents Liste der Firestore-Dokumente, die Einkaufslisten enthalten.
+     * @return Eine sortierte Liste von Dokumenten, wobei die Listen mit wenigen gekauften Prdoukten oben angezeigt werden.
+     */
+    private List<DocumentSnapshot> sortListsNachGekauftProgress(List<DocumentSnapshot> documents) {
+        documents.sort((doc1, doc2) -> {
+            double prog1 = calcProgress(doc1);
+            double prog2 = calcProgress(doc2);
+
+            return Double.compare(prog1, prog2); // Höhere Werte nach unten sortieren
+        });
+
+        return documents;
+    }
+
+    /**
+     * Berechnet den Anteil der gekauften Produkte einer Einkaufsliste.
+     * (Anzahl gekaufter Produkte) / (Anzahl Produkte).
+     *
+     * @param doc Firestore-Dokument, das eine Einkaufsliste mit Produkten enthält.
+     * @return Prozentsatz der gekauften Produkte in der Liste.
+     */
+    private double calcProgress(DocumentSnapshot doc) {
+        List<Map<String, Object>> products = (List<Map<String, Object>>) doc.get("products");
+
+        if (products == null || products.isEmpty()) {
+            return 0.0; // Falls die Liste leer ist, wird sie ganz oben gelistet
+        }
+
+        //mit stream Liste der Produkte filtern (nur Produkte die gekauft sind), stream ist effizienter als for-schleife
+        long gekaufteProdukte = products.stream().filter(p -> Boolean.TRUE.equals(p.get("gekauft"))).count();
+        return (double) gekaufteProdukte / products.size();
+    }
+
 
     /**
      * Erstellt ein Dialog-Fenster um einen Benutzer hinzuzufügen.
