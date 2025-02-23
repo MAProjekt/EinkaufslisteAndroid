@@ -31,6 +31,7 @@ import com.fhswf.einkaufslisteandroid.models.Product;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         firestoreManager = new FirestoreManager();
         mAuth = FirebaseAuth.getInstance();
 
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            checkAndAssignFcmToken(user.getUid());
+        }
+
         //EdgeToEdge.enable(this);
         setContentView(com.fhswf.einkaufslisteandroid.R.layout.activity_main);
         // Farbe der Statusleiste setzen
@@ -82,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         // User im nav_menu 1 (nav_header) anzeigen
-        FirebaseUser user = mAuth.getCurrentUser();
         if (user != null && user.getEmail() != null) {
             View headerView = navigationView.getHeaderView(0);
             TextView nutzerNameSlideshow = headerView.findViewById(R.id.nutzerNameSlideshow);
@@ -122,6 +127,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.white_from_fragment));
         }
+    }
+
+    private void checkAndAssignFcmToken(String userId) {
+        firestoreManager.getFcmToken(userId, existingToken -> {
+            if (existingToken == null || existingToken.isEmpty()) {
+                FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                String newToken = task.getResult();
+                                firestoreManager.saveFcmToken(userId, newToken);
+                            }
+                        });
+            }
+        });
     }
 
     /**

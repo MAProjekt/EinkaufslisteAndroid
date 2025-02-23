@@ -4,6 +4,9 @@ plugins {
 }
 
 android {
+    packagingOptions{
+        exclude("META-INF/DEPENDENCIES")
+    }
     namespace = "com.fhswf.einkaufslisteandroid"
     compileSdk = 34
 
@@ -43,6 +46,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.play.services.analytics.impl)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -60,5 +64,8 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.google.firebase:firebase-analytics")
+
+    implementation ("com.google.auth:google-auth-library-oauth2-http:0.25.2")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 
 }

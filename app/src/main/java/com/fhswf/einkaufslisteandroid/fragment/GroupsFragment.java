@@ -1,5 +1,7 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
+import static com.fhswf.einkaufslisteandroid.services.PushNotificationSender.sendPushNotification;
+
 import android.app.AlertDialog;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -33,6 +35,7 @@ import com.fhswf.einkaufslisteandroid.logic.SwipeProduct;
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.fhswf.einkaufslisteandroid.models.ProductList;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -139,7 +142,7 @@ public class GroupsFragment extends BaseFragment {
         });
 
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Liste teilen", (d, which) -> showAddUser(listId));
-        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Gruppe verlassen", (d, which) -> gruppeVerlassen(listId));
+        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Gruppe verlassen", (d, which) -> gruppeVerlassen(listId ,listName));
         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Benutzer anzeigen", (d, which) -> showMemberListDialog(listId));
 
         if(isCreator){
@@ -156,13 +159,24 @@ public class GroupsFragment extends BaseFragment {
      * Ermöglicht es einem Benutzer die Gruppe zu verlassen.
      * @param listId Die ID der Liste, welcher der Benutzer verlassen will.
      */
-    private void gruppeVerlassen(String listId) {
+    private void gruppeVerlassen(String listId, String listname ) {
+        Log.d("DEBUG", "gruppeVerlassen() wurde aufgerufen mit listId: " + listId);
+
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String userName = (currentUser != null && currentUser.getDisplayName() != null) ? currentUser.getDisplayName() : "Ein Mitglied";
+
         firestoreManager.leaveList(listId, currentUserId, aVoid -> {
-            Toast.makeText(getContext(), "Gruppe verlassen!", Toast.LENGTH_SHORT).show();
+            firestoreManager.getListMemberTokens(listId, tokens -> {
+                for (String token : tokens) {
+                    sendPushNotification(requireContext(),token, "Listen-Update", userName + " hat die Liste "+ listname + " verlassen.");
+                }
+            });
+
             refreshFragment();
-        }, e -> Toast.makeText(getContext(), "Fehler" + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }, e -> Log.e("ERROR", "Fehler beim Verlassen der Liste: " + e.getMessage()));
     }
+
 
 
     /**

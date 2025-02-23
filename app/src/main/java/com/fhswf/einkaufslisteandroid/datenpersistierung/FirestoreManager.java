@@ -1,6 +1,9 @@
 package com.fhswf.einkaufslisteandroid.datenpersistierung;
 
+import static com.fhswf.einkaufslisteandroid.services.PushNotificationSender.sendPushNotification;
+
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.fhswf.einkaufslisteandroid.models.Product;
@@ -122,7 +125,7 @@ public class FirestoreManager {
      * @param onFailure Callback bei Fehlern.
      */
     public void getUserOrGroupLists(String userId, boolean group,
-                                            OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
+                                    OnSuccessListener<List<DocumentSnapshot>> onSuccess, OnFailureListener onFailure) {
 
         db.collection("lists")
                 .whereArrayContains("members", userId)
@@ -166,23 +169,60 @@ public class FirestoreManager {
     /**
      * Entfernt einen Benutzer aus einer Liste.
      * @param listId ID der Liste aus der ein Nutzer entfernt werden soll.
-     * @param userID ID des Nutzers der aus der Liste entfernt werden soll.
-     * @param onSuccess Callback bei Erfolg.
-     * @param onFailure Callback bei Fehlern.
+     *
      */
-    public void leaveList(String listId, String userID, OnSuccessListener<String> onSuccess, OnFailureListener onFailure){
-        db.collection("lists").document(listId)
-                .get()
+    public void leaveList(String listId, String userId, OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
+        db.collection("lists").document(listId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     List<String> members = (List<String>) documentSnapshot.get("members");
-                    members.remove(userID);
-
-                    db.collection("lists").document(listId)
-                            .update("members", members)
-                            .addOnSuccessListener(aVoid -> onSuccess.onSuccess(null))
-                            .addOnFailureListener(onFailure);
-                }).addOnFailureListener(onFailure);
+                    if (members != null) {
+                        members.remove(userId);
+                        db.collection("lists").document(listId)
+                                .update("members", members)
+                                .addOnSuccessListener(onSuccess)
+                                .addOnFailureListener(e -> onFailure.onFailure((Exception) e));  // Casting sicherstellen
+                    }
+                })
+                .addOnFailureListener(e -> onFailure.onFailure((Exception) e)); // Fehler korrekt weiterleiten
     }
+
+
+
+
+    public void saveFcmToken(String userId, String token) {
+        db.collection("benutzer").document(userId)
+                .update("fcmToken", token)
+                .addOnSuccessListener(aVoid -> System.out.println("Token gespeichert"))
+                .addOnFailureListener(e -> System.err.println("Fehler beim Speichern: " + e.getMessage()));
+    }
+
+    public void getFcmToken(String userId, OnSuccessListener<String> onSuccess) {
+        db.collection("benutzer").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    String token = documentSnapshot.getString("fcmToken");
+                    onSuccess.onSuccess(token);
+                });
+    }
+
+    public void getListMemberTokens(String listId, OnSuccessListener<List<String>> onSuccess) {
+        db.collection("lists").document(listId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    List<String> userIds = (List<String>) documentSnapshot.get("members");
+                    List<String> tokens = new ArrayList<>();
+                    for (String userId : userIds) {
+                        getFcmToken(userId, token -> {
+                            if (token != null) {
+                                tokens.add(token);
+                                if (tokens.size() == userIds.size()) {  //Rufe erst die Callback Methode auf, wnen alle FCMTokens der Benutzer abgerufen wurden
+                                    onSuccess.onSuccess(tokens);
+                                }
+                            }
+                        });
+                    }
+                });
+    }
+
 
     /**
      * Fügt ein Produkt zu einer Liste hinzu.
