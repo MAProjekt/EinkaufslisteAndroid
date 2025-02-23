@@ -137,20 +137,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         checkNotificationPermission();
     }
 
-    private void checkAndAssignFcmToken(String userId) {
-        firestoreManager.getFcmToken(userId, existingToken -> {
-            if (existingToken == null || existingToken.isEmpty()) {
-                FirebaseMessaging.getInstance().getToken()
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                String newToken = task.getResult();
-                                firestoreManager.saveFcmToken(userId, newToken);
-                            }
-                        });
-            }
-        });
-    }
-
     /**
      * Behandelt die Auswahl von Menü-Elementen im Navigation-Drawer und lädt das entsprechende
      * Fragment dann.
@@ -285,7 +271,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .setNegativeButton("Abbrechen", null)
                 .show();
     }
-    // Methode zum Prüfen und Anfordern der Berechtigungen
+
+    /**
+     * Methode zum Prüfen und Anfordern der Berechtigungen
+     */
     private void checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -294,5 +283,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
             }
         }
+    }
+
+    /**
+     * Holt sich den FCM-Token des jeweiligen Users, um zu gucken wen er die Benachrichtigung senden
+     * soll. Und speichert diese anschließend in Firestore ab.
+     * @param userId Id des eingeloggten Users.
+     */
+    private void checkAndAssignFcmToken(String userId) {
+        firestoreManager.getFcmToken(userId, existingToken -> {
+            if (existingToken == null || existingToken.isEmpty()) {
+                FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                String newToken = task.getResult();
+                                firestoreManager.saveFcmToken(userId, newToken);
+                            }
+                        });
+            }
+        });
     }
 }
