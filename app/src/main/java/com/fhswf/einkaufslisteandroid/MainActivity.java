@@ -1,6 +1,8 @@
 package com.fhswf.einkaufslisteandroid;
 
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -35,6 +38,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import android.Manifest;
 
 /**
  * MainActivity ist der zentrale Einstiegspunkt der App.
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 Toast.makeText(this, "TextView sideMenuUsername wurde nicht gefunden.", Toast.LENGTH_SHORT).show();
             }
+
         }
 
         // getHeaderView(0) wird verwendet, um auf den Header des NavigationView zuzugreifen,
@@ -127,6 +133,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.white_from_fragment));
         }
+
+        checkNotificationPermission();
     }
 
     private void checkAndAssignFcmToken(String userId) {
@@ -276,5 +284,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 })
                 .setNegativeButton("Abbrechen", null)
                 .show();
+    }
+    // Methode zum Prüfen und Anfordern der Berechtigungen
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
     }
 }

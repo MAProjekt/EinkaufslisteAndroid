@@ -163,13 +163,11 @@ public class GroupsFragment extends BaseFragment {
         Log.d("DEBUG", "gruppeVerlassen() wurde aufgerufen mit listId: " + listId);
 
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        String userName = (currentUser != null && currentUser.getDisplayName() != null) ? currentUser.getDisplayName() : "Ein Mitglied";
 
         firestoreManager.leaveList(listId, currentUserId, aVoid -> {
             firestoreManager.getListMemberTokens(listId, tokens -> {
                 for (String token : tokens) {
-                    sendPushNotification(requireContext(),token, "Listen-Update", userName + " hat die Liste "+ listname + " verlassen.");
+                    sendPushNotification(requireContext(),token, "Listen-Update", "Ein Mitglied hat die Liste "+ listname + " verlassen.");
                 }
             });
 

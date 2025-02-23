@@ -32,6 +32,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.Logger;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.regex.Pattern;
 
@@ -160,15 +162,34 @@ public class Login extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
                             Toast.makeText(getApplicationContext(), "Login erfolgreich", Toast.LENGTH_SHORT).show();
+
+                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            if (user != null) {
+                                saveFcmToken(user.getUid());  // ✅ Token nach Login speichern!
+                            }
+
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
-                            finish();  //Das schließt das Login-Fenster
+                            finish();  // Das schließt das Login-Fenster
                         } else {
-                            Toast.makeText(Login.this, "Authentifizierung fehlgeschlagen",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Login.this, "Authentifizierung fehlgeschlagen", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
+    }
+
+    private void saveFcmToken(String userId) {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnSuccessListener(token -> {
+                    if (token != null && !token.isEmpty()) {
+                        FirebaseFirestore.getInstance().collection("benutzer")
+                                .document(userId)
+                                .update("fcmToken", token)
+                                .addOnSuccessListener(aVoid -> Log.d("DEBUGFCM", "FCM-Token gespeichert: " + token))
+                                .addOnFailureListener(e -> Log.e("ERRORFCM", "Fehler beim Speichern des FCM-Tokens", e));
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("ERRORFCM", "Fehler beim Abrufen des FCM-Tokens", e));
     }
 
     /**
