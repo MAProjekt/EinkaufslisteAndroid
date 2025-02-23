@@ -166,11 +166,20 @@ public class GroupsFragment extends BaseFragment {
 
         firestoreManager.leaveList(listId, currentUserId, aVoid -> {
             firestoreManager.getListMemberTokens(listId, tokens -> {
-                for (String token : tokens) {
-                    sendPushNotification(requireContext(),token, "Listen-Update", "Ein Mitglied hat die Liste "+ listname + " verlassen.");
+                if (tokens.size() == 1) {
+                    // Falls nur noch ein Nutzer übrig ist
+                    for (String token : tokens) {
+                        sendPushNotification(requireContext(), token, "Listen-Update",
+                                "Die Liste \"" + listname + "\" wurde zu HomeFragment transferiert.");
+                    }
+                } else {
+                    // bei mehreren verbleibenden Nutzern
+                    for (String token : tokens) {
+                        sendPushNotification(requireContext(), token, "Listen-Update",
+                                "Ein Mitglied hat die Liste \"" + listname + "\" verlassen.");
+                    }
                 }
             });
-
             refreshFragment();
         }, e -> Log.e("ERROR", "Fehler beim Verlassen der Liste: " + e.getMessage()));
     }

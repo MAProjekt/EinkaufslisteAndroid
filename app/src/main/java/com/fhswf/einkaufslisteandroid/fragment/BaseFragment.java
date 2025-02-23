@@ -1,5 +1,7 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
+import static com.fhswf.einkaufslisteandroid.services.PushNotificationSender.sendPushNotification;
+
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -173,6 +175,13 @@ public abstract class BaseFragment extends Fragment {
                                     aVoid -> {
                                         Toast.makeText(getContext(), "Benutzer hinzugefügt!", Toast.LENGTH_SHORT).show();
                                         refreshFragment();
+                                        // Nur den neu hinzugefügten Benutzer benachrichtigen:
+                                        firestoreManager.getFcmToken(userId, token -> {
+                                            if (token != null && !token.isEmpty()) {
+                                                sendPushNotification(requireContext(), token, "Listen-Update",
+                                                        "Du wurdest einer Liste hinzugefügt.");
+                                            }
+                                        });
                                     },
                                     e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                             );
