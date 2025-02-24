@@ -134,28 +134,9 @@ public class GroupsFragment extends BaseFragment {
         recyclerView.setAdapter(adapter);
 
         // Firestore SnapshotListener für Echtzeit-Aktualisierung
-        firestoreManager.db.collection("lists").document(listId)
-                .addSnapshotListener((documentSnapshot, error) -> {
-                    if (error != null || documentSnapshot == null || !documentSnapshot.exists()) {
-                        return;
-                    }
+        setupFirestoreListener(listId, products, adapter);
 
-                    ProductList updatedList = documentSnapshot.toObject(ProductList.class);
-                    if (updatedList != null) {
-                        products.clear();
-                        products.addAll(updatedList.getProducts());
-                        adapter.notifyDataSetChanged();  // RecyclerView aktualisieren
-                    }
-                });
-
-        int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln
-        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            if (recyclerView.getHeight() > maxHeight) {
-                ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
-                params.height = maxHeight;
-                recyclerView.setLayoutParams(params);
-            }
-        });
+        setupRecyclerViewHeight(dialogView);
 
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Liste teilen", (d, which) -> showAddUser(listId));
         dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Gruppe verlassen", (d, which) -> gruppeVerlassen(listId ,listName));
@@ -168,6 +149,43 @@ public class GroupsFragment extends BaseFragment {
         new ItemTouchHelper(new SwipeProduct(requireContext(), recyclerView.getAdapter(), products, firestoreManager, listId)).attachToRecyclerView(recyclerView);
 
         dialog.show();
+    }
+
+    /**
+     * Wird genutzt, um den Firestore SnapshotListener für Echtzeit-Aktualisierung zu initialisieren.
+     * @param listId List-ID der betroffenen Liste.
+     * @param products Liste der Produkte.
+     * @param adapter Adapter für die RecyclerView.
+     */
+    private void setupFirestoreListener(String listId, List<Product> products, ProductAdapter adapter) {
+        firestoreManager.db.collection("lists").document(listId)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error != null || documentSnapshot == null || !documentSnapshot.exists()) {
+                        return;
+                    }
+                    ProductList updatedList = documentSnapshot.toObject(ProductList.class);
+                    if (updatedList != null) {
+                        products.clear();
+                        products.addAll(updatedList.getProducts());
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+    }
+
+    /**
+     * Setzt die maximale Höhe des RecyclerViews auf 650 Pixeln.
+     * @param dialogView Die View des Dialogs.
+     */
+    private void setupRecyclerViewHeight(View dialogView) {
+        RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewDialog);
+        int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln
+        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            if (recyclerView.getHeight() > maxHeight) {
+                ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+                params.height = maxHeight;
+                recyclerView.setLayoutParams(params);
+            }
+        });
     }
 
 
