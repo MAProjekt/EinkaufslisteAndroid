@@ -54,6 +54,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         this.listener = listener;
     }
 
+    /**
+     * Erstellt einen neuen ViewHolder für die RecyclerView.
+     * Diese Methode wird vom RecyclerView-Adapter aufgerufen, wenn ein neuer ViewHolder benötigt
+     * wird.
+     * @param parent das übergeordnete ViewGroup-Element, in das die neue View eingefügt wird.
+     * @param viewType Der View-Typ des neuen ViewHolder-Elements. (wird hier nicht verwendet)
+     * @return ein neuer ViewHolder, der das Layout item_list enthält.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -61,6 +69,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+    /**
+     * Bindet die Daten an einen bestehenden ViewHolder. Diese Methode wird aufgerufen, wenn ein
+     * RecyclerView-Element auf dem Bildschirm angezeigt werden soll.
+     * Sie setzt den Namen der Liste und lädt den Fortschritt der dazugehörigen Produkte aus der
+     * Firestore Datenbank.
+     * @param holder der ViewHolder, der die Daten enthält.
+     * @param position die Position des aktuellen Elements in der Liste.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String listName = listNames.get(position);
