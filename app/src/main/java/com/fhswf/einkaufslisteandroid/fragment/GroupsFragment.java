@@ -172,12 +172,11 @@ public class GroupsFragment extends BaseFragment {
                         sendPushNotification(requireContext(), token, "Listen-Update",
                                 "Die Liste \"" + listname + "\" wurde zu HomeFragment transferiert.");
                     }
-                } else {
-                    // bei mehreren verbleibenden Nutzern
-                    for (String token : tokens) {
-                        sendPushNotification(requireContext(), token, "Listen-Update",
-                                "Ein Mitglied hat die Liste \"" + listname + "\" verlassen.");
-                    }
+                }
+                // bei mehreren verbleibenden Nutzern
+                for (String token : tokens) {
+                    sendPushNotification(requireContext(), token, "Listen-Update",
+                            "Ein Mitglied hat die Liste \"" + listname + "\" verlassen.");
                 }
             });
             refreshFragment();
