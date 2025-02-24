@@ -1,3 +1,5 @@
+// Quelle: https://developer.android.com/reference/android/app/AlertDialog
+
 package com.fhswf.einkaufslisteandroid;
 
 import android.content.pm.PackageManager;

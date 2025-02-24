@@ -1,3 +1,6 @@
+// Quelle: https://stackoverflow.com/questions/33985719/android-swipe-to-delete-recyclerview
+// https://www.youtube.com/watch?v=eEonjkmox-0
+
 package com.fhswf.einkaufslisteandroid.logic;
 
 import android.content.Context;

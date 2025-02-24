@@ -1,4 +1,5 @@
 // Quelle: https://developer.android.com/develop/ui/views/layout/recyclerview?hl=de
+// https://developer.android.com/reference/androidx/recyclerview/widget/RecyclerView.ViewHolder
 
 package com.fhswf.einkaufslisteandroid.logic;
 
