@@ -178,5 +178,8 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
         }
 
         drawSwipeBackground(c, viewHolder, dX);
+        // Hier wird das geswipte Element bzw View verschoben, sodass der Name auch nach links
+        // gewischt wird
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 }
