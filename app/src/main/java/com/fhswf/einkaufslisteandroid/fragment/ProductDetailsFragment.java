@@ -153,11 +153,6 @@ public class ProductDetailsFragment extends DialogFragment {
         return view;
     }
 
-    private int dpToPx(int dp) {
-        return (int) (dp * requireContext().getResources().getDisplayMetrics().density);
-    }
-
-
     /**
      * Bereinigt bei den Allergenen die Wörter mit "en:".
      * @param allergene Das zu übergebende Wort (allergen), welches bereinigt werden soll.

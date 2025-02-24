@@ -1,10 +1,13 @@
 package com.fhswf.einkaufslisteandroid.logic;
 
+import static com.fhswf.einkaufslisteandroid.services.PushNotificationSender.sendPushNotification;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -109,6 +112,13 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
             adapter.notifyItemChanged(position);
             Toast.makeText(context, "Fehler beim Entfernen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
+
+        firestoreManager.getUserToken(emailToRemove, token -> {
+            if (token != null && !token.isEmpty()) {
+                sendPushNotification(context, token, "Listen-Update",
+                        "Du wurdest aus einer Liste entfernt.");
+            }
+        }, e -> Log.e("FCM", "Fehler beim Abrufen des Tokens: " + e.getMessage()));
     }
 
     /**

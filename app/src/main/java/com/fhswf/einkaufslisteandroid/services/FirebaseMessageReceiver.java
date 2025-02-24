@@ -13,14 +13,24 @@ import androidx.core.app.NotificationCompat;
 
 import com.fhswf.einkaufslisteandroid.MainActivity;
 import com.fhswf.einkaufslisteandroid.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 //https://github.com/MrHKMY/Pocketful/blob/master/BudgetWiser/app/src/main/java/com/mindscape/pocketful/FirebaseMessageReceiver.java
 
+/**
+ * Empfängt und verarbeitet FCM Push-Benachrichtigungen.
+ * Zeigt eine Benachrichtigung an, wenn eine neue Nachricht empfangen wird.
+ */
 public class FirebaseMessageReceiver extends FirebaseMessagingService {
 
-
+    /**
+     * Wird aufgerufen, wenn eine neue Push-Benachrichtigung empfangen wird.
+     * @param remoteMessage Empfangene Nachricht.
+     */
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d("DEBUG", "Empfangene Push-Nachricht: " + remoteMessage.getData());
@@ -31,6 +41,11 @@ public class FirebaseMessageReceiver extends FirebaseMessagingService {
     }
 
 
+    /**
+     * Erstellt und zeigt eine Benachrichtigung an, wenn eine neue Nachricht empfangen wird.
+     * @param title Titel der Benachrichtigung.
+     * @param message Nachricht, die in der Nenachrichtigung angezeigt wird.
+     */
     public void showNotification(String title, String message) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

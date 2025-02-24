@@ -14,6 +14,9 @@ import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Dient zum Senden von Push-Benachrichtigungen über FCM.
+ */
 public class PushNotificationSender {
     private static final String FCM_URL = "https://fcm.googleapis.com/v1/projects/einkaufsliste-3508a/messages:send";
     private static final String FIREBASE_SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
@@ -21,8 +24,15 @@ public class PushNotificationSender {
     // ExecutorService mit einem festen Thread-Pool von 3 Threads
     private static final ExecutorService executorService = Executors.newFixedThreadPool(3);
 
+    /**
+     * Sendet eine Push-Benachrichtigung an ein bestimmtes Gerät über FCM.
+     * @param context Kontext, um auf Ressourcen zuzugreifen.
+     * @param fcmToken FCM-Token des Empfängers.
+     * @param title Titel der Benachrichtigung.
+     * @param body Inhalt der Benachrichtigung.
+     */
     public static void sendPushNotification(Context context, String fcmToken, String title, String body) {
-        Log.d("DEBUG", "📢 sendPushNotification() aufgerufen mit Token: " + fcmToken);
+        Log.d("DEBUG", "sendPushNotification() aufgerufen mit Token: " + fcmToken);
 
         executorService.execute(() -> {
             try {
@@ -60,6 +70,11 @@ public class PushNotificationSender {
         });
     }
 
+    /**
+     * Ruft ein Firebase Access Token ab, um FCM-Nachrichten zu authentifizieren.
+     * @param context Kontext, um auf die JSON-Datei mit den Firebase-Anmeldedaten zuzgreifen.
+     * @return Access Token als String
+     */
     private static String getAccessToken(Context context) {
         try {
             // ✅ Datei aus dem assets-Ordner laden

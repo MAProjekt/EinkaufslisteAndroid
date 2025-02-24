@@ -165,7 +165,7 @@ public class Login extends AppCompatActivity {
 
                             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                             if (user != null) {
-                                saveFcmToken(user.getUid());  // ✅ Token nach Login speichern!
+                                saveFcmToken(user.getUid());
                             }
 
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -178,6 +178,11 @@ public class Login extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Speichert das Firebase Cloud Messaging (FCM) Token des Benutzers in Firestore.
+     *
+     * @param userId Die ID des angemeldeten Benutzers.
+     */
     private void saveFcmToken(String userId) {
         FirebaseMessaging.getInstance().getToken()
                 .addOnSuccessListener(token -> {
@@ -247,6 +252,9 @@ public class Login extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialisiert die Google-Sign-In-Optionen für die Anmeldung mit Google.
+     */
     private void setupGoogleLogin(){
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))

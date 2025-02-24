@@ -24,7 +24,7 @@ import java.util.Map;
  * Klasse für den Umgang mit Firestore, um Listen und Gruppenlisten zu verwalten
  */
 public class FirestoreManager {
-    private final FirebaseFirestore db;
+    public final FirebaseFirestore db;
 
     /**
      * Der Konstruktor der die Verbindung zur Datenbank aufbaut
@@ -171,20 +171,20 @@ public class FirestoreManager {
      * @param listId ID der Liste aus der ein Nutzer entfernt werden soll.
      *
      */
-    public void leaveList(String listId, String userId, OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
-        db.collection("lists").document(listId).get()
+    public void leaveList(String listId, String userID, OnSuccessListener<String> onSuccess, OnFailureListener onFailure){
+        db.collection("lists").document(listId)
+                .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     List<String> members = (List<String>) documentSnapshot.get("members");
-                    if (members != null) {
-                        members.remove(userId);
-                        db.collection("lists").document(listId)
-                                .update("members", members)
-                                .addOnSuccessListener(onSuccess)
-                                .addOnFailureListener(e -> onFailure.onFailure((Exception) e));  // Casting sicherstellen
-                    }
-                })
-                .addOnFailureListener(e -> onFailure.onFailure((Exception) e)); // Fehler korrekt weiterleiten
+                    members.remove(userID);
+
+                    db.collection("lists").document(listId)
+                            .update("members", members)
+                            .addOnSuccessListener(aVoid -> onSuccess.onSuccess(null))
+                            .addOnFailureListener(onFailure);
+                }).addOnFailureListener(onFailure);
     }
+
 
 
 
@@ -204,6 +204,36 @@ public class FirestoreManager {
                     onSuccess.onSuccess(token);
                 });
     }
+
+    /**
+     * Holt den FCM-Token eines Benutzers basierend auf seiner E-Mail-Adresse.
+     *
+     * @param email Die E-Mail-Adresse des Benutzers.
+     * @param onSuccess Callback-Funktion mit dem Token als Ergebnis.
+     * @param onFailure Callback-Funktion bei Fehlern.
+     */
+    public void getUserToken(String email, OnSuccessListener<String> onSuccess, OnFailureListener onFailure) {
+        db.collection("benutzer")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                        // Nehme den ersten Treffer (es sollte nur einen Benutzer mit dieser E-Mail geben)
+                        DocumentSnapshot userDoc = queryDocumentSnapshots.getDocuments().get(0);
+                        String token = userDoc.getString("fcmToken");
+
+                        if (token != null && !token.isEmpty()) {
+                            onSuccess.onSuccess(token);
+                        } else {
+                            onFailure.onFailure(new Exception("Kein FCM-Token für diesen Benutzer gefunden."));
+                        }
+                    } else {
+                        onFailure.onFailure(new Exception("Benutzer nicht gefunden."));
+                    }
+                })
+                .addOnFailureListener(onFailure);
+    }
+
 
     public void getListMemberTokens(String listId, OnSuccessListener<List<String>> onSuccess) {
         db.collection("lists").document(listId).get()

@@ -130,7 +130,23 @@ public class GroupsFragment extends BaseFragment {
 
         RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewDialog);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(new ProductAdapter(requireContext(), products, true, listName));
+        ProductAdapter adapter = new ProductAdapter(requireContext(), products, true, listName);
+        recyclerView.setAdapter(adapter);
+
+        // Firestore SnapshotListener für Echtzeit-Aktualisierung
+        firestoreManager.db.collection("lists").document(listId)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error != null || documentSnapshot == null || !documentSnapshot.exists()) {
+                        return;
+                    }
+
+                    ProductList updatedList = documentSnapshot.toObject(ProductList.class);
+                    if (updatedList != null) {
+                        products.clear();
+                        products.addAll(updatedList.getProducts());
+                        adapter.notifyDataSetChanged();  // RecyclerView aktualisieren
+                    }
+                });
 
         int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
@@ -170,7 +186,7 @@ public class GroupsFragment extends BaseFragment {
                     // Falls nur noch ein Nutzer übrig ist
                     for (String token : tokens) {
                         sendPushNotification(requireContext(), token, "Listen-Update",
-                                "Die Liste \"" + listname + "\" wurde zu HomeFragment transferiert.");
+                                "Die Liste \"" + listname + "\" wurde zu Home-Ansicht transferiert.");
                     }
                 }
                 // bei mehreren verbleibenden Nutzern
