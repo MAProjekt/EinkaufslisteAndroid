@@ -272,6 +272,14 @@ public class Login extends AppCompatActivity {
         startActivityForResult(intent, RC_SIGN_IN);
     }
 
+    /**
+     * Verarbeitet das Ergebnis des Google Sign-Ins.
+     * Falls die Anmeldung erfolgreich war, wird das Google-Token zur Firebase-Authentifizierung weitergeleitet.
+     *
+     * @param requestCode Der Anfragecode, um den Sign-In-Vorgang zu identifizieren.
+     * @param resultCode  Das Ergebnis des Sign-Ins (z. B. erfolgreich oder abgebrochen).
+     * @param data        Die zurückgegebenen Daten des Sign-In-Vorgangs.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -288,6 +296,13 @@ public class Login extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authentifiziert den Benutzer mit Firebase basierend auf dem Google-ID-Token.
+     * Nach erfolgreicher Authentifizierung wird der Benutzer in der Firestore-Datenbank gespeichert
+     * und zur MainActivity weitergeleitet.
+     *
+     * @param idToken Das Google-ID-Token, das für die Anmeldung bei Firebase verwendet wird.
+     */
     private void firebaseAuth(String idToken){
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         FirestoreManager firestoreManager = new FirestoreManager();
