@@ -33,6 +33,12 @@ public class ProductDataFetcher {
     private String listId;
 
 
+    /**
+     * Konstruktor für die Klasse ProductDataFetcher.
+     * @param context  Anwendungskontext.
+     * @param recyclerView RecyclerView, in dem die Produkte angezeigt werden.
+     * @param listId   ID der Einkaufsliste, für die die Produkte geladen werden.
+     */
     public ProductDataFetcher(Context context, RecyclerView recyclerView, String listId) {
         this.context = context;
         this.recyclerView = recyclerView;
@@ -47,6 +53,11 @@ public class ProductDataFetcher {
     }
 
 
+    /**
+     * Lädt die Produktdaten aus der JSON-Datei und filtert sie nach dem angegebenen Suchbegriff.
+     * Die gefilterten Ergebnisse werden anschließend in der RecyclerView angezeigt.
+     * @param searchTerm Suchbegriff, nach dem die Produkte gefiltert werden.
+     */
     public void fetchProductData(String searchTerm) {
         executor.execute(() -> {
             try {
@@ -108,7 +119,6 @@ public class ProductDataFetcher {
     /**
      * Aktualisiert die RecyclerView mit den gefilterten Produkten.
      * @param filteredList Die gefilterte Liste von Produkten.
-     *
      */
     private void updateRecyclerView(List<Product> filteredList) {
         // UI-Update muss auf dem Haupt-Thread erfolgen

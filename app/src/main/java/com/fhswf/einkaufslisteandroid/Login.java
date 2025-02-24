@@ -32,6 +32,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.Logger;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.regex.Pattern;
 
@@ -160,15 +162,39 @@ public class Login extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
                             Toast.makeText(getApplicationContext(), "Login erfolgreich", Toast.LENGTH_SHORT).show();
+
+                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            if (user != null) {
+                                saveFcmToken(user.getUid());
+                            }
+
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
-                            finish();  //Das schließt das Login-Fenster
+                            finish();  // Das schließt das Login-Fenster
                         } else {
-                            Toast.makeText(Login.this, "Authentifizierung fehlgeschlagen",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Login.this, "Authentifizierung fehlgeschlagen", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
+    }
+
+    /**
+     * Speichert das Firebase Cloud Messaging (FCM) Token des Benutzers in Firestore.
+     *
+     * @param userId Die ID des angemeldeten Benutzers.
+     */
+    private void saveFcmToken(String userId) {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnSuccessListener(token -> {
+                    if (token != null && !token.isEmpty()) {
+                        FirebaseFirestore.getInstance().collection("benutzer")
+                                .document(userId)
+                                .update("fcmToken", token)
+                                .addOnSuccessListener(aVoid -> Log.d("DEBUGFCM", "FCM-Token gespeichert: " + token))
+                                .addOnFailureListener(e -> Log.e("ERRORFCM", "Fehler beim Speichern des FCM-Tokens", e));
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("ERRORFCM", "Fehler beim Abrufen des FCM-Tokens", e));
     }
 
     /**
@@ -226,6 +252,9 @@ public class Login extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialisiert die Google-Sign-In-Optionen für die Anmeldung mit Google.
+     */
     private void setupGoogleLogin(){
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -243,6 +272,14 @@ public class Login extends AppCompatActivity {
         startActivityForResult(intent, RC_SIGN_IN);
     }
 
+    /**
+     * Verarbeitet das Ergebnis des Google Sign-Ins.
+     * Falls die Anmeldung erfolgreich war, wird das Google-Token zur Firebase-Authentifizierung weitergeleitet.
+     *
+     * @param requestCode Der Anfragecode, um den Sign-In-Vorgang zu identifizieren.
+     * @param resultCode  Das Ergebnis des Sign-Ins (z. B. erfolgreich oder abgebrochen).
+     * @param data        Die zurückgegebenen Daten des Sign-In-Vorgangs.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -259,6 +296,13 @@ public class Login extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authentifiziert den Benutzer mit Firebase basierend auf dem Google-ID-Token.
+     * Nach erfolgreicher Authentifizierung wird der Benutzer in der Firestore-Datenbank gespeichert
+     * und zur MainActivity weitergeleitet.
+     *
+     * @param idToken Das Google-ID-Token, das für die Anmeldung bei Firebase verwendet wird.
+     */
     private void firebaseAuth(String idToken){
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         FirestoreManager firestoreManager = new FirestoreManager();

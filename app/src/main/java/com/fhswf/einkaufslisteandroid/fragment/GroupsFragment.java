@@ -1,5 +1,7 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
+import static com.fhswf.einkaufslisteandroid.services.PushNotificationSender.sendPushNotification;
+
 import android.app.AlertDialog;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -33,6 +35,7 @@ import com.fhswf.einkaufslisteandroid.logic.SwipeProduct;
 import com.fhswf.einkaufslisteandroid.models.Product;
 import com.fhswf.einkaufslisteandroid.models.ProductList;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -127,19 +130,16 @@ public class GroupsFragment extends BaseFragment {
 
         RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewDialog);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(new ProductAdapter(requireContext(), products, true, listName));
+        ProductAdapter adapter = new ProductAdapter(requireContext(), products, true, listName);
+        recyclerView.setAdapter(adapter);
 
-        int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln
-        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            if (recyclerView.getHeight() > maxHeight) {
-                ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
-                params.height = maxHeight;
-                recyclerView.setLayoutParams(params);
-            }
-        });
+        // Firestore SnapshotListener für Echtzeit-Aktualisierung
+        setupFirestoreListener(listId, products, adapter);
+
+        setupRecyclerViewHeight(dialogView);
 
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Liste teilen", (d, which) -> showAddUser(listId));
-        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Gruppe verlassen", (d, which) -> gruppeVerlassen(listId));
+        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Gruppe verlassen", (d, which) -> gruppeVerlassen(listId ,listName));
         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Benutzer anzeigen", (d, which) -> showMemberListDialog(listId));
 
         if(isCreator){
@@ -151,18 +151,72 @@ public class GroupsFragment extends BaseFragment {
         dialog.show();
     }
 
+    /**
+     * Wird genutzt, um den Firestore SnapshotListener für Echtzeit-Aktualisierung zu initialisieren.
+     * @param listId List-ID der betroffenen Liste.
+     * @param products Liste der Produkte.
+     * @param adapter Adapter für die RecyclerView.
+     */
+    private void setupFirestoreListener(String listId, List<Product> products, ProductAdapter adapter) {
+        firestoreManager.db.collection("lists").document(listId)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error != null || documentSnapshot == null || !documentSnapshot.exists()) {
+                        return;
+                    }
+                    ProductList updatedList = documentSnapshot.toObject(ProductList.class);
+                    if (updatedList != null) {
+                        products.clear();
+                        products.addAll(updatedList.getProducts());
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+    }
+
+    /**
+     * Setzt die maximale Höhe des RecyclerViews auf 650 Pixeln.
+     * @param dialogView Die View des Dialogs.
+     */
+    private void setupRecyclerViewHeight(View dialogView) {
+        RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewDialog);
+        int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln
+        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            if (recyclerView.getHeight() > maxHeight) {
+                ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+                params.height = maxHeight;
+                recyclerView.setLayoutParams(params);
+            }
+        });
+    }
+
 
     /**
      * Ermöglicht es einem Benutzer die Gruppe zu verlassen.
      * @param listId Die ID der Liste, welcher der Benutzer verlassen will.
      */
-    private void gruppeVerlassen(String listId) {
+    private void gruppeVerlassen(String listId, String listname ) {
+        Log.d("DEBUG", "gruppeVerlassen() wurde aufgerufen mit listId: " + listId);
+
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         firestoreManager.leaveList(listId, currentUserId, aVoid -> {
-            Toast.makeText(getContext(), "Gruppe verlassen!", Toast.LENGTH_SHORT).show();
+            firestoreManager.getListMemberTokens(listId, tokens -> {
+                if (tokens.size() == 1) {
+                    // Falls nur noch ein Nutzer übrig ist
+                    for (String token : tokens) {
+                        sendPushNotification(requireContext(), token, "Listen-Update",
+                                "Die Liste \"" + listname + "\" wurde zu Home-Ansicht transferiert.");
+                    }
+                }
+                // bei mehreren verbleibenden Nutzern
+                for (String token : tokens) {
+                    sendPushNotification(requireContext(), token, "Listen-Update",
+                            "Ein Mitglied hat die Liste \"" + listname + "\" verlassen.");
+                }
+            });
             refreshFragment();
-        }, e -> Toast.makeText(getContext(), "Fehler" + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }, e -> Log.e("ERROR", "Fehler beim Verlassen der Liste: " + e.getMessage()));
     }
+
 
 
     /**

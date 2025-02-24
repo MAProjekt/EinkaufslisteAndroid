@@ -1,4 +1,5 @@
 // Quelle: https://developer.android.com/develop/ui/views/layout/recyclerview?hl=de
+// https://developer.android.com/reference/androidx/recyclerview/widget/RecyclerView.ViewHolder
 
 package com.fhswf.einkaufslisteandroid.logic;
 
@@ -55,11 +56,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     /**
-     * Wird aufgerufen, um ein neues ViewHolder-Objekt zu erstellen. Hier wird das Layout für ein
-     * einzelnes Listenelement (aus item_list.xml) aufgebaut.
-     * @param parent die jeweils übergeordnete ViewGroup.
-     * @param viewType der Typ der Ansicht.
-     * @return ein neuer ViewHolder, der das Layout enthält.
+     * Erstellt einen neuen ViewHolder für die RecyclerView.
+     * Diese Methode wird vom RecyclerView-Adapter aufgerufen, wenn ein neuer ViewHolder benötigt
+     * wird.
+     * @param parent das übergeordnete ViewGroup-Element, in das die neue View eingefügt wird.
+     * @param viewType Der View-Typ des neuen ViewHolder-Elements. (wird hier nicht verwendet)
+     * @return ein neuer ViewHolder, der das Layout item_list enthält.
      */
     @NonNull
     @Override
@@ -69,11 +71,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     /**
-     * Bindet Daten an den ViewHolder, d.h. es füllt das Listenelement mit dem entsprechenden
-     * Einkaufslisten-Namen und aktualisiert den Fortschrittsbalken basierend auf dem Kauf-Status.
-     *
-     * @param holder der ViewHolder, der aktualisiert werden soll.
-     * @param position die Position des Elements in der Datenliste.
+     * Bindet die Daten an einen bestehenden ViewHolder. Diese Methode wird aufgerufen, wenn ein
+     * RecyclerView-Element auf dem Bildschirm angezeigt werden soll.
+     * Sie setzt den Namen der Liste und lädt den Fortschritt der dazugehörigen Produkte aus der
+     * Firestore Datenbank.
+     * @param holder der ViewHolder, der die Daten enthält.
+     * @param position die Position des aktuellen Elements in der Liste.
      */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {

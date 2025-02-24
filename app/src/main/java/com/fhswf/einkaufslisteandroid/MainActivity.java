@@ -1,6 +1,10 @@
+// Quelle: https://developer.android.com/reference/android/app/AlertDialog
+
 package com.fhswf.einkaufslisteandroid;
 
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -31,9 +36,12 @@ import com.fhswf.einkaufslisteandroid.models.Product;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import android.Manifest;
 
 /**
  * MainActivity ist der zentrale Einstiegspunkt der App.
@@ -60,6 +68,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         firestoreManager = new FirestoreManager();
         mAuth = FirebaseAuth.getInstance();
 
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            checkAndAssignFcmToken(user.getUid());
+        }
+
         //EdgeToEdge.enable(this);
         setContentView(com.fhswf.einkaufslisteandroid.R.layout.activity_main);
         // Farbe der Statusleiste setzen
@@ -72,6 +85,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        toggleActionBar(savedInstanceState, navigationView, toolbar);
+
+        loadUserInfo(user, navigationView);
+        userInfoEdit(navigationView);
+
+        // Farbe der NavigationBar ändern je nach Mode (Darkmode)
+        ThemeLogic.updateNavigationBarColor(this);
+
+        checkNotificationPermission();
+    }
+
+
+    /**
+     * Initialisiert die ActionBar und den Navigation Drawer.
+     * @param savedInstanceState der zuvor gespeicherte Zustand der Activity.
+     * @param navigationView das Navigation Drawer.
+     * @param toolbar die Toolbar.
+     */
+    private void toggleActionBar(Bundle savedInstanceState, NavigationView navigationView, Toolbar toolbar){
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.schliesseDrawer);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
@@ -80,9 +112,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container_view_tag, new HomeFragment()).commit();
             navigationView.setCheckedItem(R.id.nav_home);
         }
+    }
 
+    /**
+     * Lödt die Benutzerinformationen in die Header-Ansicht.
+     * @param user der eingeloggte Benutzer.
+     * @param navigationView der Navigation Drawer.
+     */
+    private void loadUserInfo(FirebaseUser user, NavigationView navigationView){
         // User im nav_menu 1 (nav_header) anzeigen
-        FirebaseUser user = mAuth.getCurrentUser();
         if (user != null && user.getEmail() != null) {
             View headerView = navigationView.getHeaderView(0);
             TextView nutzerNameSlideshow = headerView.findViewById(R.id.nutzerNameSlideshow);
@@ -99,8 +137,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 Toast.makeText(this, "TextView sideMenuUsername wurde nicht gefunden.", Toast.LENGTH_SHORT).show();
             }
-        }
 
+        }
+    }
+
+    /**
+     * Ermöglicht das Editieren des Nutzernamens.
+     * Und lädt ein Benutzerbild, wenn es vorhanden ist.
+     * @param navigationView das Navigation Drawer.
+     */
+    private void userInfoEdit(NavigationView navigationView){
         // getHeaderView(0) wird verwendet, um auf den Header des NavigationView zuzugreifen,
         // um darin enthaltene Views zu ändern, wie z.B. den Benutzernamen.
         View headerView = navigationView.getHeaderView(0);
@@ -113,14 +159,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             AuthService.getInstance().loadUserProfileImage(this, profileImage);
         } else {
             Toast.makeText(this, "Profilbild-ImageView wurde nicht gefunden.", Toast.LENGTH_SHORT).show();
-        }
-
-        // Farbe der NavigationBar ändern je nach Mode (Darkmode)
-        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
-            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.black_from_fragment));
-        } else {
-            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.white_from_fragment));
         }
     }
 
@@ -257,5 +295,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 })
                 .setNegativeButton("Abbrechen", null)
                 .show();
+    }
+
+    /**
+     * Methode zum Prüfen und Anfordern der Berechtigungen
+     */
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+    }
+
+    /**
+     * Holt sich den FCM-Token des jeweiligen Users, um zu gucken wen er die Benachrichtigung senden
+     * soll. Und speichert diese anschließend in Firestore ab.
+     * @param userId Id des eingeloggten Users.
+     */
+    private void checkAndAssignFcmToken(String userId) {
+        firestoreManager.getFcmToken(userId, existingToken -> {
+            if (existingToken == null || existingToken.isEmpty()) {
+                FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                String newToken = task.getResult();
+                                firestoreManager.saveFcmToken(userId, newToken);
+                            }
+                        });
+            }
+        });
     }
 }

@@ -1,9 +1,14 @@
 package com.fhswf.einkaufslisteandroid.logic;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
+
+import com.fhswf.einkaufslisteandroid.R;
 
 /**
  * Klasse um Theme anzupassen
@@ -21,6 +26,19 @@ public class ThemeLogic {
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             Toast.makeText(context, "Darkmode aktiviert", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Methode um die Farbe der NavigationBar zu ändern.
+     * @param activity die Activity, in der die NavigationBar geändert werden soll.
+     */
+    public static void updateNavigationBarColor(Activity activity) {
+        int nightModeFlags = activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+            activity.getWindow().setNavigationBarColor(ContextCompat.getColor(activity, R.color.black_from_fragment));
+        } else {
+            activity.getWindow().setNavigationBarColor(ContextCompat.getColor(activity, R.color.white_from_fragment));
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
+import static com.fhswf.einkaufslisteandroid.services.PushNotificationSender.sendPushNotification;
+
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -155,38 +157,54 @@ public abstract class BaseFragment extends Fragment {
         builder.setView(layout);
 
         builder.setPositiveButton("Hinzufügen", (dialog, which) -> {
-            String email = emailInput.getText().toString().trim();
-            if (email.isEmpty()) {
-                Toast.makeText(getContext(), "E-Mail darf nicht leer sein!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-            db.collection("benutzer")
-                    .whereEqualTo("email", email)
-                    .get()
-                    .addOnSuccessListener(queryDocumentSnapshots -> {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            String userId = queryDocumentSnapshots.getDocuments().get(0).getId();
-
-                            firestoreManager.addUserToList(listId, userId,
-                                    aVoid -> {
-                                        Toast.makeText(getContext(), "Benutzer hinzugefügt!", Toast.LENGTH_SHORT).show();
-                                        refreshFragment();
-                                    },
-                                    e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                            );
-                        } else {
-                            Toast.makeText(getContext(), "Benutzer nicht gefunden!", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Fehler beim Suchen der E-Mail!", Toast.LENGTH_SHORT).show();
-                    });
+            handleUserAdd(listId, emailInput);
         });
 
         builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.dismiss());
         builder.show();
+    }
+
+    /**
+     * Fügt einen Benutzer zur Liste hinzu.
+     * @param listId Id der Liste, zu dem der Benutzer hinzugefügt werden soll.
+     * @param emailInput E-Mail des Benutzers, der hinzugefügt werden soll.
+     */
+    private void handleUserAdd(String listId, EditText emailInput){
+        String email = emailInput.getText().toString().trim();
+        if (email.isEmpty()) {
+            Toast.makeText(getContext(), "E-Mail darf nicht leer sein!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("benutzer")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        String userId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                        firestoreManager.addUserToList(listId, userId,
+                                aVoid -> {
+                                    Toast.makeText(getContext(), "Benutzer hinzugefügt!", Toast.LENGTH_SHORT).show();
+                                    refreshFragment();
+                                    // Nur den neu hinzugefügten Benutzer benachrichtigen:
+                                    firestoreManager.getFcmToken(userId, token -> {
+                                        if (token != null && !token.isEmpty()) {
+                                            sendPushNotification(requireContext(), token, "Listen-Update",
+                                                    "Du wurdest einer Liste hinzugefügt.");
+                                        }
+                                    });
+                                },
+                                e -> Toast.makeText(getContext(), "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                        );
+                    } else {
+                        Toast.makeText(getContext(), "Benutzer nicht gefunden!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Fehler beim Suchen der E-Mail!", Toast.LENGTH_SHORT).show();
+                });
     }
 
     /**

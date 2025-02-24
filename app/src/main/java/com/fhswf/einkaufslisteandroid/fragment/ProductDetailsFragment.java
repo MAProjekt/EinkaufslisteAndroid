@@ -82,14 +82,67 @@ public class ProductDetailsFragment extends DialogFragment {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         String userId = auth.getCurrentUser().getUid();
 
+        Button produktHinzufuegenButton = view.findViewById(R.id.produktHinzufuegen);
+        EditText produktMenge = view.findViewById(R.id.productAmount);  //Hier initialisieren, sonst wird null beim Speichern in DB übergeben
+
+        initProductDetails(view);
+
+        Bundle args1 = getArguments();
+        String productName = (args1 != null) ? args1.getString(ARG_NAME, "Kein Name") : null;
+        String imageUrl = (args1 != null) ? args1.getString(ARG_IMAGE_URL, "") : null;
+
+        //Button zum Hinzufügen des Produktes zu einer Liste
+        Bundle args = getArguments();
+        String listId = (args != null) ? args.getString("listId") : null;
+        boolean fromUebersicht = (args != null) && args.getBoolean("fromUebersicht", false);
+        Log.d("DEBUG", "Liste ID aus DetailsFragment: " + listId);
+        Log.d("DEBUG", "ProductDetailsFragment - Name: " + productName + ", listId: " + listId + ", ImageURL: " + imageUrl);
+
+        Button schliessenButton = new Button(requireContext());
+
+        if (listId == null && !fromUebersicht) {
+            deactivateMengeAndButton(view, produktHinzufuegenButton, schliessenButton, produktMenge);
+        }
+
+        produktHinzufuegenButton.setOnClickListener(v -> {
+            if (listId != null) {
+                addProductToListById(listId, userId);
+            } else {
+                showSelectionDialog(userId);
+            }
+        });
+
+        return view;
+    }
+
+    /**
+     * Dealtiviert die Mengeneingabe und Hinzufügen-Button, wenn man die Produkt-Details in der Home oder Gruppenansicht öffnet.
+     * @param view Die View des Fragments.
+     * @param produktHinzufuegenButton Das Produkt hinzufügen-Button.
+     * @param schliessenButton Schließen-Button.
+     * @param produktMenge Die Eingabefeld für die Menge.
+     */
+    private void deactivateMengeAndButton(View view, Button produktHinzufuegenButton, Button schliessenButton, EditText produktMenge){
+        produktHinzufuegenButton.setVisibility(View.GONE);
+        produktMenge.setVisibility(View.GONE);
+        schliessenButton.setText("Schließen");
+        schliessenButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white));
+        schliessenButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.default_ThemeOverlay_AppCompat));
+        schliessenButton.setOnClickListener(v -> dismiss());
+        ((ViewGroup) view).addView(schliessenButton);
+    }
+
+    /**
+     * Initialisiert die Produktdetails und füllt die UI mit Daten.
+     * @param view Die View des Fragments.
+     */
+    private void initProductDetails(View view){
         ImageView produktBildDetails = view.findViewById(R.id.produktBildDetails);
         TextView produktNameText = view.findViewById(R.id.produktNameText);
         TextView produktZutatenText = view.findViewById(R.id.produktZutatenText);
         TableLayout nutriTabelle = view.findViewById(R.id.nutriTabelle);
         TextView produktAllergeneText = view.findViewById(R.id.produktAllergeneText);
         TextView produktStoreText = view.findViewById(R.id.produktHerkunftText);
-        Button produktHinzufuegenButton = view.findViewById(R.id.produktHinzufuegen);
-        EditText produktMenge = view.findViewById(R.id.productAmount);  //Hier initialisieren, sonst wird null beim Speichern in DB übergeben
 
         //mit getArguments() auf die Daten die im Bundle gespeichert sind zuzugreifen
         if (getArguments() != null) {
@@ -115,46 +168,6 @@ public class ProductDetailsFragment extends DialogFragment {
                 Glide.with(requireContext()).load(imageUrl).into(produktBildDetails);
             }
         }
-
-        Bundle args1 = getArguments();
-        String productName = (args1 != null) ? args1.getString(ARG_NAME, "Kein Name") : null;
-        String imageUrl = (args1 != null) ? args1.getString(ARG_IMAGE_URL, "") : null;
-
-
-
-        //Button zum Hinzufügen des Produktes zu einer Liste
-        Bundle args = getArguments();
-        String listId = (args != null) ? args.getString("listId") : null;
-        boolean fromUebersicht = (args != null) && args.getBoolean("fromUebersicht", false);
-        Log.d("DEBUG", "Liste ID aus DetailsFragment: " + listId);
-        Log.d("DEBUG", "ProductDetailsFragment - Name: " + productName + ", listId: " + listId + ", ImageURL: " + imageUrl);
-
-        Button schliessenButton = new Button(requireContext());
-
-        if (listId == null && !fromUebersicht) {
-            produktHinzufuegenButton.setVisibility(View.GONE);
-            produktMenge.setVisibility(View.GONE);
-            schliessenButton.setText("Schließen");
-            schliessenButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white));
-            schliessenButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.default_ThemeOverlay_AppCompat));
-            schliessenButton.setOnClickListener(v -> dismiss());
-            ((ViewGroup) view).addView(schliessenButton);
-        }
-
-        produktHinzufuegenButton.setOnClickListener(v -> {
-            if (listId != null) {
-                addProductToListById(listId, userId);
-            } else {
-                showSelectionDialog(userId);
-            }
-        });
-
-
-        return view;
-    }
-
-    private int dpToPx(int dp) {
-        return (int) (dp * requireContext().getResources().getDisplayMetrics().density);
     }
 
 
