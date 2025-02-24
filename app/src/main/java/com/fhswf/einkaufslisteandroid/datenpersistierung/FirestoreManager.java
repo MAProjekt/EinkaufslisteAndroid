@@ -168,8 +168,10 @@ public class FirestoreManager {
 
     /**
      * Entfernt einen Benutzer aus einer Liste.
-     * @param listId ID der Liste aus der ein Nutzer entfernt werden soll.
-     *
+     * @param listId ID der Liste.
+     * @param userID ID des zu löschenden Benutzers.
+     * @param onSuccess Callback bei Erfolg.
+     * @param onFailure Callback bei Fehler.
      */
     public void leaveList(String listId, String userID, OnSuccessListener<String> onSuccess, OnFailureListener onFailure){
         db.collection("lists").document(listId)
@@ -186,9 +188,11 @@ public class FirestoreManager {
     }
 
 
-
-
-
+    /**
+     * Speichert den FCM-Token eines Benutzers.
+     * @param userId ID des Benutzers.
+     * @param token FCM-Token des Benutzers.
+     */
     public void saveFcmToken(String userId, String token) {
         db.collection("benutzer").document(userId)
                 .update("fcmToken", token)
@@ -196,6 +200,11 @@ public class FirestoreManager {
                 .addOnFailureListener(e -> System.err.println("Fehler beim Speichern: " + e.getMessage()));
     }
 
+    /**
+     * Holt den FCM-Token eines Benutzers.
+     * @param userId ID des Benutzers.
+     * @param onSuccess Callback mit dem FCM-Token.
+     */
     public void getFcmToken(String userId, OnSuccessListener<String> onSuccess) {
         db.collection("benutzer").document(userId)
                 .get()
@@ -235,6 +244,11 @@ public class FirestoreManager {
     }
 
 
+    /**
+     * Holt die FCM-Tokens aller Mitglieder einer Liste.
+     * @param listId ID der Liste.
+     * @param onSuccess Callback mit einer Liste der FCM-Tokens.
+     */
     public void getListMemberTokens(String listId, OnSuccessListener<List<String>> onSuccess) {
         db.collection("lists").document(listId).get()
                 .addOnSuccessListener(documentSnapshot -> {
