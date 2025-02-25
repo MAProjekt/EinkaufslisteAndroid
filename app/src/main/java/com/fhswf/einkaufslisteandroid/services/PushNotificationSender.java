@@ -1,5 +1,8 @@
 package com.fhswf.einkaufslisteandroid.services;
 
+//Quelle:
+//https://rollout.com/integration-guides/firebase-admin-sdk/sdk/step-by-step-guide-to-building-a-firebase-admin-sdk-api-integration-in-java
+
 import android.content.Context;
 import android.util.Log;
 
@@ -32,7 +35,6 @@ public class PushNotificationSender {
      * @param body Inhalt der Benachrichtigung.
      */
     public static void sendPushNotification(Context context, String fcmToken, String title, String body) {
-        Log.d("DEBUG", "sendPushNotification() aufgerufen mit Token: " + fcmToken);
 
         executorService.execute(() -> {
             try {
@@ -60,9 +62,10 @@ public class PushNotificationSender {
                         .post(requestBody)
                         .build();
 
+                //ZUm Debuggen
                 Response response = client.newCall(request).execute();
-                Log.d("DEBUG", "Response Code: " + response.code());
-                Log.d("DEBUG", "Response Body: " + response.body().string());
+                Log.d("DEBUG", "code: " + response.code());
+                Log.d("DEBUG", "body: " + response.body().string());
 
             } catch (Exception e) {
                 Log.e("ERROR", "Fehler beim Senden der Push-Nachricht: " + e.getMessage(), e);
@@ -77,7 +80,7 @@ public class PushNotificationSender {
      */
     private static String getAccessToken(Context context) {
         try {
-            // ✅ Datei aus dem assets-Ordner laden
+            // Datei aus dem assets-Ordner laden
             InputStream inputStream = context.getAssets().open("einkaufsliste-3508a-firebase-adminsdk-rz597-6c02809d6b.json");
 
             GoogleCredentials credentials = GoogleCredentials

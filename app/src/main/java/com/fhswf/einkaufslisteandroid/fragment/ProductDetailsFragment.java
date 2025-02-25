@@ -1,5 +1,9 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
+//Quellen:
+//https://de.openfoodfacts.org/data
+//https://www.youtube.com/watch?v=4IAd0oj5goo&t=442s
+
 import static androidx.core.util.TypedValueCompat.dpToPx;
 
 import android.app.AlertDialog;

@@ -1,5 +1,8 @@
 package com.fhswf.einkaufslisteandroid.logic;
 
+//Quelle:
+//https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html
+
 import android.content.Context;
 import android.util.Log;
 

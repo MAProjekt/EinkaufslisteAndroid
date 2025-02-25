@@ -1,4 +1,11 @@
 package com.fhswf.einkaufslisteandroid;
+
+//Quellen:
+//https://www.youtube.com/watch?v=QAKq8UBv4GI&list=LL&index=44&t=3s
+//https://stackoverflow.com/questions/54485656/how-do-i-link-auth-users-to-collection-in-firestore
+//https://www.youtube.com/watch?v=KiCluB_vijA&list=LL&index=41
+//https://firebase.google.com/docs/auth?hl=de
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;

@@ -1,5 +1,8 @@
 package com.fhswf.einkaufslisteandroid.fragment;
 
+//Quelle
+//https://developer.android.com/guide/fragments?hl=de
+
 import static com.fhswf.einkaufslisteandroid.services.PushNotificationSender.sendPushNotification;
 
 import android.app.AlertDialog;

@@ -1,5 +1,6 @@
 // Quelle: https://stackoverflow.com/questions/54485656/how-do-i-link-auth-users-to-collection-in-firestore
-
+//https://firebase.google.com/docs/firestore/query-data/listen?hl=de
+//https://www.youtube.com/watch?v=_tyjqozrEPY&list=LL&index=39
 package com.fhswf.einkaufslisteandroid.datenpersistierung;
 
 import static com.fhswf.einkaufslisteandroid.services.PushNotificationSender.sendPushNotification;

@@ -19,8 +19,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+//Quelle
 //https://github.com/MrHKMY/Pocketful/blob/master/BudgetWiser/app/src/main/java/com/mindscape/pocketful/FirebaseMessageReceiver.java
-
+//https://www.youtube.com/watch?v=5NgSrL63GHo&list=LL&index=4&t=191s
 /**
  * Empfängt und verarbeitet FCM Push-Benachrichtigungen.
  * Zeigt eine Benachrichtigung an, wenn eine neue Nachricht empfangen wird.
