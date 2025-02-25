@@ -146,7 +146,8 @@ public class GroupsFragment extends BaseFragment {
             dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Liste löschen", (d, which) -> deleteListBestaetigen(listId, listName));
         }
 
-        new ItemTouchHelper(new SwipeProduct(requireContext(), recyclerView.getAdapter(), products, firestoreManager, listId)).attachToRecyclerView(recyclerView);
+        new ItemTouchHelper(new SwipeProduct(requireContext(), recyclerView.getAdapter(), products, firestoreManager, listId, false))
+                .attachToRecyclerView(recyclerView);
 
         dialog.show();
     }
