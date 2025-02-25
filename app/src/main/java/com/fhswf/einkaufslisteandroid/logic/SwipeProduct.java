@@ -73,17 +73,26 @@ public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         int position = viewHolder.getAdapterPosition();
+
+        if (position == RecyclerView.NO_POSITION || position >= products.size()) {
+            adapter.notifyDataSetChanged();
+            return;
+        }
+
         Product product = products.get(position);
 
         firestoreManager.deleteProductFromList(listId, product, aVoid -> {
-            products.remove(position);
-            adapter.notifyItemRemoved(position);
+            if (position < products.size()) {
+                products.remove(position);
+                adapter.notifyItemRemoved(position);
+            }
             Toast.makeText(context, "Produkt gelöscht!", Toast.LENGTH_SHORT).show();
         }, e -> {
             adapter.notifyItemChanged(position);
             Toast.makeText(context, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
+
 
     /**
      * Methode, um das Aussehen des geswipeten Elements während des Swipes anzupassen.
