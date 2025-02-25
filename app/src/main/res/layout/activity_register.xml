@@ -87,6 +87,7 @@
         android:text="@string/klicke_hier_um_dich_zu_anmelden"
         android:layout_gravity="center"
         android:textSize="15sp"
+        android:textColor="@color/black"
         android:textStyle="bold"/>
 
 </LinearLayout>
