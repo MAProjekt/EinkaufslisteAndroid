@@ -1,8 +1,10 @@
 package com.fhswf.einkaufslisteandroid.services;
 
 //Quelle:
+//Hinweis die Sender Klasse wurde mit Hilfe der folgenden Quellen erstellt:
+//chatgpt.com (Half die bei der Erstellung der sendPushNotification Methode, da wir dort große Schwierigkeiten und Zeitdruck hatten)
 //https://rollout.com/integration-guides/firebase-admin-sdk/sdk/step-by-step-guide-to-building-a-firebase-admin-sdk-api-integration-in-java
-
+//https://www.youtube.com/watch?v=uSY2RqdBL04
 import android.content.Context;
 import android.util.Log;
 
