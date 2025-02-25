@@ -73,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             checkAndAssignFcmToken(user.getUid());
         }
 
+        ThemeLogic.applyDarkModeFromPreferences(this);
+
         //EdgeToEdge.enable(this);
         setContentView(com.fhswf.einkaufslisteandroid.R.layout.activity_main);
         // Farbe der Statusleiste setzen
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        toggleActionBar(savedInstanceState, navigationView, toolbar);
+        toggleActionBar(savedInstanceState, navigationView, toolbar); // ruft gespeicherte Einstellung zum Darkmdde auf
 
         loadUserInfo(user, navigationView);
         userInfoEdit(navigationView);
