@@ -30,7 +30,7 @@ public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
     private final FirestoreManager firestoreManager;
     private final String listId;
     private final Context context;
-    private final boolean performLocalDeletion; // Gibt an, ob die lokale Entfernung durchgeführt
+    private final boolean localDelete; // Gibt an, ob die lokale Entfernung durchgeführt
 
     /**
      * Konstruktor für SwipeProduct.
@@ -40,17 +40,17 @@ public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
      * @param firestoreManager der FirestoreManager, der für die Kommunikation mit der Datenbank
      *                         zuständig ist.
      * @param listId die ID der Liste, aus der das Produkt gelöscht werden soll.
-     * @param performLocalDeletion  true, wenn die lokale Löschung (products.remove(...)) erfolgen soll
+     * @param localDelete  true, wenn die lokale Löschung (products.remove(...)) erfolgen soll
      *                              false, wenn auf die Aktualisierung per Snapshot Listener vertraut werden soll.
      */
-    public SwipeProduct(Context context, RecyclerView.Adapter adapter, List<Product> products, FirestoreManager firestoreManager, String listId, boolean performLocalDeletion) {
+    public SwipeProduct(Context context, RecyclerView.Adapter adapter, List<Product> products, FirestoreManager firestoreManager, String listId, boolean localDelete) {
         super(0, ItemTouchHelper.LEFT);
         this.context = context;
         this.adapter = adapter;
         this.products = products;
         this.firestoreManager = firestoreManager;
         this.listId = listId;
-        this.performLocalDeletion = performLocalDeletion;
+        this.localDelete = localDelete;
     }
 
     /**
@@ -86,7 +86,7 @@ public class SwipeProduct extends ItemTouchHelper.SimpleCallback {
         Product product = products.get(position);
 
         firestoreManager.deleteProductFromList(listId, product, aVoid -> {
-            if (performLocalDeletion) {
+            if (localDelete) {
                 if (position < products.size()) {
                     products.remove(position);
                     adapter.notifyItemRemoved(position);
