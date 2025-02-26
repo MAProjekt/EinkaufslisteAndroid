@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
-            checkAndAssignFcmToken(user.getUid());
+            checkAndGiveFcmToken(user.getUid());
         }
 
         ThemeLogic.applyDarkModeFromPreferences(this);
@@ -317,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * soll. Und speichert diese anschließend in Firestore ab.
      * @param userId Id des eingeloggten Users.
      */
-    private void checkAndAssignFcmToken(String userId) {
+    private void checkAndGiveFcmToken(String userId) {
         firestoreManager.getFcmToken(userId, existingToken -> {
             if (existingToken == null || existingToken.isEmpty()) {
                 FirebaseMessaging.getInstance().getToken()
