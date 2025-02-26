@@ -119,7 +119,7 @@ public class SwipeMember extends ItemTouchHelper.SimpleCallback {
         firestoreManager.getUserToken(emailToRemove, token -> {
             if (token != null && !token.isEmpty()) {
                 sendPushNotification(context, token, "Listen-Update",
-                        "Du wurdest aus einer Liste entfernt.");
+                        emailToRemove + " wurde aus der Liste entfernt.");
             }
         }, e -> Log.e("FCM", "Fehler beim Abrufen des Tokens: " + e.getMessage()));
     }
