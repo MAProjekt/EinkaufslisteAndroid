@@ -91,9 +91,9 @@ public class GroupsFragment extends BaseFragment {
     /**
      * Zeigt die Produkte einer Liste an.
      * Zudem gibt es unter dem Dialog die Möglichkeit einen Benutzer hinzuzufügen oder die Liste zu löschen.
-     * @param listId
-     * @param listName
-     * @param products
+     * @param listId Die Liste die man im Fragment auswählt.
+     * @param listName Name der Liste die man im Fragment auswählt.
+     * @param products  Die Liste der Produkte in der akutellen Liste.
      */
     @Override
     protected void showProductsDialog(String listId, String listName, List<Product> products) {
@@ -195,7 +195,7 @@ public class GroupsFragment extends BaseFragment {
      * @param listId Die ID der Liste, welcher der Benutzer verlassen will.
      */
     private void gruppeVerlassen(String listId, String listname ) {
-        Log.d("DEBUG", "gruppeVerlassen() wurde aufgerufen mit listId: " + listId);
+        Log.d("debugFCM", "gruppeVerlassen() wurde aufgerufen mit listId: " + listId);
 
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 

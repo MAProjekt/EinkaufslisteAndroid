@@ -272,6 +272,9 @@ public class Login extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
+    /**
+     * Prüft, ob ein Benutzer bereits verifiziert ist.
+     */
     private void checkUserVerif(){
         FirebaseUser user = mAuth.getCurrentUser();
 

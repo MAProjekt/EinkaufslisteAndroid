@@ -216,18 +216,18 @@ public class ProductDetailsFragment extends DialogFragment {
                 nameTextView.setText(nutrientKey);
                 nameTextView.setPadding(8, 8, 8, 8);
 
-                TextView valueTextView = new TextView(getContext());
-                valueTextView.setText(value);
-                valueTextView.setPadding(8, 8, 8, 8);
+                TextView valTextView = new TextView(getContext());
+                valTextView.setText(value);
+                valTextView.setPadding(8, 8, 8, 8);
 
-                TextView unitTextView = new TextView(getContext());
-                unitTextView.setText(unit);
-                unitTextView.setPadding(8, 8, 8, 8);
+                TextView einheitTextView = new TextView(getContext());
+                einheitTextView.setText(unit);
+                einheitTextView.setPadding(8, 8, 8, 8);
 
                 // Zeile zur Tabelle hinzufügen
                 row.addView(nameTextView);
-                row.addView(valueTextView);
-                row.addView(unitTextView);
+                row.addView(valTextView);
+                row.addView(einheitTextView);
 
                 table.addView(row);
             }

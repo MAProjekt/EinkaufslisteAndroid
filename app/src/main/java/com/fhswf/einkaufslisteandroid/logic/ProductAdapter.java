@@ -128,7 +128,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         holder.itemView.post(() -> {
             int itemWidth = holder.itemView.getWidth();
-            Log.d("ItemSize", "Breite des Items an Position " + position + ": " + itemWidth + "px");
+            Log.d("ItemSize", "Breite des Items an Position " + position + ": " + itemWidth);
         });
 
 
