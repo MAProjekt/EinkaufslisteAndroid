@@ -130,8 +130,6 @@ public class ProductDetailsFragment extends DialogFragment {
         produktHinzufuegenButton.setVisibility(View.GONE);
         produktMenge.setVisibility(View.GONE);
         schliessenButton.setText("Schließen");
-        schliessenButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white));
-        schliessenButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.default_ThemeOverlay_AppCompat));
         schliessenButton.setOnClickListener(v -> dismiss());
         ((ViewGroup) view).addView(schliessenButton);
     }
