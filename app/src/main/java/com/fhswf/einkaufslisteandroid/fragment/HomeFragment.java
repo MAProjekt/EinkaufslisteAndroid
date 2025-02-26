@@ -125,7 +125,7 @@ public class HomeFragment extends BaseFragment {
         //Debugger für die RecyclerView Breite
 //        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
 //            int recyclerViewWidth = recyclerView.getWidth();
-//            Log.d("RecyclerViewSize", "Breite der RecyclerView: " + recyclerViewWidth + "px");
+//            Log.d("recyclerViewSize", "Breite der RecyclerView: " + recyclerViewWidth + "px");
 //        });
 
         int maxHeight = 650; // Maximale Höhe des RecyclerViews in Pixeln

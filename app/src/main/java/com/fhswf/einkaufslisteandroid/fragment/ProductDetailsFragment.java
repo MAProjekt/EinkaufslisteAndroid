@@ -99,8 +99,8 @@ public class ProductDetailsFragment extends DialogFragment {
         Bundle args = getArguments();
         String listId = (args != null) ? args.getString("listId") : null;
         boolean fromUebersicht = (args != null) && args.getBoolean("fromUebersicht", false);
-        Log.d("DEBUG", "Liste ID aus DetailsFragment: " + listId);
-        Log.d("DEBUG", "ProductDetailsFragment - Name: " + productName + ", listId: " + listId + ", ImageURL: " + imageUrl);
+        Log.d("debugProduct", "Liste ID aus DetailsFragment: " + listId);
+        Log.d("debugProduct", "ProductDetailsFragment - Name: " + productName + ", listId: " + listId + ", ImageURL: " + imageUrl);
 
         Button schliessenButton = new Button(requireContext());
 

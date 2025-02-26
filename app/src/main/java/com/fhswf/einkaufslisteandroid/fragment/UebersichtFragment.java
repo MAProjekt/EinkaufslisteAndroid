@@ -62,7 +62,7 @@ public class UebersichtFragment extends Fragment {
         Bundle args = getArguments();
         String listId = (args != null) ? args.getString("listId") : null;
 
-        Log.d("DEBUG", "Liste ID aus ÜbersichtFragment: " + listId);
+        Log.d("DEBUGProduct", "Liste ID aus ÜbersichtFragment: " + listId);
         eingabeProdukt = view.findViewById(R.id.eingabeProduktEditText);
         RecyclerView recyclerView = view.findViewById(R.id.productRecyclerView);
         productDataFetcher = new ProductDataFetcher(getContext(), recyclerView, listId);

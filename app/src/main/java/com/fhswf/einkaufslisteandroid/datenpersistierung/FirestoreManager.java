@@ -261,7 +261,7 @@ public class FirestoreManager {
                         getFcmToken(userId, token -> {
                             if (token != null) {
                                 tokens.add(token);
-                                if (tokens.size() == userIds.size()) {  //Rufe erst die Callback Methode auf, wnen alle FCMTokens der Benutzer abgerufen wurden
+                                if (tokens.size() == userIds.size()) {  //Ruf erst die Callback Methode auf, wnen alle FCMTokens der Benutzer abgerufen wurden
                                     onSuccess.onSuccess(tokens);
                                 }
                             }

@@ -144,38 +144,66 @@ public class Login extends AppCompatActivity {
         email = String.valueOf(editTextEmail.getText());
         password = String.valueOf(editTextPasswort.getText());
 
-        if(email.isEmpty()){
-            Toast.makeText(Login.this, "Gebe bitte eine E-Mail-Adresse ein!", Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.GONE);
-            return;
-        }
-        if(password.isEmpty()){
-            Toast.makeText(Login.this, "Gebe bitte ein Passwort ein!", Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.GONE);
-            return;
-        }
-        if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
-            Toast.makeText(Login.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
+        if(!loginValidateInput(email, password)){
             progressBar.setVisibility(View.GONE);
             return;
         }
 
+        doLogin(email, password);
+
+    }
+
+    /**
+     * Validiert die Benutzereingabe für die Anmeldung.
+     * @param email Mail, welcher der Benutzer beim Login eingibt.
+     * @param password Passwort, welcher der Benutzer beim Login eingibt.
+     * @return true, wenn die Benutzereingabe gültig ist, sonst false.
+     */
+    private boolean loginValidateInput(String email, String password){
+        if(email.isEmpty()){
+            Toast.makeText(Login.this, "Gebe bitte eine E-Mail-Adresse ein!", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return false;
+        }
+        if(password.isEmpty()){
+            Toast.makeText(Login.this, "Gebe bitte ein Passwort ein!", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return false;
+        }
+        if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
+            Toast.makeText(Login.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Meldet den Benutzer mit Firebase an.
+     * @param email Die E-Mail-Adresse des Benutzers.
+     * @param password Das Passwort des Benutzers.
+     */
+    private void doLogin(String email, String password){
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Login erfolgreich", Toast.LENGTH_SHORT).show();
 
                             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                            if (user != null) {
+                            if (user != null && user.isEmailVerified()) {
                                 saveFcmToken(user.getUid());
-                            }
+                                Toast.makeText(getApplicationContext(), "Login erfolgreich", Toast.LENGTH_SHORT).show();
 
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(intent);
-                            finish();  // Das schließt das Login-Fenster
+
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+                                finish();  // Das schließt das Login-Fenster
+                            }
+                            else{
+                                Toast.makeText(Login.this, "Bitte verifiziere deine E-Mail-Adresse", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             Toast.makeText(Login.this, "Authentifizierung fehlgeschlagen", Toast.LENGTH_SHORT).show();
                         }

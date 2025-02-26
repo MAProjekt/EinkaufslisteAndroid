@@ -66,11 +66,11 @@ public class PushNotificationSender {
 
                 //ZUm Debuggen
                 Response response = client.newCall(request).execute();
-                Log.d("DEBUG", "code: " + response.code());
-                Log.d("DEBUG", "body: " + response.body().string());
+                Log.d("debugFCM", "code: " + response.code());
+                Log.d("debugFCM", "body: " + response.body().string());
 
             } catch (Exception e) {
-                Log.e("ERROR", "Fehler beim Senden der Push-Nachricht: " + e.getMessage(), e);
+                Log.e("errorFCM", "Fehler beim Senden der Push-Nachricht: " + e.getMessage(), e);
             }
         });
     }
@@ -90,10 +90,10 @@ public class PushNotificationSender {
                     .createScoped(Collections.singletonList(FIREBASE_SCOPE));
             credentials.refreshIfExpired();
             String token = credentials.getAccessToken().getTokenValue();
-            Log.d("DEBUG", "Firebase Access Token erhalten: " + token);
+            Log.d("debugFCM", "Firebase Access Token erhalten: " + token);
             return token;
         } catch (Exception e) {
-            Log.e("ERROR", "Fehler beim Abrufen des Firebase Access Tokens: " + e.getMessage(), e);
+            Log.e("errorFCM", "Fehler beim Abrufen des firebase access tokens: " + e.getMessage(), e);
             return null;
         }
     }

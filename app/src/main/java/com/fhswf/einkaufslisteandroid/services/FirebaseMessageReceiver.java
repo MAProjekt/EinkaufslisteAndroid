@@ -34,7 +34,7 @@ public class FirebaseMessageReceiver extends FirebaseMessagingService {
      */
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        Log.d("DEBUG", "Empfangene Push-Nachricht: " + remoteMessage.getData());
+        Log.d("debugReceiver", "Empfangene Push-Nachricht: " + remoteMessage.getData());
 
         if (remoteMessage.getData().size() > 0) {
             showNotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"));

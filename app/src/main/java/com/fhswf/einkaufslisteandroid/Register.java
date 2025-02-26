@@ -126,28 +126,51 @@ public class Register extends AppCompatActivity {
         email = String.valueOf(editTextEmail.getText());
         password = String.valueOf(editTextPassword.getText());
 
+        if(!registerValidateInput(email, password)){
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+
+        doRegister(email, password);
+    }
+
+    /**
+     * Validiert die Benutzereingabe für das Registrieren.
+     * @param email Die E-Mail-Adresse des Benutzers.
+     * @param password Das Passwort des Benutzers.
+     * @return true, wenn die Benutzereingabe gültig ist, sonst false.
+     */
+    private boolean registerValidateInput(String email, String password){
         if(TextUtils.isEmpty(email)){
             Toast.makeText(Register.this, "Gebe eine Mail ein", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
-            return;
+            return false;
         }
         if(TextUtils.isEmpty(password)){
             Toast.makeText(Register.this, "Gebe ein Passwort ein", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
-            return;
+            return false;
         }
         if (!password.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$")) {
             Toast.makeText(Register.this, "Passwort muss mind. 8 Zeichen, eine Zahl, ein Sonderzeichen und ein Großbuchstaben haben ", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
-            return;
+            return false;
         }
 
         if (!Pattern.matches("^[^@]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", email)) {
             Toast.makeText(Register.this, "Keine gültige E-Mail-Adresse!", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
-            return;
+            return false;
         }
+        return true;
+    }
 
+    /**
+     * Registriert den Benutzer in Firebase.
+     * @param email Die E-Mail-Adresse des Benutzers.
+     * @param password Das Passwort des Benutzers.
+     */
+    private void doRegister(String email, String password){
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
